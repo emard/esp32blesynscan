@@ -46,9 +46,24 @@ int32_t led_event_us = t_us; // schedule next immediately
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
-#define SERVICE_UUID           "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"  // UART service UUID
+#if 1
+// serial terminal works
+#define SERVICE_UUID           "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"  // UART service UUID nordic nRF
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
+#endif
+#if 0
+// serial terminal works
+#define SERVICE_UUID           "49535343-FE7D-4AE5-8FA9-9FAFD205E455"  // UART service UUID microchip RN4871
+#define CHARACTERISTIC_UUID_RX "49535343-8841-43F4-A8D4-ECBE34729BB3"
+#define CHARACTERISTIC_UUID_TX "49535343-1E4D-4BD9-BA61-23C647249616"
+#endif
+#if 0
+// serial terminal doesn't work "gatt status 133"
+#define SERVICE_UUID           "0000fefb-0000-1000-8000-00805f9b34fb"  // UART service UUID Telit TIO
+#define CHARACTERISTIC_UUID_RX "00000002-0000-1000-8000-00805f9b34fb"
+#define CHARACTERISTIC_UUID_TX "00000001-0000-1000-8000-00805f9b34fb"
+#endif
 
 class MyServerCallbacks : public BLEServerCallbacks
 {
