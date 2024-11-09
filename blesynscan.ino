@@ -50,6 +50,8 @@ int32_t led_event_us = t_us; // schedule next immediately
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
+#define BLE_NAME "SynScan"
+
 #if 1
 // serial terminal works
 #define SERVICE_UUID           "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"  // UART service UUID nordic nRF
@@ -119,7 +121,7 @@ void setup()
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
 
   // Create the BLE Device
-  BLEDevice::init("SynScan");
+  BLEDevice::init(BLE_NAME);
 
   // Create the BLE Server
   pServer = BLEDevice::createServer();
@@ -168,7 +170,7 @@ void loop()
   {
     delay(500);                   // give the bluetooth stack the chance to get things ready
     pServer->startAdvertising();  // restart advertising
-    Serial.println("disconnected");
+    Serial.println("Disconnected");
     oldDeviceConnected = deviceConnected;
   }
   // connecting
@@ -176,6 +178,6 @@ void loop()
   {
     // do stuff here on connecting
     oldDeviceConnected = deviceConnected;
-    Serial.println("connected");
+    Serial.println("Connected");
   }
 }
