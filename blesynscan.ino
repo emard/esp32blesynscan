@@ -25,7 +25,6 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
-#include <soc/rtc.h>
 
 // Hardware Serial2 pins
 #define RXD2 16
@@ -40,8 +39,8 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 uint8_t txValue = 64;
 
-time_t t_us = micros(); // [us] microseconds for LED blinking
-time_t led_event_us = t_us + 1000000000000LL; // schedule next very far in the future;
+int32_t t_us = micros(); // [us] microseconds for LED blinking
+int32_t led_event_us = t_us; // schedule next immediately
 
 
 // See the following for generating UUIDs:
@@ -66,12 +65,6 @@ class MyServerCallbacks : public BLEServerCallbacks
   }
 };
 
-void blink()
-{
-  digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
-  led_event_us = t_us + 200000; // after 0.2s if connected, led ON
-}
-
 class MyCallbacks : public BLECharacteristicCallbacks
 {
   void onWrite(BLECharacteristic *pCharacteristic)
@@ -80,21 +73,22 @@ class MyCallbacks : public BLECharacteristicCallbacks
     #if 0
     if (rxValue.length() > 0)
     {
-      digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
+      digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on
       for (int i = 0; i < rxValue.length(); i++)
       {
         Serial2.write(rxValue[i]);
         Serial.write(rxValue[i]);
         delay(1);
       }
-      blink();
+      digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
     }
     #else
     if (rxValue.length() > 0)
     {
+      digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on
       Serial2.write(rxValue.c_str(), rxValue.length());
       Serial.write(rxValue.c_str(), rxValue.length());
-      blink();
+      digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
     }
     #endif
   }
@@ -145,7 +139,7 @@ void loop()
       pTxCharacteristic->setValue(&txValue, 1);
       pTxCharacteristic->notify();
       Serial.write(txValue);
-      blink();
+      digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on
     }
     //delay(10);  // bluetooth stack will go into congestion, if too many packets are sent
   }
@@ -164,12 +158,5 @@ void loop()
     // do stuff here on connecting
     oldDeviceConnected = deviceConnected;
     Serial.println("connected");
-  }
-
-  t_us = micros();
-  if(led_event_us - t_us > 0)
-  {
-    digitalWrite(LED_BUILTIN, deviceConnected);  // turn the LED on if connected
-    led_event_us = t_us + 1000000000; // schedule next very far in the future
   }
 }
