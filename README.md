@@ -63,7 +63,8 @@ in SynScan Pro window
     ... SynScan pro -> Settings -> Connect Settings -> Serial
     ... Serial Port: COM1
     ... press top "<" touch btn then "Connect" btn will appear.
-    ... Touch "Connect" btn it should work
+    ... Touch "Connect" btn, maybe need to retry few times
+    ... it should work
 
 SynScanPro can be debugged from wine:
 
