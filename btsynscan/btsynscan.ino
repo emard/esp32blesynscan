@@ -33,7 +33,8 @@ void setup() {
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
   SerialBT.begin(device_name);  //Bluetooth device name
   //SerialBT.deleteAllBondedDevices(); // Uncomment this to delete paired devices; Must be called after begin
-  Serial.printf("The device with name \"%s\" is started.\nNow you can pair it with Bluetooth!\n", device_name.c_str());
+  Serial.printf("Bluetooth classic serial \"%s\"\n", device_name.c_str());
+  pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop() {
@@ -42,11 +43,14 @@ void loop() {
     a = Serial2.read();
     SerialBT.write(a);
     Serial.write(a);
+    digitalWrite(LED_BUILTIN, LOW);
   }
   if (SerialBT.available()) {
     a = SerialBT.read();
     Serial2.write(a);
     Serial.write(a);
+    digitalWrite(LED_BUILTIN, LOW);
   }
   delay(1);
+  digitalWrite(LED_BUILTIN, SerialBT.connected(0));
 }
