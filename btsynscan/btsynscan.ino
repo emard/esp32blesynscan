@@ -7,7 +7,7 @@
 
 #include "BluetoothSerial.h"
 
-String device_name = "BTSynScan";
+String device_name = "SynScan_BT";
 
 // Hardware Serial2 pins
 #define RXD2 16
