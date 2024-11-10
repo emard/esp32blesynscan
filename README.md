@@ -73,8 +73,9 @@ SynScanPro can be debugged from wine:
 
 # Android
 
-Currently "Serial Bluetooth Terminal" can connect and
-basic request/response works:
+Currently "Serial Bluetooth Terminal" can connect in
+Bluetooth Classic and Low Energy mode.
+Basic request/response works:
 
     request
     :e1\r
