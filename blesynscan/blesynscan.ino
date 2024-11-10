@@ -29,6 +29,7 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
+//#include <esp_mac.h>
 
 // Hardware Serial2 pins
 #define RXD2 16
@@ -50,7 +51,9 @@ int32_t led_event_us = t_us; // schedule next immediately
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
-#define BLE_NAME "SynScan"
+//const uint8_t new_mac[8] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
+//esp_base_mac_addr_get(new_mac);
+#define BLE_NAME "SynScan_BLE"
 
 #if 1
 // serial terminal works
@@ -63,6 +66,12 @@ int32_t led_event_us = t_us; // schedule next immediately
 #define SERVICE_UUID           "49535343-FE7D-4AE5-8FA9-9FAFD205E455"  // UART service UUID microchip RN4871
 #define CHARACTERISTIC_UUID_RX "49535343-8841-43F4-A8D4-ECBE34729BB3"
 #define CHARACTERISTIC_UUID_TX "49535343-1E4D-4BD9-BA61-23C647249616"
+#endif
+#if 0
+// trying...
+#define SERVICE_UUID           "54806524-B5A3-F393-E0A9-E50E24DCCA9E"  // maybe synscan
+#define CHARACTERISTIC_UUID_RX "54806524-0100-F393-E0A9-E50E24DCCA9E"
+#define CHARACTERISTIC_UUID_TX "54806524-0200-F393-E0A9-E50E24DCCA9E"
 #endif
 #if 0
 // serial terminal doesn't work "gatt status 133"
