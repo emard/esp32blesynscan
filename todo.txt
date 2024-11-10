@@ -1,0 +1,5 @@
+[ ] allow to change mac address
+[ ] classic bt serial
+[ ] integrate BLE+BT hardware switch to choose
+
+
