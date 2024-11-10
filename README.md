@@ -1,8 +1,8 @@
 # ESP32 blesyncscan
 
-Attempt to make ESP32 Bluetooth Classic and Bluetooth Low Energy
-UART bridge that can be used to connect SynScan Pro 2.5.2.
-Hardware on other end is is SkyWatcher Virtuoso 90 Heritage mount.
+Arduino ESP32 Bluetooth Classic and Bluetooth Low Energy
+UART bridge for SynScan Pro 2.5.2.
+UART 3.3V TTL is connected to SkyWatcher Virtuoso 90 Heritage mount.
 
 Currently it works for linux.
 Hopfully with small fixes it should work on Android 10 phone.
@@ -63,8 +63,7 @@ in SynScan Pro window
     ... SynScan pro -> Settings -> Connect Settings -> Serial
     ... Serial Port: COM1
     ... press top "<" touch btn then "Connect" btn will appear.
-    ... Touch "Connect" btn, maybe need to retry few times
-    ... it should work
+    ... touch "Connect" btn, retry few times
 
 SynScanPro can be debugged from wine:
 
