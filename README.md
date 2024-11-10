@@ -1,11 +1,25 @@
 # ESP32 blesyncscan
 
-Attempt to make ESP32 BLE UART bridge that can be used
-to connect SynScan Pro 2.5.2 on Android 10 phone with
-SkyWatcher Virtuoso 90 Heritage mount.
+Attempt to make ESP32 Bluetooth Classic and Bluetooth Low Energy
+UART bridge that can be used to connect SynScan Pro 2.5.2.
+Hardware on other end is is SkyWatcher Virtuoso 90 Heritage mount.
+
+Currently it works for linux.
+Hopfully with small fixes it should work on Android 10 phone.
+
+# Install
 
 Arduino project "btblesynscan" is recommended as it
-supports both Bluetooth classic and Bluetooth Low Energy.
+supports both Bluetooth Classic and Bluetooth Low Energy.
+
+From board manager Install esp32 by espressif
+
+Copy "btblesynscan.ino" to directory "~Arduino/btblesynscan/btblesynscan.ino"
+
+From Arduino, open project "Arduino/btblesynscan",
+compile and upload to ESP32 board.
+
+# Bluetooth Classic or Low Energy
 
 After board power ON or reset by pressing "EN" button,
 blue LED will turn ON for 1.5 seconds.
@@ -15,6 +29,11 @@ Bluetooth Classic Serial.
 
 If "BOOT" button is held during blue LED is ON
 then ESP32 will provide Bluetooth Low Energy Serial.
+
+ESP32 in Bluetooth Low Energy mode only supports
+BLE protocol and does not save battery power.
+In both Classic and Low Energy modes ESP32 consumes
+about 70 mA.
 
 # Linux
 
