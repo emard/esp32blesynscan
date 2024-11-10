@@ -12,7 +12,8 @@ Hopfully with small fixes it should work on Android 10 phone.
 Arduino project "btblesynscan" is recommended as it
 supports both Bluetooth Classic and Bluetooth Low Energy.
 
-From board manager Install esp32 by espressif
+From board manager Install esp32 by espressif,
+select board "ESP32 Dev Module"
 
 Copy "btblesynscan.ino" to directory "~Arduino/btblesynscan/btblesynscan.ino"
 
