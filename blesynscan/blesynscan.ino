@@ -103,22 +103,20 @@ class MyCallbacks : public BLECharacteristicCallbacks
     #if 0
     if (rxValue.length() > 0)
     {
-      digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on
+      digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
       for (int i = 0; i < rxValue.length(); i++)
       {
         Serial2.write(rxValue[i]);
         Serial.write(rxValue[i]);
         delay(1);
       }
-      digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
     }
     #else
     if (rxValue.length() > 0)
     {
-      digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on
+      digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
       Serial2.write(rxValue.c_str(), rxValue.length());
       Serial.write(rxValue.c_str(), rxValue.length());
-      digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
     }
     #endif
   }
@@ -165,11 +163,11 @@ void loop()
   {
     if(Serial2.available())
     {
+      digitalWrite(LED_BUILTIN, LOW);  // turn the LED on
       txValue = Serial2.read();
       pTxCharacteristic->setValue(&txValue, 1);
       pTxCharacteristic->notify();
       Serial.write(txValue);
-      digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on
     }
     //delay(10);  // bluetooth stack will go into congestion, if too many packets are sent
   }
@@ -189,4 +187,5 @@ void loop()
     oldDeviceConnected = deviceConnected;
     Serial.println("Connected");
   }
+  digitalWrite(LED_BUILTIN, deviceConnected);
 }
