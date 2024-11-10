@@ -18,7 +18,7 @@ select board "ESP32 Dev Module"
 Copy "btblesynscan.ino" to directory "~Arduino/btblesynscan/btblesynscan.ino"
 
 From Arduino, open project "Arduino/btblesynscan",
-compile and upload to ESP32 board.
+compile and upload to ESP32 board connected with Micro USB Cable.
 
 # Bluetooth Classic or Low Energy
 
