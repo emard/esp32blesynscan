@@ -46,22 +46,19 @@ in shell 1
     hcitool scan
     Scanning ...
             24:0A:C4:11:22:33   SynScan_BT
-    rfcomm connect /dev/rfcomm0 24:0A:C4:11:22:33
-    Connected /dev/rfcomm0 to 24:0A:C4:11:22:33 on channel 1
-    Press CTRL-C for hangup
-
-in shell 2
-
+    rfcomm bind /dev/rfcomm0 24:0A:C4:11:22:33
     unzip synscanpro_windows_252.zip
     cd SynScanPro
     wine SynScanPro.exe
-    ... wine will initialize com1 symlink /dev/ttyS0
+    ... wine will initialize com1 as symlink to /dev/ttyS0
     ... we must change this symlink to /dev/rfcomm0
 
-in shell 3
+in shell 2
 
     cd ~/.wine/dosdevices
     ln -sf /dev/rfcomm0 com1
+
+in SynScan Pro window 
 
     ... synscan pro Advanced -> Connect -> Serial
     ... select port COM1, up menu to show "Connect" touch btn
