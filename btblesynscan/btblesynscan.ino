@@ -101,8 +101,11 @@ bool oldDeviceConnected = false;
 // on windows synscan 2.5.2 BLE device will appear
 // on the connect list regardless of ManufacturerData
 
-// first 2 chars "h." (hex 0x68 0x2e) encode
-// manufacturer id 0x2e68
+// first 2 chars "h." (hex 0x68 0x2e) encode manufacturer id 0x2e68
+// ghydra found it:
+// void FUN_140137c80(longlong *param_1)
+// this = (QByteArray *)QBluetoothDeviceInfo::manufacturerData(pQVar7,local_90,0x2e68);
+// pcStack_50 = QByteArrayView::castHelper("54806524");
 #define ManufacturerData "h.54806524"
 
 // see https://esp32.com/viewtopic.php?t=16492
