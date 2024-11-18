@@ -164,5 +164,13 @@ Basic request/response works:
     =0210A1\r
 
 But synscan pro application when set connection as BLE
-and then touch "Connect" button displays "Searching" and
-"Device Not Found".
+and then touch "Connect" button displays "SynScan_BLE"
+but when connecting it fails with error:
+"mount mode not detected".
+No serial traffic is detected on esp32 debug terminal.
+
+# Todo
+
+Fix arduino code for nRF connect to display
+SERVICE_UUID and CHARASTERISTIC_UUID,
+currently no UUID is listed.
