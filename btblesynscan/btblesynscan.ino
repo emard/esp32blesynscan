@@ -28,6 +28,7 @@
 /*********** BLUETOOTH LOW ENERGY ***********/
 
 #define BLE_NAME "SynScan_BLE"
+#define BLE_NAME_SHORT "SynScan"
 
 /*
     Video: https://www.youtube.com/watch?v=oCMOYS71NIU
@@ -83,10 +84,9 @@ bool oldDeviceConnected = false;
 #define CHARACTERISTIC_UUID_TX "49535343-1E4D-4BD9-BA61-23C647249616"
 #endif
 #if 0
-// trying...
-#define SERVICE_UUID           "54806524-B5A3-F393-E0A9-E50E24DCCA9E"  // maybe synscan
-#define CHARACTERISTIC_UUID_RX "54806524-0100-F393-E0A9-E50E24DCCA9E"
-#define CHARACTERISTIC_UUID_TX "54806524-0200-F393-E0A9-E50E24DCCA9E"
+#define SERVICE_UUID           "0000fefb-0000-1000-8000-00805f9b34fb"  // UART service UUID Telit TIO
+#define CHARACTERISTIC_UUID_RX "00000300-0300-0300-8000-00805f9b34fb"  // Mount->SynScan app
+#define CHARACTERISTIC_UUID_TX "00000100-0100-0100-8000-00805f9b34fb"  // SynScan app->Mount
 #endif
 #if 0
 // serial terminal doesn't work "gatt status 133"
@@ -95,6 +95,20 @@ bool oldDeviceConnected = false;
 #define CHARACTERISTIC_UUID_TX "00000001-0000-1000-8000-00805f9b34fb"
 #endif
 
+// ManufacturerData makes BLE device appear
+// in connect list on android synscan pro 2.5.2
+
+// on windows synscan 2.5.2 BLE device will appear
+// on the connect list regardless of ManufacturerData
+
+// first 2 chars "h." (hex 0x68 0x2e) encode
+// manufacturer id 0x2e68
+#define ManufacturerData "h.54806524"
+
+// see https://esp32.com/viewtopic.php?t=16492
+BLEAdvertisementData oAdvertisementData = BLEAdvertisementData();
+
+// *********** COMMON CODE **************
 void (*loop_selected)(void); // pointer to loop function BT or BLE
 
 class MyServerCallbacks : public BLEServerCallbacks
@@ -116,6 +130,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
 {
   void onWrite(BLECharacteristic *pCharacteristic)
   {
+    Serial.println("write");
     String rxValue = pCharacteristic->getValue();
     #if 0
     if (rxValue.length() > 0)
@@ -156,18 +171,67 @@ void setup_ble()
 
   // Create a BLE Characteristic
   pTxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_NOTIFY);
-
   pTxCharacteristic->addDescriptor(new BLE2902());
 
   BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
-
   pRxCharacteristic->setCallbacks(new MyCallbacks());
+
+  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+  pAdvertising->addServiceUUID(SERVICE_UUID);
+  pAdvertising->setScanResponse(true);
+  oAdvertisementData.setShortName(BLE_NAME_SHORT);
+  oAdvertisementData.setManufacturerData(ManufacturerData);
+  pAdvertising->setAdvertisementData(oAdvertisementData);
+  pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
+  pAdvertising->setMinPreferred(0x12);
 
   // Start the service
   pService->start();
 
   // control the LED
   pinMode(LED_BUILTIN, OUTPUT);
+
+  // setup detailed advertising response
+
+  // Start advertising
+  pAdvertising->start();
+  Serial.write("Bluetooth Low Energy Serial: ");
+  Serial.println(BLE_NAME);
+}
+
+void setup_ble_old()
+{
+  Serial.begin(115200);
+  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+
+  // Create the BLE Device
+  BLEDevice::init(BLE_NAME);
+
+  // Create the BLE Server
+  BLEServer *pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new MyServerCallbacks());
+
+  // Create the BLE Service
+  BLEService *pService = pServer->createService(SERVICE_UUID);
+
+  // Create a BLE Characteristic
+  pTxCharacteristic = pService->createCharacteristic(
+    CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_NOTIFY);
+  pTxCharacteristic->addDescriptor(new BLE2902());
+
+  BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(
+    CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
+  pRxCharacteristic->setCallbacks(new MyCallbacks());
+
+  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+
+  // Start the service
+  pService->start();
+
+  // control the LED
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  // setup detailed advertising response
 
   // Start advertising
   pServer->getAdvertising()->start();
@@ -188,6 +252,7 @@ void loop_ble()
       pTxCharacteristic->setValue(&txValue, 1);
       pTxCharacteristic->notify();
       Serial.write(txValue);
+      Serial.println("read");
     }
     //delay(10);  // bluetooth stack will go into congestion, if too many packets are sent
   }
@@ -267,7 +332,7 @@ void setup()
   printf("Hold BOOT while BLUE LED ON for BLE mode\n");
   delay(1500);
   digitalWrite(LED_BUILTIN, LOW);
-  if(digitalRead(PIN_BLE) == 0)
+  if(digitalRead(PIN_BLE) != 0)
   {
     setup_ble();
     loop_selected = loop_ble;
