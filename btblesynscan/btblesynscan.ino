@@ -89,9 +89,9 @@ bool oldDeviceConnected = false;
 #define CHARACTERISTIC_UUID_TX "49535343-1E4D-4BD9-BA61-23C647249616"
 #endif
 #if 0
-#define SERVICE_UUID           "00000001-0000-0000-0000-2b992ddfa232"  // maybe synscan
-#define CHARACTERISTIC_UUID_RX "00000002-0000-0000-0000-2b992ddfa232"  // Mount->SynScan app
-#define CHARACTERISTIC_UUID_TX "00000003-0000-0000-0000-2b992ddfa232"  // SynScan app->Mount
+// trying to connect with synscan, not yet successful
+#define SERVICE_UUID             "00000001-0000-0000-0000-2b992ddfa232"  // maybe synscan
+#define CHARACTERISTIC_UUID_TXRX "00000002-0000-0000-0000-2b992ddfa232"  // Mount->SynScan app
 #endif
 #if 0
 // serial terminal doesn't work "gatt status 133"
@@ -185,12 +185,6 @@ void setup_ble()
     BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
   pTxCharacteristic->addDescriptor(new BLE2902());
   pTxCharacteristic->setCallbacks(new MyCallbacks());
-
-  /*
-  BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(
-    CHARACTERISTIC_UUID_TXRX,
-    BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
-  */
   #else
   // separate characteristics for RX and TX
   // Create a BLE Characteristic
