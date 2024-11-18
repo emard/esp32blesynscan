@@ -71,11 +71,16 @@ bool oldDeviceConnected = false;
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
-#if 1
+#if 0
 // serial terminal works
 #define SERVICE_UUID           "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"  // UART service UUID nordic nRF
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
+#endif
+#if 1
+// serial terminal works
+#define SERVICE_UUID             "0000ffe0-0000-1000-8000-00805f9b34fb"  // UART service UUID Telit TIO
+#define CHARACTERISTIC_UUID_TXRX "0000ffe1-0000-1000-8000-00805f9b34fb"
 #endif
 #if 0
 // serial terminal works
@@ -84,9 +89,9 @@ bool oldDeviceConnected = false;
 #define CHARACTERISTIC_UUID_TX "49535343-1E4D-4BD9-BA61-23C647249616"
 #endif
 #if 0
-#define SERVICE_UUID           "0000fefb-0000-1000-8000-00805f9b34fb"  // UART service UUID Telit TIO
-#define CHARACTERISTIC_UUID_RX "00000300-0300-0300-8000-00805f9b34fb"  // Mount->SynScan app
-#define CHARACTERISTIC_UUID_TX "00000100-0100-0100-8000-00805f9b34fb"  // SynScan app->Mount
+#define SERVICE_UUID           "00000001-0000-0000-0000-2b992ddfa232"  // maybe synscan
+#define CHARACTERISTIC_UUID_RX "00000002-0000-0000-0000-2b992ddfa232"  // Mount->SynScan app
+#define CHARACTERISTIC_UUID_TX "00000003-0000-0000-0000-2b992ddfa232"  // SynScan app->Mount
 #endif
 #if 0
 // serial terminal doesn't work "gatt status 133"
@@ -133,13 +138,13 @@ class MyCallbacks : public BLECharacteristicCallbacks
 {
   void onWrite(BLECharacteristic *pCharacteristic)
   {
-    Serial.println("write");
+    Serial.println("\nwrite");
     String rxValue = pCharacteristic->getValue();
     #if 0
     if (rxValue.length() > 0)
     {
       digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
-      for (int i = 0; i < rxValue.length(); i++)
+      for (int i = 0; i < rxValue.length(); i2b992ddfa232++)
       {
         Serial2.write(rxValue[i]);
         Serial.write(rxValue[i]);
@@ -172,12 +177,29 @@ void setup_ble()
   // Create the BLE Service
   BLEService *pService = pServer->createService(SERVICE_UUID);
 
+  #ifdef CHARACTERISTIC_UUID_TXRX
+  // one characteristic for both RX and TX
+  // Create a BLE Characteristic
+  pTxCharacteristic = pService->createCharacteristic(
+    CHARACTERISTIC_UUID_TXRX,
+    BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
+  pTxCharacteristic->addDescriptor(new BLE2902());
+  pTxCharacteristic->setCallbacks(new MyCallbacks());
+
+  /*
+  BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(
+    CHARACTERISTIC_UUID_TXRX,
+    BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
+  */
+  #else
+  // separate characteristics for RX and TX
   // Create a BLE Characteristic
   pTxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_NOTIFY);
   pTxCharacteristic->addDescriptor(new BLE2902());
 
   BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
   pRxCharacteristic->setCallbacks(new MyCallbacks());
+  #endif
 
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(SERVICE_UUID);
@@ -202,6 +224,7 @@ void setup_ble()
   Serial.println(BLE_NAME);
 }
 
+#if 0
 void setup_ble_old()
 {
   Serial.begin(115200);
@@ -241,6 +264,7 @@ void setup_ble_old()
   Serial.write("Bluetooth Low Energy Serial: ");
   Serial.println(BLE_NAME);
 }
+#endif
 
 void loop_ble()
 {
@@ -250,12 +274,12 @@ void loop_ble()
   {
     if(Serial2.available())
     {
+      Serial.println("\nread");
       digitalWrite(LED_BUILTIN, LOW);  // turn the LED on
       txValue = Serial2.read();
       pTxCharacteristic->setValue(&txValue, 1);
       pTxCharacteristic->notify();
       Serial.write(txValue);
-      Serial.println("read");
     }
     //delay(10);  // bluetooth stack will go into congestion, if too many packets are sent
   }
