@@ -56,6 +56,13 @@
 
    In this example rxValue is the data received (only accessible inside that function).
    And txValue is the data to be sent, in this example just a byte incremented every second.
+
+   https://github.com/Jakeler/ble-serial
+   source ble-venv/bin/activate
+   ble-scan -i hci1
+   Started general BLE scan
+   24:0A:C4:11:22:33 (rssi=-48): SynScan_BLE
+   ble-serial -i hci1 -d 24:0A:C4:11:22:33
 */
 #include <BLEDevice.h>
 #include <BLEServer.h>
@@ -65,19 +72,22 @@
 BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
 
+// default is 15 maybe we need more
+#define BLE_HANDLERS 30
+
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
-#if 0
+#if 1
 // serial terminal works
 #define SERVICE_UUID           "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"  // UART service UUID nordic nRF
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 #endif
-#if 1
+#if 0
 // serial terminal works
 #define SERVICE_UUID             "0000ffe0-0000-1000-8000-00805f9b34fb"  // UART service UUID Telit TIO
 #define CHARACTERISTIC_UUID_TXRX "0000ffe1-0000-1000-8000-00805f9b34fb"
@@ -90,8 +100,14 @@ bool oldDeviceConnected = false;
 #endif
 #if 0
 // trying to connect with synscan, not yet successful
-#define SERVICE_UUID             "00000001-0000-0000-0000-2b992ddfa232"  // maybe synscan
-#define CHARACTERISTIC_UUID_TXRX "00000002-0000-0000-0000-2b992ddfa232"  // Mount->SynScan app
+#define SERVICE_UUID             "c306c306-c306-c306-c306-2b992ddfa232"  // maybe synscan
+#define CHARACTERISTIC_UUID_TXRX "a002a002-a002-a002-a002-2b992ddfa232"  // bidir
+#endif
+#if 0
+// trying to connect with synscan, not yet successful
+#define SERVICE_UUID             "a002c306-a002-c306-a002-2b992ddfa232"  // maybe synscan
+#define CHARACTERISTIC_UUID_TX   "c306c306-c306-c306-c306-2b992ddfa232"  // SynScan app->Mount
+#define CHARACTERISTIC_UUID_RX   "a002a002-a002-a002-a002-2b992ddfa232"  // Mount->SynScan app
 #endif
 #if 0
 // serial terminal doesn't work "gatt status 133"
@@ -175,7 +191,7 @@ void setup_ble()
   pServer->setCallbacks(new MyServerCallbacks());
 
   // Create the BLE Service
-  BLEService *pService = pServer->createService(SERVICE_UUID);
+  BLEService *pService = pServer->createService(BLEUUID(SERVICE_UUID), BLE_HANDLERS);
 
   #ifdef CHARACTERISTIC_UUID_TXRX
   // one characteristic for both RX and TX
@@ -192,6 +208,7 @@ void setup_ble()
   pTxCharacteristic->addDescriptor(new BLE2902());
 
   BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
+  // pRxCharacteristic->addDescriptor(new BLEDescriptor("2901"));
   pRxCharacteristic->setCallbacks(new MyCallbacks());
   #endif
 
