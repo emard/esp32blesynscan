@@ -57,6 +57,12 @@
    In this example rxValue is the data received (only accessible inside that function).
    And txValue is the data to be sent, in this example just a byte incremented every second.
 
+   16-bit Attribute UUID replaces the x’s in the following:
+   0000xxxx-0000-1000-8000-00805F9B34FB
+
+   32-bit Attribute UUID replaces the x's in the following:
+   xxxxxxxx-0000-1000-8000-00805F9B34FB
+
    https://github.com/Jakeler/ble-serial
    source ble-venv/bin/activate
    ble-scan -i hci1
@@ -105,9 +111,9 @@ bool oldDeviceConnected = false;
 #endif
 #if 0
 // trying to connect with synscan, not yet successful
-#define SERVICE_UUID             "a002c306-a002-c306-a002-2b992ddfa232"  // maybe synscan
-#define CHARACTERISTIC_UUID_TX   "c306c306-c306-c306-c306-2b992ddfa232"  // SynScan app->Mount
-#define CHARACTERISTIC_UUID_RX   "a002a002-a002-a002-a002-2b992ddfa232"  // Mount->SynScan app
+#define SERVICE_UUID             "12345678-0000-1000-8000-00805F9B34FB"  // maybe synscan
+#define CHARACTERISTIC_UUID_TX   "0000c306-0000-1000-8000-00805F9B34FB"  // SynScan app->Mount 0xc306 INDICATE
+#define CHARACTERISTIC_UUID_RX   "0000c302-0000-1000-8000-00805F9B34FB"  // Mount->SynScan app 0xc302 WRITE
 #endif
 #if 0
 // serial terminal doesn't work "gatt status 133"
@@ -205,6 +211,7 @@ void setup_ble()
   // separate characteristics for RX and TX
   // Create a BLE Characteristic
   pTxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_NOTIFY);
+  // pTxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_INDICATE);
   pTxCharacteristic->addDescriptor(new BLE2902());
 
   BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
