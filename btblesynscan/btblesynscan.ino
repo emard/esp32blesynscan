@@ -112,8 +112,8 @@ bool oldDeviceConnected = false;
 #if 0
 // trying to connect with synscan, not yet successful
 #define SERVICE_UUID             "12345678-0000-1000-8000-00805F9B34FB"  // maybe synscan
-#define CHARACTERISTIC_UUID_TX   "0000c306-0000-1000-8000-00805F9B34FB"  // SynScan app->Mount 0xc306 INDICATE
-#define CHARACTERISTIC_UUID_RX   "0000c302-0000-1000-8000-00805F9B34FB"  // Mount->SynScan app 0xc302 WRITE
+#define CHARACTERISTIC_UUID_RX   "0000c302-0000-1000-8000-00805F9B34FB"  // SynScan->Mount 0xc302 WRITE
+#define CHARACTERISTIC_UUID_TX   "0000c306-0000-1000-8000-00805F9B34FB"  // Mount->SynScan 0xc306 INDICATE
 #endif
 #if 0
 // serial terminal doesn't work "gatt status 133"
