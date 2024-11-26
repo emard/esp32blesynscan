@@ -81,6 +81,17 @@ BLECharacteristic *pTxCharacteristic;
 // default is 15 maybe we need more
 #define BLE_HANDLERS 30
 
+// enable one of:
+// NOTIFY   faster, no required confirmation from other end
+// INDICATE slower, requires confirmation from other end
+#define TX_NOTIFY   1
+#define TX_INDICATE 0
+
+// enable one or none
+#define RX_NOTIFY   1
+#define RX_INDICATE 0
+
+bool rx_indicate = false;
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 
@@ -181,6 +192,12 @@ class MyCallbacks : public BLECharacteristicCallbacks
       Serial.write(rxValue.c_str(), rxValue.length());
     }
     #endif
+    #if RX_NOTIFY
+    pCharacteristic->notify();
+    #endif
+    #if RX_INDICATE
+    rx_indicate = true;
+    #endif
   }
 };
 
@@ -210,8 +227,12 @@ void setup_ble()
   #else
   // separate characteristics for RX and TX
   // Create a BLE Characteristic
+  #if TX_NOTIFY
   pTxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_NOTIFY);
-  // pTxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_INDICATE);
+  #endif
+  #if TX_INDICATE
+  pTxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_INDICATE);
+  #endif
   pTxCharacteristic->addDescriptor(new BLE2902());
 
   BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
@@ -296,10 +317,22 @@ void loop_ble()
       digitalWrite(LED_BUILTIN, LOW);  // turn the LED on
       txValue = Serial2.read();
       pTxCharacteristic->setValue(&txValue, 1);
+      #if TX_NOTIFY
       pTxCharacteristic->notify();
+      #endif
+      #if TX_INDICATE
+      pTxCharacteristic->indicate();
+      #endif
       Serial.write(txValue);
     }
     //delay(10);  // bluetooth stack will go into congestion, if too many packets are sent
+    #if RX_INDICATE
+    if(rx_indicate)
+    {
+      pRxCharacteristic->indicate();
+      rx_indicate = false;
+    }
+    #endif
   }
 
   // disconnecting
