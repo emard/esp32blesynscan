@@ -77,6 +77,7 @@
 
 BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
+BLECharacteristic *pRxCharacteristic;
 
 // default is 15 maybe we need more
 #define BLE_HANDLERS 30
@@ -88,7 +89,10 @@ BLECharacteristic *pTxCharacteristic;
 #define TX_INDICATE 0
 
 // enable one or none
-#define RX_NOTIFY   1
+// if CHARACTERISTIC_UUID_TXRX is used and RX_NOTIFY is enabled
+// then seriar bluetooth terminal prints repeated chars
+// maybe comm is not fully correct with RX_NOTIFY with TXRX
+#define RX_NOTIFY   0
 #define RX_INDICATE 0
 
 bool rx_indicate = false;
@@ -139,7 +143,12 @@ bool oldDeviceConnected = false;
 // on windows synscan 2.5.2 BLE device will appear
 // on the connect list regardless of ManufacturerData
 
-// first 2 chars "h." (hex 0x68 0x2e) encode manufacturer id 0x2e68
+// first 2 bytes "h." (hex 0x68 0x2e)
+// in nRF connect appear as
+// Company: Reserved ID: <0x2E68>
+// following 4 bytes encode string "54806524"
+// in nRF connect appear as
+// 0x3534383036353234
 // ghydra found it:
 // void FUN_140137c80(longlong *param_1)
 // this = (QByteArray *)QBluetoothDeviceInfo::manufacturerData(pQVar7,local_90,0x2e68);
@@ -221,22 +230,57 @@ void setup_ble()
   // Create a BLE Characteristic
   pTxCharacteristic = pService->createCharacteristic(
     CHARACTERISTIC_UUID_TXRX,
-    BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
+  #if TX_NOTIFY
+    BLECharacteristic::PROPERTY_NOTIFY |
+  #endif
+  #if TX_INDICATE
+    BLECharacteristic::PROPERTY_INDICATE |
+  #endif
+    BLECharacteristic::PROPERTY_WRITE);
   pTxCharacteristic->addDescriptor(new BLE2902());
   pTxCharacteristic->setCallbacks(new MyCallbacks());
   #else
   // separate characteristics for RX and TX
+  auto DescriptorTx2902 = new BLE2902();
   // Create a BLE Characteristic
   #if TX_NOTIFY
   pTxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_NOTIFY);
+  DescriptorTx2902->setNotifications(true);
+  #else
+  DescriptorTx2902->setNotifications(false);
   #endif
   #if TX_INDICATE
   pTxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_INDICATE);
+  DescriptorTx2902->setIndications(true);
+  #else
+  DescriptorTx2902->setIndications(false);
   #endif
-  pTxCharacteristic->addDescriptor(new BLE2902());
+  // in nRF connect BLE2902 appears under
+  // TX Characteristic
+  // Descriptors:
+  // Client Characteristic Configuration
+  // UUID: 0x2902
+  pTxCharacteristic->addDescriptor(DescriptorTx2902);
 
-  BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
-  // pRxCharacteristic->addDescriptor(new BLEDescriptor("2901"));
+  auto DescriptorRx2902 = new BLE2902();
+  #if RX_NOTIFY
+  DescriptorRx2902->setNotifications(true);
+  #else
+  DescriptorRx2902->setNotifications(false);
+  #endif
+  #if RX_INDICATE
+  DescriptorRx2902->setIndications(true);
+  #else
+  DescriptorRx2902->setIndications(false);
+  #endif
+  pRxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
+  // in nRF connect BLE2902 appears under
+  // RX Characteristic
+  // Descriptors:
+  // Client Characteristic Configuration
+  // UUID: 0x2902
+  pRxCharacteristic->addDescriptor(DescriptorRx2902);
+  //pRxCharacteristic->addDescriptor(new BLEDescriptor("2901"));
   pRxCharacteristic->setCallbacks(new MyCallbacks());
   #endif
 
