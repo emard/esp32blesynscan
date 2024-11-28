@@ -82,22 +82,41 @@ BLECharacteristic *pRxCharacteristic;
 // default is 15 maybe we need more
 #define BLE_HANDLERS 30
 
+// direction mount->synscan
 // enable one of:
 // NOTIFY   faster, no required confirmation from other end
 // INDICATE slower, requires confirmation from other end
-#define TX_NOTIFY   1
-#define TX_INDICATE 0
+#define TX_NOTIFY   0
+#define TX_INDICATE 1
 
+// TXBUF_LEN 0  to disable
+// TXBUF_LEN > 0 to enable (TX_INDICATE needs it)
+// recommend TXBUF_LEN 32 with TX_INDICATE 1
+// [bytes] length of TX buffer
+// conditions when buffer is delivered
+// with optional notify/indicate signal:
+// first "=" must be received then "\r" (CR)
+// todo: timout, buffer full
+#define TXBUF_LEN   32
+
+// direction synscan->mount
 // enable one or none
 // if CHARACTERISTIC_UUID_TXRX is used and RX_NOTIFY is enabled
-// then seriar bluetooth terminal prints repeated chars
+// then android serial bluetooth terminal prints repeated chars
 // maybe comm is not fully correct with RX_NOTIFY with TXRX
+// if notify is not enabled, synscan will keep on sending the same message
+// for 1 second
 #define RX_NOTIFY   1
 #define RX_INDICATE 0
 
 bool rx_indicate = false;
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
+
+uint8_t txbuf[TXBUF_LEN];
+uint8_t txbuf_index = 0;
+
+bool equal_sign_received = false;
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
@@ -121,7 +140,7 @@ bool oldDeviceConnected = false;
 #endif
 #if 0
 // trying to connect with synscan, not yet successful
-#define SERVICE_UUID             "c306c306-c306-c306-c306-2b992ddfa232"  // maybe synscan
+#define SERVICE_UUID             "c306c306-c306-c306-c306-2b992ddfa232"  // trying synscan
 #define CHARACTERISTIC_UUID_TXRX "a002a002-a002-a002-a002-2b992ddfa232"  // bidir
 #endif
 #if 1
@@ -180,7 +199,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
 {
   void onWrite(BLECharacteristic *pCharacteristic)
   {
-    Serial.println("\nwrite");
+    //Serial.println("\nwrite");
     String rxValue = pCharacteristic->getValue();
     #if 0
     if (rxValue.length() > 0)
@@ -262,16 +281,16 @@ void setup_ble()
   // UUID: 0x2902
   pTxCharacteristic->addDescriptor(DescriptorTx2902);
 
-  auto DescriptorRx2902 = new BLE2902();
+  BLEDescriptor *DescriptorRx2901 = new BLEDescriptor("2901");
   #if RX_NOTIFY
-  DescriptorRx2902->setNotifications(true);
+  //DescriptorRx2901->setNotifications(true);
   #else
-  DescriptorRx2902->setNotifications(false);
+  //DescriptorRx2901->setNotifications(false);
   #endif
   #if RX_INDICATE
-  DescriptorRx2902->setIndications(true);
+  //DescriptorRx2901->setIndications(true);
   #else
-  DescriptorRx2902->setIndications(false);
+  //DescriptorRx2901->setIndications(false);
   #endif
   pRxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
   // in nRF connect BLE2902 appears under
@@ -279,8 +298,10 @@ void setup_ble()
   // Descriptors:
   // Client Characteristic Configuration
   // UUID: 0x2902
-  pRxCharacteristic->addDescriptor(DescriptorRx2902);
-  //pRxCharacteristic->addDescriptor(new BLEDescriptor("2901"));
+  //pRxCharacteristic->addDescriptor(DescriptorRx2902);
+  // Characteristic User Description
+  // UUID: 0x2901
+  pRxCharacteristic->addDescriptor(DescriptorRx2901);
   pRxCharacteristic->setCallbacks(new MyCallbacks());
   #endif
 
@@ -360,11 +381,23 @@ void loop_ble()
   {
     if(Serial2.available())
     {
-      Serial.println("\nread");
+      //Serial.println("\nread");
       digitalWrite(LED_BUILTIN, LOW);  // turn the LED on
       txValue = Serial2.read();
-      pTxCharacteristic->setValue(&txValue, 1); // 1 is the length
-      // pTxCharacteristic->writeValue((uint8_t*)&txValue, 4); // example of multibyte write
+      txbuf[txbuf_index++] = txValue;
+      if(txValue == '=')
+        equal_sign_received = true;
+      if(txbuf_index >= TXBUF_LEN
+      || (equal_sign_received && txValue == '\r') )
+      {
+        // deliver data now
+        pTxCharacteristic->setValue(txbuf, txbuf_index); // txbuf_index is the length
+        // reset after delivery, prepare for next data
+        txbuf_index = 0;
+        equal_sign_received = false;
+      }
+      // pTxCharacteristic->setValue(&txValue, 1); // 1 is the length
+      // pTxCharacteristic->setValue((uint8_t*)&txValue, 4); // example of multibyte write
       #if TX_NOTIFY
       pTxCharacteristic->notify();
       #endif
