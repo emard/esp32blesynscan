@@ -113,7 +113,7 @@ bool rx_indicate = false;
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 
-uint8_t txbuf[TXBUF_LEN];
+uint8_t txbuf[TXBUF_LEN+1];
 uint8_t txbuf_index = 0;
 
 bool equal_sign_received = false;
@@ -137,11 +137,6 @@ bool equal_sign_received = false;
 #define SERVICE_UUID           "49535343-FE7D-4AE5-8FA9-9FAFD205E455"  // UART service UUID microchip RN4871
 #define CHARACTERISTIC_UUID_RX "49535343-8841-43F4-A8D4-ECBE34729BB3"
 #define CHARACTERISTIC_UUID_TX "49535343-1E4D-4BD9-BA61-23C647249616"
-#endif
-#if 0
-// trying to connect with synscan, not yet successful
-#define SERVICE_UUID             "c306c306-c306-c306-c306-2b992ddfa232"  // trying synscan
-#define CHARACTERISTIC_UUID_TXRX "a002a002-a002-a002-a002-2b992ddfa232"  // bidir
 #endif
 #if 1
 // trying to connect with synscan, not yet successful
@@ -387,6 +382,7 @@ void loop_ble()
       txbuf[txbuf_index++] = txValue;
       if(txValue == '=')
         equal_sign_received = true;
+      Serial.write(txValue);
       if(txbuf_index >= TXBUF_LEN
       || (equal_sign_received && txValue == '\r') )
       {
@@ -395,6 +391,8 @@ void loop_ble()
         // reset after delivery, prepare for next data
         txbuf_index = 0;
         equal_sign_received = false;
+        Serial.write('\n');
+        // txbuf[txbuf_index] = '\0';
       }
       // pTxCharacteristic->setValue(&txValue, 1); // 1 is the length
       // pTxCharacteristic->setValue((uint8_t*)&txValue, 4); // example of multibyte write
@@ -404,7 +402,6 @@ void loop_ble()
       #if TX_INDICATE
       pTxCharacteristic->indicate();
       #endif
-      Serial.write(txValue);
     }
     //delay(10);  // bluetooth stack will go into congestion, if too many packets are sent
     #if RX_INDICATE
