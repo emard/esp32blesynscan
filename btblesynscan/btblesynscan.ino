@@ -113,7 +113,7 @@ bool rx_indicate = false;
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 
-uint8_t txbuf[TXBUF_LEN+1];
+uint8_t txbuf[TXBUF_LEN+2]; // +2 to terminate with \n\0 for debug priting
 uint8_t txbuf_index = 0;
 
 bool equal_sign_received = false;
@@ -140,7 +140,7 @@ bool equal_sign_received = false;
 #endif
 #if 1
 // trying to connect with synscan, not yet successful
-#define SERVICE_UUID             "0000a002-0000-1000-8000-00805F9B34FB"  // SynScan has it
+#define SERVICE_UUID             "0000a002-0000-1000-8000-00805F9B34FB"  // SynScan has 
 #define CHARACTERISTIC_UUID_RX   "0000c302-0000-1000-8000-00805F9B34FB"  // SynScan->Mount 0xc302 WRITE
 #define CHARACTERISTIC_UUID_TX   "0000c306-0000-1000-8000-00805F9B34FB"  // Mount->SynScan 0xc306 INDICATE
 #endif
@@ -200,7 +200,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
     if (rxValue.length() > 0)
     {
       digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
-      for (int i = 0; i < rxValue.length(); i2b992ddfa232++)
+      for (int i = 0; i < rxValue.length(); i++)
       {
         Serial2.write(rxValue[i]);
         Serial.write(rxValue[i]);
@@ -211,8 +211,23 @@ class MyCallbacks : public BLECharacteristicCallbacks
     if (rxValue.length() > 0)
     {
       digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
-      Serial2.write(rxValue.c_str(), rxValue.length());
-      Serial.write(rxValue.c_str(), rxValue.length());
+      if(rxValue[0] == 'A') // this is "AT+CWMODE_CUR?"", rewrite as :e1
+      {
+        Serial2.write(":e1\r");
+        Serial.write(rxValue.c_str(), rxValue.length());
+      }
+      #if 0
+      else if(rxValue[0] == ':') // every ":" rewritten as ":e1", strange but it connects in AZ mode
+      {
+        Serial2.write(":e1\r");
+        Serial.write(rxValue.c_str(), rxValue.length());
+      }
+      #endif
+      else
+      {
+        Serial2.write(rxValue.c_str(), rxValue.length());
+        Serial.write(rxValue.c_str(), rxValue.length());
+      }
     }
     #endif
     #if RX_NOTIFY
@@ -392,7 +407,9 @@ void loop_ble()
         txbuf_index = 0;
         equal_sign_received = false;
         Serial.write('\n');
-        // txbuf[txbuf_index] = '\0';
+        //txbuf[txbuf_index] = '\n';
+        //txbuf[txbuf_index+1] = '\0';
+        //Serial.write(txbuf, txbuf_index+2); // debug print on USB serial
       }
       // pTxCharacteristic->setValue(&txValue, 1); // 1 is the length
       // pTxCharacteristic->setValue((uint8_t*)&txValue, 4); // example of multibyte write
