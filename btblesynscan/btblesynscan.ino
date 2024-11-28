@@ -219,7 +219,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
       #if 0
       else if(rxValue[0] == ':') // every ":" rewritten as ":e1", strange but it connects in AZ mode
       {
-        Serial2.write(":e1\r");
+        Serial2.write(":e1\r"); // of course it doesn't work as normal mount
         Serial.write(rxValue.c_str(), rxValue.length());
       }
       #endif
