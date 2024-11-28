@@ -27,8 +27,8 @@
 
 /*********** BLUETOOTH LOW ENERGY ***********/
 
-#define BLE_NAME "SynScan_BLE"
-#define BLE_NAME_SHORT "SynScan"
+#define BLE_NAME "SynScan_b1e5"
+//#define BLE_NAME_SHORT "SynScan"
 
 /*
     Video: https://www.youtube.com/watch?v=oCMOYS71NIU
@@ -92,7 +92,7 @@ BLECharacteristic *pRxCharacteristic;
 // if CHARACTERISTIC_UUID_TXRX is used and RX_NOTIFY is enabled
 // then seriar bluetooth terminal prints repeated chars
 // maybe comm is not fully correct with RX_NOTIFY with TXRX
-#define RX_NOTIFY   0
+#define RX_NOTIFY   1
 #define RX_INDICATE 0
 
 bool rx_indicate = false;
@@ -102,7 +102,7 @@ bool oldDeviceConnected = false;
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
-#if 1
+#if 0
 // serial terminal works
 #define SERVICE_UUID           "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"  // UART service UUID nordic nRF
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
@@ -124,9 +124,9 @@ bool oldDeviceConnected = false;
 #define SERVICE_UUID             "c306c306-c306-c306-c306-2b992ddfa232"  // maybe synscan
 #define CHARACTERISTIC_UUID_TXRX "a002a002-a002-a002-a002-2b992ddfa232"  // bidir
 #endif
-#if 0
+#if 1
 // trying to connect with synscan, not yet successful
-#define SERVICE_UUID             "12345678-0000-1000-8000-00805F9B34FB"  // maybe synscan
+#define SERVICE_UUID             "0000a002-0000-1000-8000-00805F9B34FB"  // SynScan has it
 #define CHARACTERISTIC_UUID_RX   "0000c302-0000-1000-8000-00805F9B34FB"  // SynScan->Mount 0xc302 WRITE
 #define CHARACTERISTIC_UUID_TX   "0000c306-0000-1000-8000-00805F9B34FB"  // Mount->SynScan 0xc306 INDICATE
 #endif
@@ -287,7 +287,9 @@ void setup_ble()
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(SERVICE_UUID);
   pAdvertising->setScanResponse(true);
+  #ifdef BLE_NAME_SHORT
   oAdvertisementData.setShortName(BLE_NAME_SHORT);
+  #endif
   oAdvertisementData.setManufacturerData(ManufacturerData);
   pAdvertising->setAdvertisementData(oAdvertisementData);
   pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
