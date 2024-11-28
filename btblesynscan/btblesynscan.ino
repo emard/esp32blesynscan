@@ -361,7 +361,8 @@ void loop_ble()
       Serial.println("\nread");
       digitalWrite(LED_BUILTIN, LOW);  // turn the LED on
       txValue = Serial2.read();
-      pTxCharacteristic->setValue(&txValue, 1);
+      pTxCharacteristic->setValue(&txValue, 1); // 1 is the length
+      // pTxCharacteristic->writeValue((uint8_t*)&txValue, 4); // example of multibyte write
       #if TX_NOTIFY
       pTxCharacteristic->notify();
       #endif
