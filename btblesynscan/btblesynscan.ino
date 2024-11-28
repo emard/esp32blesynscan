@@ -333,6 +333,7 @@ void setup_ble_old()
   pRxCharacteristic->setCallbacks(new MyCallbacks());
 
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+  // pAdvertising->addServiceUUID(SERVICE_UUID);
 
   // Start the service
   pService->start();
