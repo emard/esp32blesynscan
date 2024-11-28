@@ -116,7 +116,7 @@ bool oldDeviceConnected = false;
 uint8_t txbuf[TXBUF_LEN+2]; // +2 to terminate with \n\0 for debug priting
 uint8_t txbuf_index = 0;
 
-bool equal_sign_received = false;
+bool response_detected = false;
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
@@ -224,15 +224,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
       }
       #endif
       #if 1
-      else if(false
-           || rxValue[1] == 'f'
-           // || rxValue[1] == 'q'
-           // || rxValue[1] == 'a'
-           // || rxValue[1] == 'b'
-           // || rxValue[1] == 's'
-           // || rxValue[1] == 'j'
-           || rxValue[1] == 'P'
-           // || rxValue[1] == 'V'
+      else if(rxValue[1] == 'f' || rxValue[1] == 'P'
            ) // minimum set of commands rewritten as ":e1" to force connect
       {
         Serial2.write(":e1\r"); // of course it doesn't work as normal mount
@@ -411,17 +403,17 @@ void loop_ble()
       digitalWrite(LED_BUILTIN, LOW);  // turn the LED on
       txValue = Serial2.read();
       txbuf[txbuf_index++] = txValue;
-      if(txValue == '=')
-        equal_sign_received = true;
+      if(txValue == '=' || txValue == '!')
+        response_detected = true;
       Serial.write(txValue);
       if(txbuf_index >= TXBUF_LEN
-      || (equal_sign_received && txValue == '\r') )
+      || (response_detected && txValue == '\r') )
       {
         // deliver data now
         pTxCharacteristic->setValue(txbuf, txbuf_index); // txbuf_index is the length
         // reset after delivery, prepare for next data
         txbuf_index = 0;
-        equal_sign_received = false;
+        response_detected = false;
         Serial.write('\n');
         //txbuf[txbuf_index] = '\n';
         //txbuf[txbuf_index+1] = '\0';
