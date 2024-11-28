@@ -223,6 +223,22 @@ class MyCallbacks : public BLECharacteristicCallbacks
         Serial.write(rxValue.c_str(), rxValue.length());
       }
       #endif
+      #if 1
+      else if(false
+           || rxValue[1] == 'f'
+           // || rxValue[1] == 'q'
+           // || rxValue[1] == 'a'
+           // || rxValue[1] == 'b'
+           // || rxValue[1] == 's'
+           // || rxValue[1] == 'j'
+           || rxValue[1] == 'P'
+           // || rxValue[1] == 'V'
+           ) // minimum set of commands rewritten as ":e1" to force connect
+      {
+        Serial2.write(":e1\r"); // of course it doesn't work as normal mount
+        Serial.write(rxValue.c_str(), rxValue.length());
+      }
+      #endif
       else
       {
         Serial2.write(rxValue.c_str(), rxValue.length());
