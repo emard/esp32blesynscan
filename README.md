@@ -217,6 +217,28 @@ to print debug messages from esp32.
     Connected
     Disconnected
 
+# Principle of operation
+
+ESP32 creates a bluetooth server with serial port bridge.
+Phyisical TTL serial port is 9600,8,n,1.
+
+RX Direction synscan->motor (UUID 0xC302)
+
+Bluetooth LE packetizes serial protocol so
+entire message is delivered in one packet.
+ESP32 filters out some problematic commands for
+"2.16.A1" motor firmware (see Firmware bugfix)
+other firmwares may not need it.
+Message is written to TTL serial and signaled
+with "NOTIFY" flow control.
+
+TX Direction motor->synscan (UUID 0xC306)
+
+TTL serial receiver buffers bytes until "complete"
+message is received, it begins with '=' or '!'
+and ends with '\r'. It is delivered via bluetooth
+and signaled with "INDICATE" flow control.
+
 # Firmware bugfix
 
 Motor firmware version 2.16.A1 is the latest but has
