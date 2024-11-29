@@ -24,11 +24,11 @@ compile and upload to ESP32 board connected with Micro USB Cable.
 After board power ON or reset by pressing "EN" button,
 blue LED will turn ON for 1.5 seconds.
 
-By default if nothing is pressed ESP32 provides 
-Bluetooth Classic Serial.
+By default if nothing is pressed ESP32 provides
+Bluetooth Low Energy Serial.
 
 If "BOOT" button is held during blue LED is ON
-then ESP32 will provide Bluetooth Low Energy Serial.
+then ESP32 will provide Bluetooth Classic Serial.
 
 ESP32 in Bluetooth Low Energy mode only supports
 BLE protocol and does not save battery power.
