@@ -27,7 +27,9 @@
 
 /*********** BLUETOOTH LOW ENERGY ***********/
 
-#define BLE_NAME "SynScan_b1e5"
+// #define BLE_NAME "SynScan_b1e5" // original devices have hex from WiFi MAC to BLE name
+#define BLE_NAME "SynScan_BLE"
+
 //#define BLE_NAME_SHORT "SynScan"
 
 /*
@@ -79,13 +81,14 @@ BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
 BLECharacteristic *pRxCharacteristic;
 
-// default is 15 maybe we need more
-#define BLE_HANDLERS 30
+// default is 15 normally we don't need more
+#define BLE_HANDLERS 15
 
 // direction mount->synscan
 // enable one of:
 // NOTIFY   faster, no required confirmation from other end
 // INDICATE slower, requires confirmation from other end
+// synscan works only with TX_INDICATE
 #define TX_NOTIFY   0
 #define TX_INDICATE 1
 
@@ -106,6 +109,7 @@ BLECharacteristic *pRxCharacteristic;
 // maybe comm is not fully correct with RX_NOTIFY with TXRX
 // if notify is not enabled, synscan will keep on sending the same message
 // for 1 second
+// synscan works only with RX_NOTIFY
 #define RX_NOTIFY   1
 #define RX_INDICATE 0
 
@@ -492,6 +496,8 @@ void loop_bt() {
     a = Serial2.read();
     SerialBT.write(a);
     Serial.write(a);
+    if(a == '\r')
+      Serial.write('\n');
     digitalWrite(LED_BUILTIN, LOW);
   }
   if (SerialBT.available()) {
@@ -510,7 +516,8 @@ void setup()
   pinMode(PIN_BLE, INPUT_PULLUP);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
-  printf("Hold BOOT while BLUE LED ON for BLE mode\n");
+  //printf("Default is Bluetooth Low Energy mode (BLE) for SynScan.\n");
+  printf("Hold BOOT while BLUE LED ON for Bluetooth Classic mode.\n");
   delay(1500);
   digitalWrite(LED_BUILTIN, LOW);
   if(digitalRead(PIN_BLE) != 0)
