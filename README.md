@@ -92,6 +92,15 @@ Synscan works in BLE mode.
 
 SynScan pro -> Settings -> Connect Settings -> BLE.
 
+If device no longer appears in connect list and 
+you want to retry connecting, then android application
+has to be stopped and started again:
+
+View applications as smaller windows. To stop synscan,
+drag it left on ardoid 10 or drag it up on android 14.
+
+Protocol testing:
+
 "Serial Bluetooth Terminal" can connect in
 Bluetooth Classic directly when ESP32 is booted
 in Bluetooth Classic mode.
@@ -202,12 +211,7 @@ SynScanPro can be debugged from wine:
 # Windows
 
 With suitable BLE adapter, for example TP-LINK UB500
-synscan pro 2.5.2 for windows detects "SynScan_BLE"
-adapter but connecting doesn't work with error
-"mount mode not detected". ESP32 connected to CP2102
-serial port prints "Connected" message after first
-BLE connection attempt and when Synscan pro is closed
-esp32 prints "Disconnected" message.
+synscan pro 2.5.2 for windows connects with "SynScan_BLE".
 
 "SimplySerial" is simple terminal emulator for
 windows. It can can be started from powershell
