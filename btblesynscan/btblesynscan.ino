@@ -114,7 +114,7 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 
 uint8_t txbuf[TXBUF_LEN+2]; // +2 to terminate with \n\0 for debug priting
-uint8_t txbuf_index = 0;
+uint32_t txbuf_index = 0;
 
 bool response_detected = false;
 
@@ -139,7 +139,7 @@ bool response_detected = false;
 #define CHARACTERISTIC_UUID_TX "49535343-1E4D-4BD9-BA61-23C647249616"
 #endif
 #if 1
-// trying to connect with synscan, not yet successful
+// synscan works
 #define SERVICE_UUID             "0000a002-0000-1000-8000-00805F9B34FB"  // SynScan has 
 #define CHARACTERISTIC_UUID_RX   "0000c302-0000-1000-8000-00805F9B34FB"  // SynScan->Mount 0xc302 WRITE
 #define CHARACTERISTIC_UUID_TX   "0000c306-0000-1000-8000-00805F9B34FB"  // Mount->SynScan 0xc306 INDICATE
@@ -211,11 +211,13 @@ class MyCallbacks : public BLECharacteristicCallbacks
     if (rxValue.length() > 0)
     {
       digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
+      #if 0
       if(rxValue[0] == 'A') // this is "AT+CWMODE_CUR?"", rewrite as :e1
       {
         Serial2.write(":e1\r");
         Serial.write(rxValue.c_str(), rxValue.length());
       }
+      #endif
       #if 0
       else if(rxValue[0] == ':') // every ":" rewritten as ":e1", strange but it connects in AZ mode
       {
@@ -223,7 +225,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
         Serial.write(rxValue.c_str(), rxValue.length());
       }
       #endif
-      #if 1
+      #if 0
       else if(rxValue[1] == 'f' || rxValue[1] == 'P'
            ) // minimum set of commands rewritten as ":e1" to force connect
       {
@@ -231,7 +233,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
         Serial.write(rxValue.c_str(), rxValue.length());
       }
       #endif
-      else
+      // else
       {
         Serial2.write(rxValue.c_str(), rxValue.length());
         Serial.write(rxValue.c_str(), rxValue.length());
@@ -244,6 +246,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
     #if RX_INDICATE
     rx_indicate = true;
     #endif
+    Serial.write('\n');
   }
 };
 
@@ -402,14 +405,20 @@ void loop_ble()
       //Serial.println("\nread");
       digitalWrite(LED_BUILTIN, LOW);  // turn the LED on
       txValue = Serial2.read();
-      txbuf[txbuf_index++] = txValue;
+      #if 1
       if(txValue == '=' || txValue == '!')
+      {
         response_detected = true;
+        txbuf_index = 0;
+      }
+      #endif
+      txbuf[txbuf_index++] = txValue;
       Serial.write(txValue);
       if(txbuf_index >= TXBUF_LEN
       || (response_detected && txValue == '\r') )
       {
         // deliver data now
+        // if(txbuf_index > 0) if(txbuf[txbuf_index-1] == '\r') txbuf_index--;
         pTxCharacteristic->setValue(txbuf, txbuf_index); // txbuf_index is the length
         // reset after delivery, prepare for next data
         txbuf_index = 0;
@@ -418,17 +427,17 @@ void loop_ble()
         //txbuf[txbuf_index] = '\n';
         //txbuf[txbuf_index+1] = '\0';
         //Serial.write(txbuf, txbuf_index+2); // debug print on USB serial
-      }
-      // pTxCharacteristic->setValue(&txValue, 1); // 1 is the length
-      // pTxCharacteristic->setValue((uint8_t*)&txValue, 4); // example of multibyte write
-      #if TX_NOTIFY
-      pTxCharacteristic->notify();
-      #endif
-      #if TX_INDICATE
-      pTxCharacteristic->indicate();
-      #endif
+        // pTxCharacteristic->setValue(&txValue, 1); // 1 is the length
+        // pTxCharacteristic->setValue((uint8_t*)&txValue, 4); // example of multibyte write
+        #if TX_NOTIFY
+        pTxCharacteristic->notify();
+        #endif
+        #if TX_INDICATE
+        pTxCharacteristic->indicate();
+        #endif
+        delay(1);  // bluetooth stack will go into congestion, if too many packets are sent
+     }
     }
-    //delay(10);  // bluetooth stack will go into congestion, if too many packets are sent
     #if RX_INDICATE
     if(rx_indicate)
     {
