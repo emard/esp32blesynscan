@@ -4,20 +4,69 @@ Arduino ESP32 Bluetooth Classic and Bluetooth Low Energy
 UART bridge for SynScan Pro 2.5.2.
 UART 3.3V TTL is connected to SkyWatcher Virtuoso 90 Heritage mount.
 
-It works for android and linux, windows not tested yet.
+It works for android, linux and windows.
 
 # Install
 
-Arduino project "btblesynscan" is recommended as it
-supports both Bluetooth Classic and Bluetooth Low Energy.
+Arduino project "btblesynscan" should be used.
+It supports both Bluetooth Classic and Bluetooth Low Energy.
 
 From board manager Install esp32 by espressif,
 select board "ESP32 Dev Module"
 
-Copy "btblesynscan.ino" to directory "~Arduino/btblesynscan/btblesynscan.ino"
+Copy "btblesynscan.ino" to directory "~Arduino/esp32blesynscan/btblesynscan/btblesynscan.ino"
 
-From Arduino, open project "Arduino/btblesynscan",
+From Arduino, open project "Arduino/esp32blesynscan/btblesynscan",
 compile and upload to ESP32 board connected with Micro USB Cable.
+
+# Electrical
+
+There should be some 12V->3.3V converter,
+to save power recommended is switching converter (Canton Power).
+RJ-12 plug can't guarantee that GND makes
+connection before other pins.
+Use 3.6V zener diodes to protect
+sensitive 3.3V data pins from getting 12V
+during plugging in.
+
+In the mount manual see RJ12 pinout.
+Conenct RJ12 RX/TX with short straight
+RJ12 cable to ESP32 RX2/TX2 pins.
+
+# Connection
+
+Looking at female RJ-12 socket on the mount:
+
+       ____
+    ---    ---
+    | 654321 |
+    ----------
+
+    1 blue   N.C.
+    2 yellow TX       (3.3V) (mount receives)
+    3 green  Vpp+     ( 12V)
+    4 red    RX       (3.3V) (mount sends)
+    5 black  GND
+    6 white  Reserved (3.3V)
+
+RX/TX roles on the mount are swapped and
+actually indicate RX/TX on remote end
+
+RJ-11 4-pin socket can be used as pins 1 and 6 are
+not connected.
+
+# WARNING WARNING WARNING
+
+There are different RJ-11 and RJ-12 cables,
+with [straight and cross wiring](/doc/straight-vs-cross-cable.pdf).
+For the telephones it does not matter but here it matters!
+
+STANDARD PHONE CROSS CABLE MAY NOT BE SUITABLE.
+USE ONLY STRAIGHT WIRED 4-PIN RJ-11 or
+STRAIGHT WIRED 6-PIN RJ-12. CROSS RJ-11 AND RJ-12 
+CABLES AND ALL 2-PIN RJ-11 CABLES ARE NOT SUITABLE.
+IF A CROSS WIRED CABLE OR ANY 2-PIN CABLE IS CONNECTED
+THEN 12V WILL FRY ELECTRONICS IN THE MOUNT AND ESP32.
 
 # Bluetooth Classic or Low Energy
 
@@ -148,7 +197,6 @@ SynScanPro can be debugged from wine:
     ...
     Wine-gdb> c
 
-
 # Windows
 
 With suitable BLE adapter, for example TP-LINK UB500
@@ -167,3 +215,27 @@ to print debug messages from esp32.
     Connected
     Disconnected
 
+# Firmware bugfix
+
+Motor firmware version 2.16.A1 is the latest but has
+problem with SynScan application on android.
+After each connect user must enable "Auxiliary Encoder"
+otherwise mount will start turning around azimuth axis
+and will never stop by itself (user should press cancel to stop).
+
+To fix this in function "udpcb()" one message is rewritten
+
+    :W2050000\r -> :W2040000\r
+
+Second fix is more to prevent sending junk to
+motor firmware which is easy to crash.
+
+Synscan sends some AT command probably for its
+original SynScan WiFi ESP8266 AT firmware.
+This AT command should not reach motor firmware so
+"udpcb()" function rewrites this AT command as ":e1\\r"
+and to this command motor firmware responds with
+version number which is not really response to AT
+command but synscan accepts it.
+
+    AT+CWMODE_CUR?\r\n -> :e1\r
