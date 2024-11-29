@@ -1,3 +1,6 @@
+// install Board -> Boards Manager -> "esp32 by espressif"
+// Board: ESP32 Dev Module
+
 /*********** COMMON ***********/
 
 // Hardware Serial2 pins
