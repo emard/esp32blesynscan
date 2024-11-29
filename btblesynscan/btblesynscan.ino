@@ -211,29 +211,25 @@ class MyCallbacks : public BLECharacteristicCallbacks
     if (rxValue.length() > 0)
     {
       digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
-      #if 0
-      if(rxValue[0] == 'A') // this is "AT+CWMODE_CUR?"", rewrite as :e1
+      #if 1
+      if(rxValue == "AT+CWMODE_CUR?\r\n") // this is problematic command
       {
-        Serial2.write(":e1\r");
+        Serial2.write(":e1\r"); // rewritten as non-problematic command :e1
         Serial.write(rxValue.c_str(), rxValue.length());
       }
       #endif
-      #if 0
-      else if(rxValue[0] == ':') // every ":" rewritten as ":e1", strange but it connects in AZ mode
+      #if 1
+      // fix for virtuoso heritage 90 with firmware v2.16.A1
+      // problem: mount turns non stop if auxiliary encoders are not used
+      // this rewrites :W2050000\r -> :W2040000\r
+      // now it is not neccessary to enable auxiliary encoders
+      if(rxValue == ":W2050000\r") // this is problematic command
       {
-        Serial2.write(":e1\r"); // of course it doesn't work as normal mount
+        Serial2.write(":W2040000\r"); // rewritten as non problematic command
         Serial.write(rxValue.c_str(), rxValue.length());
       }
       #endif
-      #if 0
-      else if(rxValue[1] == 'f' || rxValue[1] == 'P'
-           ) // minimum set of commands rewritten as ":e1" to force connect
-      {
-        Serial2.write(":e1\r"); // of course it doesn't work as normal mount
-        Serial.write(rxValue.c_str(), rxValue.length());
-      }
-      #endif
-      // else
+      else
       {
         Serial2.write(rxValue.c_str(), rxValue.length());
         Serial.write(rxValue.c_str(), rxValue.length());
@@ -406,6 +402,7 @@ void loop_ble()
       digitalWrite(LED_BUILTIN, LOW);  // turn the LED on
       txValue = Serial2.read();
       #if 1
+      // ECHO CANCELLATION, SEND ONLY RESPONSE PART
       if(txValue == '=' || txValue == '!')
       {
         response_detected = true;
@@ -413,12 +410,12 @@ void loop_ble()
       }
       #endif
       txbuf[txbuf_index++] = txValue;
-      Serial.write(txValue);
+      if(response_detected)
+        Serial.write(txValue);
       if(txbuf_index >= TXBUF_LEN
       || (response_detected && txValue == '\r') )
       {
         // deliver data now
-        // if(txbuf_index > 0) if(txbuf[txbuf_index-1] == '\r') txbuf_index--;
         pTxCharacteristic->setValue(txbuf, txbuf_index); // txbuf_index is the length
         // reset after delivery, prepare for next data
         txbuf_index = 0;
@@ -427,8 +424,6 @@ void loop_ble()
         //txbuf[txbuf_index] = '\n';
         //txbuf[txbuf_index+1] = '\0';
         //Serial.write(txbuf, txbuf_index+2); // debug print on USB serial
-        // pTxCharacteristic->setValue(&txValue, 1); // 1 is the length
-        // pTxCharacteristic->setValue((uint8_t*)&txValue, 4); // example of multibyte write
         #if TX_NOTIFY
         pTxCharacteristic->notify();
         #endif
