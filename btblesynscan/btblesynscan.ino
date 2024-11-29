@@ -211,24 +211,20 @@ class MyCallbacks : public BLECharacteristicCallbacks
     if (rxValue.length() > 0)
     {
       digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
-      #if 1
       if(rxValue == "AT+CWMODE_CUR?\r\n") // this is problematic command
       {
         Serial2.write(":e1\r"); // rewritten as non-problematic command :e1
         Serial.write(rxValue.c_str(), rxValue.length());
       }
-      #endif
-      #if 1
       // fix for virtuoso heritage 90 with firmware v2.16.A1
       // problem: mount turns non stop if auxiliary encoders are not used
       // this rewrites :W2050000\r -> :W2040000\r
       // now it is not neccessary to enable auxiliary encoders
-      if(rxValue == ":W2050000\r") // this is problematic command
+      else if(rxValue == ":W2050000\r") // this is problematic command
       {
         Serial2.write(":W2040000\r"); // rewritten as non problematic command
         Serial.write(rxValue.c_str(), rxValue.length());
       }
-      #endif
       else
       {
         Serial2.write(rxValue.c_str(), rxValue.length());
