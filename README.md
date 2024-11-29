@@ -21,8 +21,9 @@ compile and upload to ESP32 board connected with Micro USB Cable.
 
 # Electrical
 
-There should be some 12V->3.3V converter,
-to save power recommended is switching converter (Canton Power).
+There should be 12V->3.3V converter.
+To save power recommended is switching converter 
+(Canton Power).
 RJ-12 plug can't guarantee that GND makes
 connection before other pins.
 Use 3.6V zener diodes to protect
@@ -50,9 +51,10 @@ Looking at female RJ-12 socket on the mount:
     6 white  Reserved (3.3V)
 
 RX/TX roles on the mount are swapped and
-actually indicate RX/TX on remote end
+actually indicate RX/TX on remote end.
 
-RJ-11 4-pin socket can be used as pins 1 and 6 are
+RJ-11 4-pin socket can be used instead of
+RJ-12 6-pin because as pins 1 and 6 are
 not connected.
 
 # WARNING WARNING WARNING
