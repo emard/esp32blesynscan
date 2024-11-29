@@ -4,8 +4,7 @@ Arduino ESP32 Bluetooth Classic and Bluetooth Low Energy
 UART bridge for SynScan Pro 2.5.2.
 UART 3.3V TTL is connected to SkyWatcher Virtuoso 90 Heritage mount.
 
-Currently it works for linux.
-Hopfully with small fixes it should work on Android 10 phone.
+It works for android and linux, windows not tested yet.
 
 # Install
 
@@ -145,15 +144,11 @@ to print debug messages from esp32.
     Connected
     Disconnected
 
-No serial traffic is printed probably BLE emulation
-doesn't have UUIDs of read/write BLE characteristics
-which synscan pro expects.
-
-Currantly expected UUIDs are not known.
-
 # Android
 
-Currently "Serial Bluetooth Terminal" can connect in
+Synscan works in BLE mode.
+
+"Serial Bluetooth Terminal" can connect in
 Bluetooth Classic and Low Energy mode.
 Basic request/response works:
 
@@ -162,15 +157,3 @@ Basic request/response works:
 
     response
     =0210A1\r
-
-But synscan pro application when set connection as BLE
-and then touch "Connect" button displays "SynScan_BLE"
-but when connecting it fails with error:
-"mount mode not detected".
-No serial traffic is detected on esp32 debug terminal.
-
-# Todo
-
-Fix arduino code for nRF connect to display
-SERVICE_UUID and CHARASTERISTIC_UUID,
-currently no UUID is listed.
