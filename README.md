@@ -35,6 +35,29 @@ BLE protocol and does not save battery power.
 In both Classic and Low Energy modes ESP32 consumes
 about 70 mA.
 
+# Android
+
+Synscan works in BLE mode.
+
+SynScan pro -> Settings -> Connect Settings -> BLE.
+
+"Serial Bluetooth Terminal" can connect in
+Bluetooth Classic directly when ESP32 is booted
+in Bluetooth Classic mode.
+
+"Serial Bluetooth Terminal" can connect in
+Low Energy mode if source is compiled with
+UUIDs of nRF, Microchip or TIO (search for comments
+"serial terminal works").
+
+Basic request/response works:
+
+    request
+    :e1\r
+
+    response
+    =0210A1\r
+
 # Linux Bluetooth Classic
 
 Bluetooth classic works from linux and
@@ -144,16 +167,3 @@ to print debug messages from esp32.
     Connected
     Disconnected
 
-# Android
-
-Synscan works in BLE mode.
-
-"Serial Bluetooth Terminal" can connect in
-Bluetooth Classic and Low Energy mode.
-Basic request/response works:
-
-    request
-    :e1\r
-
-    response
-    =0210A1\r
