@@ -106,9 +106,9 @@ Bluetooth Classic directly when ESP32 is booted
 in Bluetooth Classic mode.
 
 "Serial Bluetooth Terminal" can connect in
-Low Energy mode if source is compiled with
-UUIDs of nRF, Microchip or TIO (search for comments
-"serial terminal works").
+Low Energy mode with long touch on SynScan_BLE device
+selecting custom profile and accepting offered UUID
+values for Service, RX and TX.
 
 Basic request/response works:
 
