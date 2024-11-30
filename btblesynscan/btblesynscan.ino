@@ -410,6 +410,10 @@ void loop_ble()
     pServer->startAdvertising();  // restart advertising
     Serial.println("Disconnected");
     oldDeviceConnected = deviceConnected;
+    // reset connection tracking states
+    rx_indicate = false;
+    response_detected = false;
+    txbuf_index = 0;
   }
   // connecting
   if (deviceConnected && !oldDeviceConnected)
@@ -417,6 +421,10 @@ void loop_ble()
     // do stuff here on connecting
     oldDeviceConnected = deviceConnected;
     Serial.println("Connected");
+    // reset connection tracking states
+    rx_indicate = false;
+    response_detected = false;
+    txbuf_index = 0;
   }
   digitalWrite(LED_BUILTIN, deviceConnected);
 }
