@@ -1,5 +1,6 @@
 // install Board -> Boards Manager -> "esp32 by espressif"
 // Board: ESP32 Dev Module
+// CPU freq 80MHz (WiFi/BT) for power saving
 
 /*********** COMMON ***********/
 
@@ -349,49 +350,6 @@ void setup_ble()
   Serial.write("Bluetooth Low Energy Serial: ");
   Serial.println(BLE_NAME);
 }
-
-#if 0
-void setup_ble_old()
-{
-  Serial.begin(115200);
-  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
-
-  // Create the BLE Device
-  BLEDevice::init(BLE_NAME);
-
-  // Create the BLE Server
-  BLEServer *pServer = BLEDevice::createServer();
-  pServer->setCallbacks(new MyServerCallbacks());
-
-  // Create the BLE Service
-  BLEService *pService = pServer->createService(SERVICE_UUID);
-
-  // Create a BLE Characteristic
-  pTxCharacteristic = pService->createCharacteristic(
-    CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_NOTIFY);
-  pTxCharacteristic->addDescriptor(new BLE2902());
-
-  BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(
-    CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
-  pRxCharacteristic->setCallbacks(new MyCallbacks());
-
-  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-  // pAdvertising->addServiceUUID(SERVICE_UUID);
-
-  // Start the service
-  pService->start();
-
-  // control the LED
-  pinMode(LED_BUILTIN, OUTPUT);
-
-  // setup detailed advertising response
-
-  // Start advertising
-  pServer->getAdvertising()->start();
-  Serial.write("Bluetooth Low Energy Serial: ");
-  Serial.println(BLE_NAME);
-}
-#endif
 
 void loop_ble()
 {
