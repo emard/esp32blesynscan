@@ -107,8 +107,13 @@ in Bluetooth Classic mode.
 
 "Serial Bluetooth Terminal" can connect in
 Low Energy mode with long touch on SynScan_BLE device
-selecting custom profile and accepting offered UUID
-values for Service, Read and Write.
+selecting "Edit" Custom profile and then
+accepting offered UUID values for Service, Read and Write.
+Settings:
+
+    Receive Newline = CR
+    Send    Newline = Auto (Same as Receive)
+    Send    Local Echo ( o) enabled
 
 Basic request/response works:
 
