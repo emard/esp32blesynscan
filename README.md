@@ -289,6 +289,11 @@ otherwise mount will start turning around azimuth axis
 and will never stop by itself (user should press cancel to stop).
 
 fix#1: in function "udpcb()" one message is rewritten
+with this fix Auxiliary Encoder doesn't have to be enabled.
+It seems that mount internally always uses Auxiliary Encoders.
+Regardless of Auxiliary Encoders being set ON or OFF without
+this patch, when clutches are released and mount is manually moved,
+SynScan always knows its new position.
 
     :W2050000\r -> :W2040000\r
 
