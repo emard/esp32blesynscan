@@ -267,10 +267,10 @@ to the mount, the mount immediately echoes it.
 In the code there is echo cancellation built in
 to reduce BLE traffic, run faster and save energy.
 
-Mount and esp32 cannot send at the
-same time. If synscan tries to send
-while mount sends, then received data
-will be just noise.
+Mount and ESP32 cannot send at the
+same time. If ESP32 tries to send
+while mount sends, then the data
+received by ESP32 will be just noise.
 
 Received bytes are occasionaly wrong
 with typically one of the bits that
