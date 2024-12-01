@@ -238,7 +238,11 @@ to print debug messages from esp32.
 # Principle of operation
 
 ESP32 creates a bluetooth server with serial port bridge.
-Phyisical TTL serial port is 9600,8,n,1.
+Phyisical TTL serial port should be 9600,8,n,1. Using 9800
+baud seems to receive less noise than 9600 baud.
+
+Minimum that works is a BLE Service (UUID 0xA002) with
+two characteristics, one for RX other for TX:
 
 RX Direction SynScan->motor (UUID 0xC302)
 
