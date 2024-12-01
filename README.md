@@ -105,7 +105,7 @@ If device no longer appears in connect list and
 you want to retry connecting, then android application
 has to be stopped and started again:
 
-View applications as smaller windows. To stop synscan,
+View applications as smaller windows. To stop SynScan,
 drag it left on ardoid 10 or drag it up on android 14.
 
 Protocol testing:
@@ -225,7 +225,7 @@ SynScanPro can be debugged from wine:
 # Windows
 
 With suitable BLE adapter, for example TP-LINK UB500
-synscan pro 2.5.2 for windows connects with "SynScan_BLE".
+SynScan pro 2.5.2 for windows connects with "SynScan_BLE".
 
 "SimplySerial" is simple terminal emulator for
 windows. It can can be started from powershell
@@ -240,7 +240,7 @@ to print debug messages from esp32.
 ESP32 creates a bluetooth server with serial port bridge.
 Phyisical TTL serial port is 9600,8,n,1.
 
-RX Direction synscan->motor (UUID 0xC302)
+RX Direction SynScan->motor (UUID 0xC302)
 
 Bluetooth LE packetizes serial protocol so
 entire message is delivered in one packet.
@@ -250,7 +250,7 @@ other firmwares may not need it.
 Message is written to TTL serial and signaled
 with "NOTIFY" flow control.
 
-TX Direction motor->synscan (UUID 0xC306)
+TX Direction motor->SynScan (UUID 0xC306)
 
 TTL serial receiver buffers bytes until "complete"
 message is received, it begins with '=' or '!'
@@ -306,7 +306,7 @@ This AT command should not reach motor firmware so
 "udpcb()" function rewrites this AT command as ":e1\\r"
 and to this command motor firmware responds with
 version number which is not really response to AT
-command but synscan accepts it.
+command but SynScan accepts it.
 
     AT+CWMODE_CUR?\r\n -> :e1\r
 
@@ -314,5 +314,5 @@ fix#3: receive buffer is discarded after timeout of 10 ms
 or when unexpected (noise) byte is received outside of
 expected chars "=0123456789ABCDEF!\r". Synscan will
 retry the command after its own timeout.
-This fix improves initial connect, without it synscan sometimes
+This fix improves initial connect, without it SynScan sometimes
 has to be manually restarted 5 times to reconnect.
