@@ -308,6 +308,6 @@ command but synscan accepts it.
 fix#3: receive buffer is discarded after timeout of 10 ms
 or when unexpected (noise) byte is received outside of
 expected chars "=0123456789ABCDEF!\r". synscan will receive
-nothing in this case and it will quicly retry retry the command.
+retry the command if it didn't generate any response.
 This fix improves initial connect, without it synscan sometimes
 has to be manually restarted 5 times to reconnect.
