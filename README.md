@@ -54,8 +54,7 @@ RX/TX roles on the mount are swapped and
 actually indicate RX/TX on remote end.
 
 RJ-11 4-pin socket can be used instead of
-RJ-12 6-pin because as pins 1 and 6 are
-not connected.
+RJ-12 6-pin because pins 1 and 6 are not connected.
 
 ![top](/pic/top.jpg)
 
