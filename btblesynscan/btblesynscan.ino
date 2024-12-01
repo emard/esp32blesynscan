@@ -125,7 +125,8 @@ bool oldDeviceConnected = false;
 
 uint8_t txbuf[TXBUF_LEN+2]; // +2 to terminate with \n\0 for debug priting
 uint32_t txbuf_index = 0;
-int32_t prev_recv_us = 0;
+int32_t prev_recv_us = 0, recv_us = 0;
+uint8_t recv_acceptable[256];
 
 bool response_detected = false;
 
@@ -253,6 +254,22 @@ class MyCallbacks : public BLECharacteristicCallbacks
   }
 };
 
+void reset_buffer()
+{
+  txbuf_index = 0;
+  response_detected = false;
+}
+
+void init_recv_acceptable()
+{
+  memset(recv_acceptable    , 0, 256); // clear
+  memset(recv_acceptable+'0', 1, 10); // 0-9 set as acceptable
+  memset(recv_acceptable+'A', 1, 6); // A-F set as acceptable
+  recv_acceptable['='] = 1;
+  recv_acceptable['!'] = 1;
+  recv_acceptable['\r'] = 1;
+}
+
 void setup_ble()
 {
   Serial.begin(115200);
@@ -352,6 +369,7 @@ void setup_ble()
   pAdvertising->start();
   Serial.write("Bluetooth Low Energy Serial: ");
   Serial.println(BLE_NAME);
+  init_recv_acceptable();
 }
 
 void loop_ble()
@@ -384,8 +402,7 @@ void loop_ble()
         // deliver data now
         pTxCharacteristic->setValue(txbuf, txbuf_index); // txbuf_index is the length
         // reset after delivery, prepare for next data
-        txbuf_index = 0;
-        response_detected = false;
+        reset_buffer();
         Serial.write('\n');
         //txbuf[txbuf_index] = '\n';
         //txbuf[txbuf_index+1] = '\0';
@@ -400,12 +417,11 @@ void loop_ble()
      }
      else // we are still inserial available, check timeout
      {
-       if(recv_us-prev_recv_us > RECV_TIMEOUT_US)
+       if(recv_us-prev_recv_us > RECV_TIMEOUT_US || recv_acceptable[txValue] == 0)
        {
          // discard buffer on timeout
-         rx_indicate = false;
-         txbuf_index = 0;
-         response_detected = false;
+         rx_indicate = false; // trying to increase chance of BLE retry
+         reset_buffer();
        }
      }
      prev_recv_us = recv_us;
@@ -428,8 +444,7 @@ void loop_ble()
     oldDeviceConnected = deviceConnected;
     // reset connection tracking states
     rx_indicate = false;
-    response_detected = false;
-    txbuf_index = 0;
+    reset_buffer();
   }
   // connecting
   if (deviceConnected && !oldDeviceConnected)
@@ -439,8 +454,7 @@ void loop_ble()
     Serial.println("Connected");
     // reset connection tracking states
     rx_indicate = false;
-    response_detected = false;
-    txbuf_index = 0;
+    reset_buffer();
   }
   digitalWrite(LED_BUILTIN, deviceConnected);
 }
