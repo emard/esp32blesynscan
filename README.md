@@ -51,9 +51,9 @@ Looking at female RJ-12 socket on the mount:
     6 white  Reserved (3.3V)
 
 RX/TX roles on the mount are swapped and
-actually indicate RX/TX on remote end.
+actually indicate RX/TX on ESP32.
 
-      mount        esp32
+      mount        ESP32
     -----------    ----------
     2 yellow TX    TX2 GPIO17
     4 red    RX    RX2 GPIO16
