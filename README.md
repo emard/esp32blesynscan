@@ -34,6 +34,16 @@ In the mount manual see RJ12 pinout.
 Conenct RJ12 RX/TX with short straight
 RJ12 cable to ESP32 RX2/TX2 pins.
 
+Mount's serial TTL port is half-duplex
+and it seems that mount has hardware
+loopback. So everything that is send to
+the mount, mount immediately echoes it.
+
+Mount and synscan cannon send at the
+same time. If synscan tries to send
+while mount sends, then received data
+will be just noise.
+
 # Connection
 
 Looking at female RJ-12 socket on the mount:
@@ -52,6 +62,12 @@ Looking at female RJ-12 socket on the mount:
 
 RX/TX roles on the mount are swapped and
 actually indicate RX/TX on remote end.
+
+      mount        esp32
+    -----------    ----------
+    2 yellow TX    TX2 GPIO17
+    4 red    RX    RX2 GPIO16
+    5 black  GND   GND
 
 RJ-11 4-pin socket can be used instead of
 RJ-12 6-pin because pins 1 and 6 are not connected.
