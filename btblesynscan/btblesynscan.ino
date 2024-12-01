@@ -7,6 +7,9 @@
 // Hardware Serial2 pins
 #define RXD2 16
 #define TXD2 17
+#define BAUD 9800 // 9800 seems receiving less noise than 9600
+// serial noise reduction 0:OFF 1:ON
+#define NOISE_REDUCTION 1
 
 // Hardware LED
 #define LED_BUILTIN 2
@@ -263,17 +266,16 @@ void reset_buffer()
 void init_recv_acceptable()
 {
   memset(recv_acceptable    , 0, 256); // clear
+  recv_acceptable['='] = 1;
   memset(recv_acceptable+'0', 1, 10); // 0-9 set as acceptable
   memset(recv_acceptable+'A', 1, 6); // A-F set as acceptable
-  recv_acceptable['='] = 1;
-  recv_acceptable['!'] = 1;
   recv_acceptable['\r'] = 1;
 }
 
 void setup_ble()
 {
   Serial.begin(115200);
-  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  Serial2.begin(BAUD, SERIAL_8N1, RXD2, TXD2);
 
   // Create the BLE Device
   BLEDevice::init(BLE_NAME);
@@ -417,12 +419,14 @@ void loop_ble()
      }
      else // we are still inserial available, check timeout
      {
+       #if NOISE_REDUCTION
        if(recv_us-prev_recv_us > RECV_TIMEOUT_US || recv_acceptable[txValue] == 0)
        {
          // discard buffer on timeout
-         rx_indicate = false; // trying to increase chance of BLE retry
+         // rx_indicate = false; // trying to increase chance of BLE retry
          reset_buffer();
        }
+       #endif
      }
      prev_recv_us = recv_us;
     }
@@ -481,7 +485,7 @@ BluetoothSerial SerialBT;
 
 void setup_bt() {
   Serial.begin(115200);
-  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  Serial2.begin(BAUD, SERIAL_8N1, RXD2, TXD2);
   SerialBT.begin(BT_NAME);  //Bluetooth device name
   //SerialBT.deleteAllBondedDevices(); // Uncomment this to delete paired devices; Must be called after begin
   Serial.print("Bluetooth Classic Serial: ");
