@@ -57,6 +57,10 @@ RJ-11 4-pin socket can be used instead of
 RJ-12 6-pin because as pins 1 and 6 are
 not connected.
 
+![top](/pic/top.jpg)
+
+![bot](/pic/bot.jpg)
+
 # WARNING WARNING WARNING
 
 There are different RJ-11 and RJ-12 cables,
