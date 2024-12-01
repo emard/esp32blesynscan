@@ -105,6 +105,8 @@ BLECharacteristic *pRxCharacteristic;
 // first "=" must be received then "\r" (CR)
 // todo: timout, buffer full
 #define TXBUF_LEN   32
+// [us] timeout on serial receive, reset txbuf buffer
+#define RECV_TIMEOUT_US 10000
 
 // direction synscan->mount
 // enable one or none
@@ -123,6 +125,7 @@ bool oldDeviceConnected = false;
 
 uint8_t txbuf[TXBUF_LEN+2]; // +2 to terminate with \n\0 for debug priting
 uint32_t txbuf_index = 0;
+int32_t prev_recv_us = 0;
 
 bool response_detected = false;
 
@@ -354,6 +357,7 @@ void setup_ble()
 void loop_ble()
 {
   uint8_t txValue;
+  static int32_t recv_us;
 
   if (deviceConnected)
   {
@@ -362,6 +366,7 @@ void loop_ble()
       //Serial.println("\nread");
       digitalWrite(LED_BUILTIN, LOW);  // turn the LED on
       txValue = Serial2.read();
+      recv_us = micros();
       #if 1
       // ECHO CANCELLATION, SEND ONLY RESPONSE PART
       if(txValue == '=' || txValue == '!')
@@ -393,6 +398,17 @@ void loop_ble()
         #endif
         delay(1);  // bluetooth stack will go into congestion, if too many packets are sent
      }
+     else // we are still inserial available, check timeout
+     {
+       if(recv_us-prev_recv_us > RECV_TIMEOUT_US)
+       {
+         // discard buffer on timeout
+         rx_indicate = false;
+         txbuf_index = 0;
+         response_detected = false;
+       }
+     }
+     prev_recv_us = recv_us;
     }
     #if RX_INDICATE
     if(rx_indicate)
