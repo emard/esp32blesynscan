@@ -34,27 +34,6 @@ In the mount manual see RJ12 pinout.
 Conenct RJ12 RX/TX with short straight
 RJ12 cable to ESP32 RX2/TX2 pins.
 
-Mount's serial TTL port is half-duplex
-and it seems that mount has hardware
-loopback. So everything that esp32 sends
-to the mount, the mount immediately echoes it.
-
-In the code there is echo cancellation built in
-to reduce BLE traffic, run faster and save energy.
-
-Mount and esp32 cannot send at the
-same time. If synscan tries to send
-while mount sends, then received data
-will be just noise.
-
-Received bytes are occasionaly wrong
-with typically one of the bits that
-should be 0 errorenously received as 1.
-This happens less often when mount is
-just powered one and more often after
-alignment when mount is driving motors
-for tracking.
-
 # Connection
 
 Looking at female RJ-12 socket on the mount:
@@ -278,6 +257,29 @@ message is received, it begins with '=' or '!'
 and ends with '\r'. It is delivered via bluetooth
 and signaled with "INDICATE" flow control.
 
+# TTL Serial Port
+
+Mount's serial TTL port is half-duplex
+and it seems that mount has hardware
+loopback. So everything that esp32 sends
+to the mount, the mount immediately echoes it.
+
+In the code there is echo cancellation built in
+to reduce BLE traffic, run faster and save energy.
+
+Mount and esp32 cannot send at the
+same time. If synscan tries to send
+while mount sends, then received data
+will be just noise.
+
+Received bytes are occasionaly wrong
+with typically one of the bits that
+should be 0 errorenously received as 1.
+This happens less often when mount is
+just powered one and more often after
+alignment when mount is driving motors
+for tracking.
+
 # Firmware bugfix
 
 Motor firmware version 2.16.A1 is the latest but has
@@ -286,11 +288,11 @@ After each connect user must enable "Auxiliary Encoder"
 otherwise mount will start turning around azimuth axis
 and will never stop by itself (user should press cancel to stop).
 
-To fix this in function "udpcb()" one message is rewritten
+fix#1: in function "udpcb()" one message is rewritten
 
     :W2050000\r -> :W2040000\r
 
-Second fix is more to prevent sending junk to
+fix#2: fix is more to prevent sending junk to
 motor firmware which is easy to crash.
 
 Synscan sends some AT command probably for its
@@ -302,3 +304,10 @@ version number which is not really response to AT
 command but synscan accepts it.
 
     AT+CWMODE_CUR?\r\n -> :e1\r
+
+fix#3: receive buffer is discarded after timeout of 10 ms
+or when unexpected (noise) byte is received outside of
+expected chars "=0123456789ABCDEF!\r". synscan will receive
+nothing in this case and it will quicly retry retry the command.
+This fix improves initial connect, without it synscan sometimes
+has to be manually restarted 5 times to reconnect.
