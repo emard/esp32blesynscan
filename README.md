@@ -297,10 +297,10 @@ SynScan always knows its new position.
 
     :W2050000\r -> :W2040000\r
 
-fix#2: fix is more to prevent sending junk to
-motor firmware which is easy to crash.
+fix#2: prevents sending junk to motor firmware which
+is easy to crash.
 
-Synscan sends some AT command probably for its
+SynScan sends some AT command probably for its
 original SynScan WiFi ESP8266 AT firmware.
 This AT command should not reach motor firmware so
 "udpcb()" function rewrites this AT command as ":e1\\r"
