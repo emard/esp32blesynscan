@@ -36,13 +36,24 @@ RJ12 cable to ESP32 RX2/TX2 pins.
 
 Mount's serial TTL port is half-duplex
 and it seems that mount has hardware
-loopback. So everything that is send to
-the mount, mount immediately echoes it.
+loopback. So everything that esp32 sends
+to the mount, the mount immediately echoes it.
 
-Mount and synscan cannon send at the
+In the code there is echo cancellation built in
+to reduce BLE traffic, run faster and save energy.
+
+Mount and esp32 cannot send at the
 same time. If synscan tries to send
 while mount sends, then received data
 will be just noise.
+
+Received bytes are occasionaly wrong
+with typically one of the bits that
+should be 0 errorenously received as 1.
+This happens less often when mount is
+just powered one and more often after
+alignment when mount is driving motors
+for tracking.
 
 # Connection
 
