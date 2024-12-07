@@ -7,7 +7,7 @@
 // Hardware Serial2 pins
 #define RXD2 16
 #define TXD2 17
-#define BAUD 9800 // 9800 seems receiving less noise than 9600
+#define BAUD 9600 // nominal 9600, try 9800 maybe less noise
 // serial noise reduction 0:OFF 1:ON
 #define NOISE_REDUCTION 1
 
@@ -15,7 +15,7 @@
 #define LED_BUILTIN 2
 
 // for BT: power up press nothing
-// for BLE: 0.5s after power up, press and hold BOOT BTN for 1s
+// for BLE: 0.5s after power up, press and hold BOOT BTN for 2s
 // Input Pin 0 (BTN BOOT): 1:BT (not pressed) 0:BLE (pressed)
 #define PIN_BLE 0
 
