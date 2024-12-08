@@ -30,9 +30,33 @@ Use 3.6V zener diodes to protect
 sensitive 3.3V data pins from getting 12V
 during plugging in.
 
+On the mount RX and TX seem as wired together
+making it a half-duplex serial port.
+ESP32 TX line should "simulate" open collector
+output with a small low drop diode like BAT42.
+
 In the mount manual see RJ12 pinout.
 Conenct RJ12 RX/TX with short straight
 RJ12 cable to ESP32 RX2/TX2 pins.
+
+# Schematics
+
+               ┌─────────────┐
+               │IN        OUT│
+               │12V  GND 3.3V│
+               └─────────────┘
+                 │    │   │            
+                 │    │   └────────┐
+      MOUNT      │    │    10k     │    ESP32  
+    ┌───────┐    │    │  ┌─░░░░─┐  │   ┌───────┐
+    │    12V│────┘    │  │      │  └───│3.3V   │
+    │       │         │  │ BAT42│      │       │
+    │     TX│─────────│──┴──⯈∫──┴───┬──│TX2    │
+    │       │         │             │  │       │
+    │     RX│─────────│─────┬───────│──│RX2    │
+    │       │         │  ┌⯈Z┘    ┌⯈Z┘  │       │
+    │    GND│─────────┴──┴───────┴─────│GND    │
+    └───────┘            3.6V    3.6V  └───────┘
 
 # Connection
 
