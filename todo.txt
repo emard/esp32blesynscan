@@ -1,5 +1,3 @@
-[ ] allow to change mac address
-[ ] classic bt serial
-[ ] integrate BLE+BT, hardware switch to choose which one
-[ ] mixed mode, also connect to bluetooth joystick and
-    provide always available remote cursor keys
+[ ] allow to change MAC address
+[ ] inclue MAC address in BLE name
+[ ] usb-serial function
