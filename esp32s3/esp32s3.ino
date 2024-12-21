@@ -1,18 +1,20 @@
 // install Board -> Boards Manager -> "esp32 by espressif"
-// Board: ESP32S3 Dev Module
+// Board: XIAO_ESP32S3
 // CPU freq 80MHz (WiFi/BT) for power saving
 
 /*********** COMMON ***********/
 
 // Hardware Serial2 pins
-#define RXD2 16
-#define TXD2 17
+#define RXD2 44
+#define TXD2 43
 #define BAUD 9600 // nominal 9600, try 9800 maybe less noise
 // serial noise reduction 0:OFF 1:ON
 #define NOISE_REDUCTION 1
 
-// Hardware LED
-#define LED_BUILTIN 2
+// Hardware LED already defined
+//#define LED_BUILTIN 2
+#define LED_ON  LOW
+#define LED_OFF HIGH
 
 /*********** BLUETOOTH LOW ENERGY ***********/
 
@@ -177,13 +179,13 @@ class MyServerCallbacks : public BLEServerCallbacks
   void onConnect(BLEServer *pServer)
   {
     deviceConnected = true;
-    digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on
+    digitalWrite(LED_BUILTIN, LED_ON);  // turn the LED on
   };
 
   void onDisconnect(BLEServer *pServer)
   {
     deviceConnected = false;
-    digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
+    digitalWrite(LED_BUILTIN, LED_OFF);  // turn the LED off
   }
 };
 
@@ -196,7 +198,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
     #if 0
     if (rxValue.length() > 0)
     {
-      digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
+      digitalWrite(LED_BUILTIN, LED_OFF);  // turn the LED off
       for (int i = 0; i < rxValue.length(); i++)
       {
         Serial2.write(rxValue[i]);
@@ -207,7 +209,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
     #else
     if (rxValue.length() > 0)
     {
-      digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
+      digitalWrite(LED_BUILTIN, LED_OFF);  // turn the LED off
       if(rxValue == "AT+CWMODE_CUR?\r\n") // this is problematic command
       {
         Serial2.write(":e1\r"); // rewritten as non-problematic command :e1
@@ -366,7 +368,7 @@ void loop_ble()
     if(Serial2.available())
     {
       //Serial.println("\nread");
-      digitalWrite(LED_BUILTIN, LOW);  // turn the LED on
+      digitalWrite(LED_BUILTIN, LED_OFF);  // turn the LED on
       txValue = Serial2.read();
       recv_us = micros();
       #if 1
@@ -442,7 +444,7 @@ void loop_ble()
     rx_indicate = false;
     reset_buffer();
   }
-  digitalWrite(LED_BUILTIN, deviceConnected);
+  digitalWrite(LED_BUILTIN, deviceConnected ^ LED_OFF);
 }
 
 
@@ -472,7 +474,7 @@ void loop_ble()
 void setup()
 {
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(LED_BUILTIN, LED_OFF);
   setup_ble();
   loop_selected = loop_ble;
 }
