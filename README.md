@@ -89,11 +89,12 @@ ESP32S3 version
 # Connection
 
 Looking at female RJ-12 socket on the mount:
-
-       ____
-    ---    ---
-    | 654321 |
-    ----------
+          
+    ┌────────┐
+    │ 123456 │
+    │        │
+    └──┐  ┌──┘ 
+       └──┘
 
     1 blue   N.C.
     2 yellow TX       (3.3V) (mount receives)
