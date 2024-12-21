@@ -59,6 +59,33 @@ RJ12 cable to ESP32 RX2/TX2 pins.
     │    GND│──────────┴─┴───────────────┴─────│GND    │
     └───────┘            3.6V            3.6V  └───────┘
 
+ESP32S3 version
+
+    Mouser P/N: 919-R-78K3.3-0.5 = 4.5-36V -> 3.3V
+
+                     RECOM 
+                 R-78K3.3-0.5
+                ┌─────────────┐
+             IN │12V  GND 3.3V│ OUT
+                │             │
+                │             │
+                └─────────────┘
+                  bottom view
+
+    Mouser P/N: 713-113991114    = XIAO ESP32S2
+
+                 XIAO  ESP32S3
+                ┌─────────────┐
+                │1    USB   5V│
+                │2         GND│
+                │3        3.3V│
+                │4           9│
+                │5           8│
+                │6           7│
+                │43 TX   RX 44│
+                └─────────────┘
+                    top view  
+
 # Connection
 
 Looking at female RJ-12 socket on the mount:
