@@ -7,9 +7,20 @@
 // Hardware Serial2 pins
 #define RXD2 44
 #define TXD2 43
-#define BAUD 9600 // nominal 9600, try 9800 maybe less noise
+#define BAUD 9600
 // serial noise reduction 0:OFF 1:ON
 #define NOISE_REDUCTION 1
+
+// debug prints
+#if 0
+#define DEBUG_PRINTLN(x)  Serial.println(x)
+#define DEBUG_WRITE(x)    Serial.write(x)
+#define DEBUG_WRITE2(x,y) Serial.write(x,y)
+#else
+#define DEBUG_PRINTLN(x)
+#define DEBUG_WRITE(x)
+#define DEBUG_WRITE2(x,y)
+#endif
 
 // Hardware LED already defined
 //#define LED_BUILTIN 2
@@ -202,7 +213,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
       for (int i = 0; i < rxValue.length(); i++)
       {
         Serial2.write(rxValue[i]);
-        Serial.write(rxValue[i]);
+        DEBUG_WRITE(rxValue[i]);
         delay(1);
       }
     }
@@ -213,7 +224,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
       if(rxValue == "AT+CWMODE_CUR?\r\n") // this is problematic command
       {
         Serial2.write(":e1\r"); // rewritten as non-problematic command :e1
-        Serial.write(rxValue.c_str(), rxValue.length());
+        DEBUG_WRITE2(rxValue.c_str(), rxValue.length());
       }
       // fix for virtuoso heritage 90 with firmware v2.16.A1
       // problem: mount turns non stop if auxiliary encoders are not used
@@ -222,12 +233,12 @@ class MyCallbacks : public BLECharacteristicCallbacks
       else if(rxValue == ":W2050000\r") // this is problematic command
       {
         Serial2.write(":W2040000\r"); // rewritten as non problematic command
-        Serial.write(rxValue.c_str(), rxValue.length());
+        DEBUG_WRITE2(rxValue.c_str(), rxValue.length());
       }
       else
       {
         Serial2.write(rxValue.c_str(), rxValue.length());
-        Serial.write(rxValue.c_str(), rxValue.length());
+        DEBUG_WRITE2(rxValue.c_str(), rxValue.length());
       }
     }
     #endif
@@ -237,7 +248,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
     #if RX_INDICATE
     rx_indicate = true;
     #endif
-    Serial.write('\n');
+    DEBUG_WRITE('\n');
   }
 };
 
@@ -353,8 +364,8 @@ void setup_ble()
 
   // Start advertising
   pAdvertising->start();
-  Serial.write("Bluetooth Low Energy Serial: ");
-  Serial.println(BLE_NAME);
+  DEBUG_WRITE("Bluetooth Low Energy Serial: ");
+  DEBUG_PRINTLN(BLE_NAME);
   init_recv_acceptable();
 }
 
@@ -381,7 +392,7 @@ void loop_ble()
       #endif
       txbuf[txbuf_index++] = txValue;
       if(response_detected)
-        Serial.write(txValue);
+        DEBUG_WRITE(txValue);
       if(txbuf_index >= TXBUF_LEN
       || (response_detected && txValue == '\r') )
       {
@@ -389,7 +400,7 @@ void loop_ble()
         pTxCharacteristic->setValue(txbuf, txbuf_index); // txbuf_index is the length
         // reset after delivery, prepare for next data
         reset_buffer();
-        Serial.write('\n');
+        DEBUG_WRITE('\n');
         //txbuf[txbuf_index] = '\n';
         //txbuf[txbuf_index+1] = '\0';
         //Serial.write(txbuf, txbuf_index+2); // debug print on USB serial
@@ -422,13 +433,21 @@ void loop_ble()
     }
     #endif
   }
+  else // usb-serial mode when BLE is not connected
+  {
+    if(Serial2.available())
+      Serial.write(Serial2.read());
+    if(Serial.available())
+      Serial2.write(Serial.read());
+    delay(1);
+  }
 
   // disconnecting
   if (!deviceConnected && oldDeviceConnected)
   {
     delay(500);                   // give the bluetooth stack the chance to get things ready
     pServer->startAdvertising();  // restart advertising
-    Serial.println("Disconnected");
+    DEBUG_PRINTLN("Disconnected");
     oldDeviceConnected = deviceConnected;
     // reset connection tracking states
     rx_indicate = false;
@@ -439,7 +458,7 @@ void loop_ble()
   {
     // do stuff here on connecting
     oldDeviceConnected = deviceConnected;
-    Serial.println("Connected");
+    DEBUG_PRINTLN("Connected");
     // reset connection tracking states
     rx_indicate = false;
     reset_buffer();
