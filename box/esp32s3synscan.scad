@@ -6,7 +6,7 @@ box_inner = [22,40,21+3];
 thick = 2;
 
 rail_top   = [2,40,2];
-rail_bot   = [3,40,2];
+rail_bot   = [2.5,40,2];
 rail_spc   = 2;
 
 pcb_bottom = 2.5+3; // space from bottom
