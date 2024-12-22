@@ -8,36 +8,39 @@ It works for android, linux and windows.
 
 # Install
 
-Arduino project "btblesynscan" should be used.
-It supports both Bluetooth Classic and Bluetooth Low Energy.
+"esp32/btblesynscan" supports both Bluetooth
+Classic and Bluetooth Low Energy on ESP32.
+"esp32s3" supports Bluetooth Low Energy on ESP32S3.
 
-From board manager Install esp32 by espressif,
-select board "ESP32 Dev Module"
+From board manager Install esp32 by espressif.
+Select board "ESP32 Dev Module" or "XIAO_ESP32S3".
 
 Copy "btblesynscan.ino" to directory "~Arduino/esp32blesynscan/btblesynscan/btblesynscan.ino"
+Copy "esp32s3.ino" to directory "~Arduino/esp32blesynscan/esp32s3/esp32s3.ino"
 
-From Arduino, open project "Arduino/esp32blesynscan/btblesynscan",
-compile and upload to ESP32 board connected with Micro USB Cable.
+From Arduino, open project "~/Arduino/esp32blesynscan/btblesynscan",
+or "~/Arduino/esp32blesynscan/esp32s3"
+compile and upload to ESP32 board connected with Micro USB Cable (ESP32)
+or USB-C Cable (ESP32S3).
 
 # Electrical
 
 There should be 12V->3.3V converter.
 To save power recommended is switching converter 
-(Canton Power).
+(Canton Power or RECOM).
 RJ-12 plug can't guarantee that GND makes
 connection before other pins.
-Use 3.6V zener diodes to protect
-sensitive 3.3V data pins from getting 12V
-during plugging in.
+Hot-plugging can result in permanent damage
+so avoid it.
 
 On the mount RX and TX seem as wired together
 making it a half-duplex serial port.
 ESP32 TX line should "simulate" open collector
 output with a small low drop diode like BAT42.
 
-In the mount manual see RJ12 pinout.
-Conenct RJ12 RX/TX with short straight
-RJ12 cable to ESP32 RX2/TX2 pins.
+In the mount manual see RJ-12 pinout.
+Conenct RJ-12 RX/TX with short straight
+RJ-12 cable to ESP32 RX2/TX2 pins.
 
 # Schematics
 
