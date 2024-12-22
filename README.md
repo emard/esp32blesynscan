@@ -29,9 +29,9 @@ There should be 12V->3.3V converter.
 To save power recommended is switching converter 
 (Canton Power or RECOM).
 RJ-12 plug can't guarantee that GND makes
-connection before other pins.
-Hot-plugging can result in permanent damage
-so avoid it.
+connection before 12V pin. Hot-plugging
+can apply 12V to 3.3V pins and risk a
+permanent damage. Avoid hot-plugging.
 
 On the mount RX and TX seem as wired together
 making it a half-duplex serial port.
