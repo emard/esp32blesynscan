@@ -400,6 +400,7 @@ void loop_ble()
         pTxCharacteristic->setValue(txbuf, txbuf_index); // txbuf_index is the length
         // reset after delivery, prepare for next data
         reset_buffer();
+        Serial.write(txbuf, txbuf_index); // usb-serial
         DEBUG_WRITE('\n');
         //txbuf[txbuf_index] = '\n';
         //txbuf[txbuf_index+1] = '\0';
@@ -432,6 +433,8 @@ void loop_ble()
       rx_indicate = false;
     }
     #endif
+    if(Serial.available()) // usb-serial
+      Serial2.write(Serial.read());
   }
   else // usb-serial mode when BLE is not connected
   {
