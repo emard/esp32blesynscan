@@ -7,7 +7,7 @@ thick = 2;
 
 rail_top   = [2,40,2];
 rail_bot   = [3,40,2];
-rail_spc   = 2.5;
+rail_spc   = 2;
 
 pcb_bottom = 2.5+3; // space from bottom
 usb_pos = 14; // from PCB bottom
@@ -49,10 +49,16 @@ module usb_connector_cut()
   cube([31,10,6],center=true);
 }
 
-module rj12_connector_cut()
+module rj12_connector_cut_rear()
 {
   translate([0,box_inner[1]/2,+box_inner[2]/2-pcb_bottom-10])
   cube([15,10,16],center=true);
+}
+
+module rj12_connector_cut_side()
+{
+  translate([0,box_inner[1]/2-10,+box_inner[2]/2-pcb_bottom-16])
+  cube([13,16,10],center=true);
 }
 
 // not used - can't screw thru antenna
@@ -71,7 +77,8 @@ module box()
     translate([0,-thick,0])
     cube(box_inner,center=true);
     // usb_connector_cut();
-    rj12_connector_cut();
+    //rj12_connector_cut_rear();
+    rj12_connector_cut_side();
     // screw_holes();
   }
   rails();
