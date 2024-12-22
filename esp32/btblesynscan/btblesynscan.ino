@@ -11,8 +11,21 @@
 // serial noise reduction 0:OFF 1:ON
 #define NOISE_REDUCTION 1
 
+// debug prints
+#if 0
+#define DEBUG_PRINTLN(x)  Serial.println(x)
+#define DEBUG_WRITE(x)    Serial.write(x)
+#define DEBUG_WRITE2(x,y) Serial.write(x,y)
+#else
+#define DEBUG_PRINTLN(x)
+#define DEBUG_WRITE(x)
+#define DEBUG_WRITE2(x,y)
+#endif
+
 // Hardware LED
 #define LED_BUILTIN 2
+#define LED_ON  HIGH
+#define LED_OFF LOW
 
 // for BT: power up press nothing
 // for BLE: 0.5s after power up, press and hold BOOT BTN for 2s
@@ -195,13 +208,13 @@ class MyServerCallbacks : public BLEServerCallbacks
   void onConnect(BLEServer *pServer)
   {
     deviceConnected = true;
-    digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on
+    digitalWrite(LED_BUILTIN, LED_ON);
   };
 
   void onDisconnect(BLEServer *pServer)
   {
     deviceConnected = false;
-    digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
+    digitalWrite(LED_BUILTIN, LED_OFF);
   }
 };
 
@@ -209,27 +222,27 @@ class MyCallbacks : public BLECharacteristicCallbacks
 {
   void onWrite(BLECharacteristic *pCharacteristic)
   {
-    //Serial.println("\nwrite");
+    //DEBUG_PRINTLN("\nwrite");
     String rxValue = pCharacteristic->getValue();
     #if 0
     if (rxValue.length() > 0)
     {
-      digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
+      digitalWrite(LED_BUILTIN, LED_OFF);
       for (int i = 0; i < rxValue.length(); i++)
       {
         Serial2.write(rxValue[i]);
-        Serial.write(rxValue[i]);
+        DEBUG_WRITE(rxValue[i]);
         delay(1);
       }
     }
     #else
     if (rxValue.length() > 0)
     {
-      digitalWrite(LED_BUILTIN, LOW);  // turn the LED off
+      digitalWrite(LED_BUILTIN, LED_OFF);
       if(rxValue == "AT+CWMODE_CUR?\r\n") // this is problematic command
       {
         Serial2.write(":e1\r"); // rewritten as non-problematic command :e1
-        Serial.write(rxValue.c_str(), rxValue.length());
+        DEBUG_WRITE2(rxValue.c_str(), rxValue.length());
       }
       // fix for virtuoso heritage 90 with firmware v2.16.A1
       // problem: mount turns non stop if auxiliary encoders are not used
@@ -238,12 +251,12 @@ class MyCallbacks : public BLECharacteristicCallbacks
       else if(rxValue == ":W2050000\r") // this is problematic command
       {
         Serial2.write(":W2040000\r"); // rewritten as non problematic command
-        Serial.write(rxValue.c_str(), rxValue.length());
+        DEBUG_WRITE2(rxValue.c_str(), rxValue.length());
       }
       else
       {
         Serial2.write(rxValue.c_str(), rxValue.length());
-        Serial.write(rxValue.c_str(), rxValue.length());
+        DEBUG_WRITE2(rxValue.c_str(), rxValue.length());
       }
     }
     #endif
@@ -253,7 +266,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
     #if RX_INDICATE
     rx_indicate = true;
     #endif
-    Serial.write('\n');
+    DEBUG_WRITE('\n');
   }
 };
 
@@ -369,8 +382,8 @@ void setup_ble()
 
   // Start advertising
   pAdvertising->start();
-  Serial.write("Bluetooth Low Energy Serial: ");
-  Serial.println(BLE_NAME);
+  DEBUG_WRITE("Bluetooth Low Energy Serial: ");
+  DEBUG_PRINTLN(BLE_NAME);
   init_recv_acceptable();
 }
 
@@ -383,8 +396,8 @@ void loop_ble()
   {
     if(Serial2.available())
     {
-      //Serial.println("\nread");
-      digitalWrite(LED_BUILTIN, LOW);  // turn the LED on
+      //DEBUG_PRINTLN("\nread");
+      digitalWrite(LED_BUILTIN, LED_OFF);
       txValue = Serial2.read();
       recv_us = micros();
       #if 1
@@ -397,7 +410,7 @@ void loop_ble()
       #endif
       txbuf[txbuf_index++] = txValue;
       if(response_detected)
-        Serial.write(txValue);
+        DEBUG_WRITE(txValue);
       if(txbuf_index >= TXBUF_LEN
       || (response_detected && txValue == '\r') )
       {
@@ -405,10 +418,10 @@ void loop_ble()
         pTxCharacteristic->setValue(txbuf, txbuf_index); // txbuf_index is the length
         // reset after delivery, prepare for next data
         reset_buffer();
-        Serial.write('\n');
+        DEBUG_WRITE('\n');
         //txbuf[txbuf_index] = '\n';
         //txbuf[txbuf_index+1] = '\0';
-        //Serial.write(txbuf, txbuf_index+2); // debug print on USB serial
+        //DEBUG_WRITE2(txbuf, txbuf_index+2); // debug print on USB serial
         #if TX_NOTIFY
         pTxCharacteristic->notify();
         #endif
@@ -438,13 +451,21 @@ void loop_ble()
     }
     #endif
   }
+  else // usb-serial mode when BLE is not connected
+  {
+    if(Serial2.available())
+      Serial.write(Serial2.read());
+    if(Serial.available())
+      Serial2.write(Serial.read());
+    delay(1);
+  }
 
   // disconnecting
   if (!deviceConnected && oldDeviceConnected)
   {
     delay(500);                   // give the bluetooth stack the chance to get things ready
     pServer->startAdvertising();  // restart advertising
-    Serial.println("Disconnected");
+    DEBUG_PRINTLN("Disconnected");
     oldDeviceConnected = deviceConnected;
     // reset connection tracking states
     rx_indicate = false;
@@ -455,12 +476,12 @@ void loop_ble()
   {
     // do stuff here on connecting
     oldDeviceConnected = deviceConnected;
-    Serial.println("Connected");
+    DEBUG_PRINTLN("Connected");
     // reset connection tracking states
     rx_indicate = false;
     reset_buffer();
   }
-  digitalWrite(LED_BUILTIN, deviceConnected);
+  digitalWrite(LED_BUILTIN, deviceConnected ^ LED_OFF);
 }
 
 
@@ -489,28 +510,41 @@ void setup_bt() {
   SerialBT.begin(BT_NAME);  //Bluetooth device name
   //SerialBT.deleteAllBondedDevices(); // Uncomment this to delete paired devices; Must be called after begin
   Serial.print("Bluetooth Classic Serial: ");
-  Serial.println(BT_NAME);
+  DEBUG_PRINTLN(BT_NAME);
   pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop_bt() {
   uint8_t a;
-  if (Serial2.available()) {
-    a = Serial2.read();
-    SerialBT.write(a);
-    Serial.write(a);
-    if(a == '\r')
-      Serial.write('\n');
-    digitalWrite(LED_BUILTIN, LOW);
+  deviceConnected = SerialBT.connected(0);
+  if(deviceConnected)
+  {
+    if (Serial2.available()) {
+      a = Serial2.read();
+      SerialBT.write(a);
+      DEBUG_WRITE(a);
+      if(a == '\r')
+        DEBUG_WRITE('\n');
+      digitalWrite(LED_BUILTIN, LED_OFF);
+    }
+    if (SerialBT.available()) {
+      a = SerialBT.read();
+      Serial2.write(a);
+      DEBUG_WRITE(a);
+      digitalWrite(LED_BUILTIN, LED_OFF);
+    }
+    delay(1);
   }
-  if (SerialBT.available()) {
-    a = SerialBT.read();
-    Serial2.write(a);
-    Serial.write(a);
-    digitalWrite(LED_BUILTIN, LOW);
+  else // usb-serial mode when Bluetooth is not connected
+  {
+    if(Serial2.available())
+      Serial.write(Serial2.read());
+    if(Serial.available())
+      Serial2.write(Serial.read());
+    delay(1);
   }
-  delay(1);
-  digitalWrite(LED_BUILTIN, SerialBT.connected(0));
+
+  digitalWrite(LED_BUILTIN, deviceConnected ^ LED_OFF);
 }
 
 /************ COMMON ***********/
@@ -518,11 +552,11 @@ void setup()
 {
   pinMode(PIN_BLE, INPUT_PULLUP);
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(LED_BUILTIN, LED_ON);
   //printf("Default is Bluetooth Low Energy mode (BLE) for SynScan.\n");
   printf("Hold BOOT while BLUE LED ON for Bluetooth Classic mode.\n");
   delay(1500);
-  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(LED_BUILTIN, LED_OFF);
   if(digitalRead(PIN_BLE) != 0)
   {
     setup_ble();
