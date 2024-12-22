@@ -125,7 +125,8 @@ uint8_t txbuf[TXBUF_LEN+2]; // +2 to terminate with \n\0 for debug priting
 uint32_t txbuf_index = 0;
 int32_t prev_recv_us = 0, recv_us = 0;
 uint8_t recv_acceptable[256];
-
+bool expect_fw_version = false;
+bool rewrite_aux_encoder = false;
 bool response_detected = false;
 
 // See the following for generating UUIDs:
@@ -221,6 +222,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
     if (rxValue.length() > 0)
     {
       digitalWrite(LED_BUILTIN, LED_OFF);  // turn the LED off
+      expect_fw_version = rxValue == ":e1\r";
       if(rxValue == "AT+CWMODE_CUR?\r\n") // this is problematic command
       {
         Serial2.write(":e1\r"); // rewritten as non-problematic command :e1
@@ -230,7 +232,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
       // problem: mount turns non stop if auxiliary encoders are not used
       // this rewrites :W2050000\r -> :W2040000\r
       // now it is not neccessary to enable auxiliary encoders
-      else if(rxValue == ":W2050000\r") // this is problematic command
+      else if(rewrite_aux_encoder && rxValue == ":W2050000\r") // this is problematic command
       {
         Serial2.write(":W2040000\r"); // rewritten as non problematic command
         DEBUG_WRITE2(rxValue.c_str(), rxValue.length());
@@ -398,6 +400,8 @@ void loop_ble()
       {
         // deliver data now
         pTxCharacteristic->setValue(txbuf, txbuf_index); // txbuf_index is the length
+        if(expect_fw_version)
+          rewrite_aux_encoder = memcmp(txbuf,"=0210A1\r",txbuf_index) == 0;
         // reset after delivery, prepare for next data
         reset_buffer();
         Serial.write(txbuf, txbuf_index); // usb-serial
