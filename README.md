@@ -2,9 +2,12 @@
 
 Arduino ESP32 Bluetooth Classic and Bluetooth Low Energy
 UART bridge for SynScan Pro 2.5.2.
-UART 3.3V TTL is connected to SkyWatcher Virtuoso 90 Heritage mount.
+UART 3.3V TTL is connected to SkyWatcher Virtuoso 90 Heritage
+mount. Works for android, linux and windows.
 
-It works for android, linux and windows.
+ESP32S3 USB-C port can be used as direct USB-SERIAL to the
+mount when BLE is not connected. It works on linux but doesn't
+work on android.
 
 # Install
 
