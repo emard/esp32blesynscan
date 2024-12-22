@@ -5,19 +5,20 @@ pcb_size = [19,39,1.6]; // size of PCB
 box_inner = [22,40,21+3];
 thick = 2;
 
-rail_outer = [2,40,6];
-rail_inner = [3,41,2.5];
+rail_top   = [2,40,2];
+rail_bot   = [3,40,2];
+rail_spc   = 2.5;
 
 pcb_bottom = 2.5+3; // space from bottom
 usb_pos = 14; // from PCB bottom
 
 module pcb()
 {
-  translate([0,0,box_inner[2]/2-rail_inner[2]/2-pcb_bottom])
+  translate([0,0,box_inner[2]/2-rail_bot[2]/2-pcb_bottom])
   cube(pcb_size,center=true);
 }
 
-module rail()
+module rail_old()
 {
   difference()
   {
@@ -26,11 +27,19 @@ module rail()
   }
 }
 
+module rail(i)
+{
+  translate([-i*rail_bot[0]/2,0,rail_bot[2]/2+rail_spc/2])
+    cube(rail_bot,center=true);
+  translate([-i*rail_top[0]/2,0,-rail_top[2]/2-rail_spc/2])
+    cube(rail_top,center=true);
+}
+
 module rails()
 {
   for(i=[-1,1])
-    translate([(box_inner[0]/2-rail_outer[0]/2)*i,0,box_inner[2]/2-rail_inner[2]/2-pcb_bottom])
-      rail();
+    translate([(box_inner[0]/2)*i,0,box_inner[2]/2-rail_bot[2]/2-pcb_bottom])
+      rail(i);
 }
 
 // not used
