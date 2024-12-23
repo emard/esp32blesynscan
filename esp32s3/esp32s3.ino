@@ -446,7 +446,7 @@ void loop_ble()
       Serial.write(Serial2.read());
     if(Serial.available())
       Serial2.write(Serial.read());
-    delay(1);
+    // delay(1);
   }
 
   // disconnecting
@@ -470,7 +470,7 @@ void loop_ble()
     rx_indicate = false;
     reset_buffer();
   }
-  digitalWrite(LED_BUILTIN, deviceConnected ^ LED_OFF);
+  digitalWrite(LED_BUILTIN, (deviceConnected | ((((micros()>>16) & 15) == 0)) ) ^ LED_OFF); // disconnected: blink, connected: on
 }
 
 
