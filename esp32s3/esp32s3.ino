@@ -9,9 +9,9 @@
 #define TXD2 43
 #define BAUD 9600
 // from RX deliver only packets containing valid chars 0:OFF 1:ON
-#define VALID_CHARS_ONLY 0
+#define VALID_CHARS_ONLY 1
 // cancel TX->RX serial echo 0:OFF 1:ON
-#define CANCEL_ECHO 0
+#define CANCEL_ECHO 1
 
 // debug prints
 #if 0
@@ -273,7 +273,7 @@ void init_recv_acceptable()
 
 void setup_ble()
 {
-  Serial.begin(115200);
+  Serial.begin(); // on ESP32S3 this is usb-serial
   Serial2.begin(BAUD, SERIAL_8N1, RXD2, TXD2);
 
   // Create the BLE Device
@@ -376,18 +376,15 @@ void setup_ble()
 void loop_ble()
 {
   uint8_t txValue;
+  int32_t time_us = micros();
   static int32_t recv_us;
+  static bool packet_complete_for_delivery = true;
 
-  if (deviceConnected)
+  if(Serial2.available())
   {
-    if(Serial2.available())
-    {
-      //Serial.println("\nread");
       digitalWrite(LED_BUILTIN, LED_OFF);  // turn the LED on
       txValue = Serial2.read();
-      recv_us = micros();
-      #if 1
-      // ECHO CANCELLATION, SEND ONLY RESPONSE PART
+      recv_us = time_us;
       if(txValue == '=' || txValue == '!')
       {
         response_detected = true;
@@ -395,62 +392,66 @@ void loop_ble()
         txbuf_index = 0;
         #endif
       }
-      #endif
       txbuf[txbuf_index++] = txValue;
       if(response_detected)
         DEBUG_WRITE(txValue);
-      if(txbuf_index >= TXBUF_LEN
-      || (response_detected && txValue == '\r') )
+      packet_complete_for_delivery = txbuf_index >= TXBUF_LEN || (response_detected && txValue == '\r');
+      if(packet_complete_for_delivery)
       {
         // deliver data now
-        pTxCharacteristic->setValue(txbuf, txbuf_index); // txbuf_index is the length
+        if(deviceConnected)
+          pTxCharacteristic->setValue(txbuf, txbuf_index); // txbuf_index is the length
         if(expect_fw_version)
           rewrite_aux_encoder = memcmp(txbuf,"=0210A1\r",txbuf_index) == 0;
         Serial.write(txbuf, txbuf_index); // usb-serial
         // reset after delivery, prepare for next data
         reset_buffer();
         DEBUG_WRITE('\n');
-        //txbuf[txbuf_index] = '\n';
-        //txbuf[txbuf_index+1] = '\0';
-        //Serial.write(txbuf, txbuf_index+2); // debug print on USB serial
         #if TX_NOTIFY
-        pTxCharacteristic->notify();
+        if(deviceConnected)
+          pTxCharacteristic->notify();
         #endif
         #if TX_INDICATE
-        pTxCharacteristic->indicate();
+        if(deviceConnected)
+          pTxCharacteristic->indicate();
         #endif
         delay(1);  // bluetooth stack will go into congestion, if too many packets are sent
-     }
-     else // we are still inserial available, check timeout
-     {
-       #if VALID_CHARS_ONLY
-       if(recv_us-prev_recv_us > RECV_TIMEOUT_US || recv_acceptable[txValue] == 0)
-       {
-         // discard buffer on timeout
-         // rx_indicate = false; // trying to increase chance of BLE retry
-         reset_buffer();
-       }
-       #endif
-     }
-     prev_recv_us = recv_us;
-    }
-    #if RX_INDICATE
+      }
+      else // Packet not yet complete for delivery. Still in serial2 available, Check timeout.
+      {
+        #if VALID_CHARS_ONLY
+        if(recv_us-prev_recv_us > RECV_TIMEOUT_US || recv_acceptable[txValue] == 0)
+        {
+          // discard buffer on timeout
+          // rx_indicate = false; // trying to increase chance of BLE retry
+          reset_buffer();
+        }
+        #endif
+      }
+      prev_recv_us = recv_us;
+  }
+  else // not Serial2.available()
+  {
+      // this tries to prevent TX while RX
+      // usb-serial is much faster than 9600
+      if(time_us-recv_us > 1) // 1us silence, prevent sending too fast
+      {
+        if(Serial.available()) // usb-serial
+        {
+          Serial2.write(Serial.read());
+          recv_us = time_us; // because of half-duplex echo, Serial2.available will follow
+        }
+      }
+  }
+
+  #if RX_INDICATE
+  if(deviceConnected)
     if(rx_indicate)
     {
       pRxCharacteristic->indicate();
       rx_indicate = false;
     }
-    #endif
-    if(Serial.available()) // usb-serial
-      Serial2.write(Serial.read());
-  }
-  else // usb-serial mode when BLE is not connected
-  {
-    if(Serial2.available())
-      Serial.write(Serial2.read());
-    if(Serial.available())
-      Serial2.write(Serial.read());
-  }
+  #endif
 
   // disconnecting
   if (!deviceConnected && oldDeviceConnected)
@@ -473,7 +474,7 @@ void loop_ble()
     rx_indicate = false;
     reset_buffer();
   }
-  digitalWrite(LED_BUILTIN, (deviceConnected | ((((micros()>>16) & 15) == 0)) ) ^ LED_OFF); // disconnected: blink, connected: on
+  digitalWrite(LED_BUILTIN, (deviceConnected | ((((time_us>>16) & 15) == 0)) ) ^ LED_OFF); // disconnected: blink, connected: on
 }
 
 
