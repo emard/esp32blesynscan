@@ -8,8 +8,10 @@
 #define RXD2 44
 #define TXD2 43
 #define BAUD 9600
-// serial noise reduction 0:OFF 1:ON
-#define NOISE_REDUCTION 1
+// from RX deliver only packets containing valid chars 0:OFF 1:ON
+#define VALID_CHARS_ONLY 0
+// cancel TX->RX serial echo 0:OFF 1:ON
+#define CANCEL_ECHO 0
 
 // debug prints
 #if 0
@@ -389,7 +391,9 @@ void loop_ble()
       if(txValue == '=' || txValue == '!')
       {
         response_detected = true;
+        #if CANCEL_ECHO
         txbuf_index = 0;
+        #endif
       }
       #endif
       txbuf[txbuf_index++] = txValue;
@@ -402,9 +406,9 @@ void loop_ble()
         pTxCharacteristic->setValue(txbuf, txbuf_index); // txbuf_index is the length
         if(expect_fw_version)
           rewrite_aux_encoder = memcmp(txbuf,"=0210A1\r",txbuf_index) == 0;
+        Serial.write(txbuf, txbuf_index); // usb-serial
         // reset after delivery, prepare for next data
         reset_buffer();
-        Serial.write(txbuf, txbuf_index); // usb-serial
         DEBUG_WRITE('\n');
         //txbuf[txbuf_index] = '\n';
         //txbuf[txbuf_index+1] = '\0';
@@ -419,7 +423,7 @@ void loop_ble()
      }
      else // we are still inserial available, check timeout
      {
-       #if NOISE_REDUCTION
+       #if VALID_CHARS_ONLY
        if(recv_us-prev_recv_us > RECV_TIMEOUT_US || recv_acceptable[txValue] == 0)
        {
          // discard buffer on timeout
@@ -446,7 +450,6 @@ void loop_ble()
       Serial.write(Serial2.read());
     if(Serial.available())
       Serial2.write(Serial.read());
-    // delay(1);
   }
 
   // disconnecting
