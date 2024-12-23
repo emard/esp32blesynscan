@@ -402,5 +402,7 @@ fix#3: receive buffer is discarded after timeout of 10 ms
 or when unexpected (noise) byte is received outside of
 expected chars "=0123456789ABCDEF!\r". Synscan will
 retry the command after its own timeout.
-This fix improves initial connect, without it SynScan sometimes
-has to be manually restarted 5 times to reconnect.
+This fix improves initial connect, without this fix
+and without open collector fit with diode and resistor,
+SynScan sometimes needs to be manually restarted few
+times to connect.
