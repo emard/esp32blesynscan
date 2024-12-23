@@ -434,7 +434,7 @@ void loop_ble()
   {
       // this tries to prevent TX while RX
       // usb-serial is much faster than 9600
-      if(time_us-recv_us > 1) // 1us silence, prevent sending too fast
+      if(time_us-recv_us > 2) // 2us silence, prevent sending too fast
       {
         if(Serial.available()) // usb-serial
         {
