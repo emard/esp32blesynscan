@@ -434,12 +434,12 @@ void loop_ble()
   {
       // this tries to prevent TX while RX
       // usb-serial is much faster than 9600
-      if(time_us-recv_us > 2) // 2us silence, prevent sending too fast
+      if(time_us-recv_us > 1000 || packet_complete_for_delivery) // 1ms silence is about 9600 baud, prevent sending too fast
       {
         if(Serial.available()) // usb-serial
         {
           Serial2.write(Serial.read());
-          recv_us = time_us; // because of half-duplex echo, Serial2.available will follow
+          // recv_us = time_us; // because of half-duplex echo, Serial2.available will follow
         }
       }
   }
