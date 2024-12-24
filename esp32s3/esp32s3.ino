@@ -475,8 +475,10 @@ void loop_ble()
         }
         else // rxbuf not yet complete for delivery
         {
+          #if VALID_CHARS_ONLY
           if(rxbuf_acceptable[rxValue] == 0)
             reset_rxbuf();
+          #endif
         }
       }
   }
