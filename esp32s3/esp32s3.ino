@@ -9,9 +9,9 @@
 #define TXD2 43
 #define BAUD 9600
 // from RX deliver only packets containing valid chars 0:OFF 1:ON
-#define VALID_CHARS_ONLY 1
+#define VALID_CHARS_ONLY 0
 // cancel TX->RX serial echo 0:OFF 1:ON
-#define CANCEL_ECHO 1
+#define CANCEL_ECHO 0
 
 // debug prints
 #if 0
@@ -107,9 +107,12 @@ BLECharacteristic *pRxCharacteristic;
 #define TXBUF_LEN   32
 // RX buffer is for usb-serial receive
 #define RXBUF_LEN   32
-// [us] timeout on serial receive, reset txbuf buffer
-#define RECV_TIMEOUT_US 10000
-
+// [us] timeout on Serial2 receive, reset txbuf buffer
+#define RECV_TIMEOUT_US 100000
+// [us] timeout on Serial receive, reset rxbuf buffer
+#define RX_TIMEOUT_US 100000
+// [us] spacing from previous Serial2.write to next Serial2.write
+#define TX2_SPACE_US 0
 
 // direction synscan->mount
 // enable one or none
@@ -129,6 +132,8 @@ bool oldDeviceConnected = false;
 uint8_t txbuf[TXBUF_LEN+2], rxbuf[RXBUF_LEN+2]; // +2 to terminate with \n\0 for debug priting
 uint32_t txbuf_index = 0, rxbuf_index = 0;
 int32_t prev_recv_us = 0, recv_us = 0;
+int32_t prev_rx_us = 0, rx_us = 0;
+int32_t prev_tx2_us = 0, tx2_us = 0;
 uint8_t txbuf_acceptable[256], rxbuf_acceptable[256];
 bool expect_fw_version = false;
 bool rewrite_aux_encoder = false;
@@ -391,7 +396,14 @@ void setup_ble()
   DEBUG_PRINTLN(BLE_NAME);
   init_txbuf_acceptable();
   init_rxbuf_acceptable();
-  recv_us = micros();
+
+  // reset serial time tracking
+  int32_t time_us = micros();
+  recv_us = time_us;
+  prev_recv_us = time_us;
+  prev_tx2_us = time_us;
+  tx2_us = time_us;
+  prev_rx_us = time_us;
 }
 
 void loop_ble()
@@ -404,7 +416,7 @@ void loop_ble()
   {
       digitalWrite(LED_BUILTIN, LED_OFF);  // turn the LED on
       txValue = Serial2.read();
-      recv_us = time_us;
+      // recv_us = time_us;
       if(txValue == '=' || txValue == '!')
       {
         response_detected = true;
@@ -426,6 +438,7 @@ void loop_ble()
         Serial.write(txbuf, txbuf_index); // usb-serial
         // reset after delivery, prepare for next data
         reset_txbuf();
+        prev_tx2_us = time_us - TX2_SPACE_US; // HACK now next tx2 can start immediately.
         DEBUG_WRITE('\n');
         #if TX_NOTIFY
         if(deviceConnected)
@@ -437,22 +450,23 @@ void loop_ble()
         #endif
         delay(1);  // bluetooth stack will go into congestion, if too many packets are sent
       }
-      else // Packet not yet complete for delivery. Still in serial2 available, Check timeout.
+      else // Packet not yet complete for delivery. Still in serial2 available,
       {
         #if VALID_CHARS_ONLY
-        if(recv_us-prev_recv_us > RECV_TIMEOUT_US || txbuf_acceptable[txValue] == 0)
-        {
-          // discard buffer on timeout
-          // rx_indicate = false; // trying to increase chance of BLE retry
+        if(txbuf_acceptable[txValue] == 0)
           reset_txbuf();
-        }
         #endif
       }
-      prev_recv_us = recv_us;
+      prev_recv_us = time_us;
   }
   else // not Serial2.available()
   {
-      // this tries to prevent TX while RX
+      if(time_us-prev_recv_us > RECV_TIMEOUT_US)
+      {
+        reset_txbuf();
+        // prev_recv_us = time_us;
+      }
+      // this tries to prevent TX2 while RX2 from sniffing the protocol
       // usb-serial is much faster than 9600
       if(Serial.available()) // usb-serial
       {
@@ -460,9 +474,15 @@ void loop_ble()
         if(rxValue == ':')
           reset_rxbuf();
         rxbuf[rxbuf_index++] = rxValue;
-        rxbuf_complete_for_delivery = rxbuf_index >= RXBUF_LEN || rxValue == '\r';
-        if(/* time_us-recv_us > 1000 && */ rxbuf_complete_for_delivery)
+        rxbuf_complete_for_delivery = rxbuf_index >= RXBUF_LEN ||
+        ( time_us-prev_tx2_us > TX2_SPACE_US // next tx2 can start after previous tx2
+        && ((rxbuf[0] == ':' && rxValue == '\r') || rxValue == '\n') );
+        prev_rx_us = time_us;
+        if(rxbuf_complete_for_delivery)
         {
+          // code here has same function as the BLECharacteristicCallbacks with String
+          // but because of rxbuf and memcmp it is written differently
+          // todo unify both
           expect_fw_version = memcmp(rxbuf, ":e1\r", rxbuf_index) == 0;
           if(memcmp(rxbuf, "AT+CWMODE_CUR?\r\n", rxbuf_index) == 0) // this is problematic command
             Serial2.write(":e1\r"); // rewritten as non-problematic command :e1
@@ -471,6 +491,7 @@ void loop_ble()
           else
             Serial2.write(rxbuf, rxbuf_index);
           reset_rxbuf();
+          prev_tx2_us = time_us;
           // recv_us = time_us; // because of half-duplex echo, Serial2.available will follow
         }
         else // rxbuf not yet complete for delivery
@@ -481,6 +502,16 @@ void loop_ble()
           #endif
         }
       }
+      else // Serial not available
+      {
+        // if timeout reset rxbuf
+        if(time_us-prev_rx_us > RX_TIMEOUT_US)
+        {
+          reset_rxbuf();
+          //prev_rx_us = time_us;
+        }
+      }
+      // prev_rx_us=rx_us;
   }
 
   #if RX_INDICATE
