@@ -105,8 +105,11 @@ BLECharacteristic *pRxCharacteristic;
 // first "=" must be received then "\r" (CR)
 // todo: timout, buffer full
 #define TXBUF_LEN   32
+// RX buffer is for usb-serial receive
+#define RXBUF_LEN   32
 // [us] timeout on serial receive, reset txbuf buffer
 #define RECV_TIMEOUT_US 10000
+
 
 // direction synscan->mount
 // enable one or none
@@ -123,10 +126,10 @@ bool rx_indicate = false;
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 
-uint8_t txbuf[TXBUF_LEN+2]; // +2 to terminate with \n\0 for debug priting
-uint32_t txbuf_index = 0;
+uint8_t txbuf[TXBUF_LEN+2], rxbuf[RXBUF_LEN+2]; // +2 to terminate with \n\0 for debug priting
+uint32_t txbuf_index = 0, rxbuf_index = 0;
 int32_t prev_recv_us = 0, recv_us = 0;
-uint8_t recv_acceptable[256];
+uint8_t txbuf_acceptable[256], rxbuf_acceptable[256];
 bool expect_fw_version = false;
 bool rewrite_aux_encoder = false;
 bool response_detected = false;
@@ -256,19 +259,35 @@ class MyCallbacks : public BLECharacteristicCallbacks
   }
 };
 
-void reset_buffer()
+void reset_txbuf()
 {
   txbuf_index = 0;
   response_detected = false;
 }
 
-void init_recv_acceptable()
+void reset_rxbuf()
 {
-  memset(recv_acceptable    , 0, 256); // clear
-  recv_acceptable['='] = 1;
-  memset(recv_acceptable+'0', 1, 10); // 0-9 set as acceptable
-  memset(recv_acceptable+'A', 1, 6); // A-F set as acceptable
-  recv_acceptable['\r'] = 1;
+  rxbuf_index = 0;
+}
+
+void init_txbuf_acceptable()
+{
+  memset(txbuf_acceptable    , 0, 256); // clear
+  txbuf_acceptable['='] = 1;
+  memset(txbuf_acceptable+'0', 1, 10); // 0-9 set as acceptable
+  memset(txbuf_acceptable+'A', 1, 6); // A-F set as acceptable
+  txbuf_acceptable['\r'] = 1;
+}
+
+void init_rxbuf_acceptable()
+{
+  memset(rxbuf_acceptable    , 0, 256); // clear
+  rxbuf_acceptable[':'] = 1;
+  rxbuf_acceptable['!'] = 1;
+  memset(rxbuf_acceptable+'0', 1, 10); // 0-9 set as acceptable
+  memset(rxbuf_acceptable+'A', 1, 26); // A-Z set as acceptable
+  memset(rxbuf_acceptable+'a', 1, 26); // a-z set as acceptable
+  rxbuf_acceptable['\r'] = 1;
 }
 
 void setup_ble()
@@ -370,15 +389,16 @@ void setup_ble()
   pAdvertising->start();
   DEBUG_WRITE("Bluetooth Low Energy Serial: ");
   DEBUG_PRINTLN(BLE_NAME);
-  init_recv_acceptable();
+  init_txbuf_acceptable();
+  init_rxbuf_acceptable();
+  recv_us = micros();
 }
 
 void loop_ble()
 {
-  uint8_t txValue;
+  uint8_t txValue, rxValue;
   int32_t time_us = micros();
-  static int32_t recv_us;
-  static bool packet_complete_for_delivery = true;
+  static bool txbuf_complete_for_delivery = true, rxbuf_complete_for_delivery = true;
 
   if(Serial2.available())
   {
@@ -395,8 +415,8 @@ void loop_ble()
       txbuf[txbuf_index++] = txValue;
       if(response_detected)
         DEBUG_WRITE(txValue);
-      packet_complete_for_delivery = txbuf_index >= TXBUF_LEN || (response_detected && txValue == '\r');
-      if(packet_complete_for_delivery)
+      txbuf_complete_for_delivery = txbuf_index >= TXBUF_LEN || (response_detected && txValue == '\r');
+      if(txbuf_complete_for_delivery)
       {
         // deliver data now
         if(deviceConnected)
@@ -405,7 +425,7 @@ void loop_ble()
           rewrite_aux_encoder = memcmp(txbuf,"=0210A1\r",txbuf_index) == 0;
         Serial.write(txbuf, txbuf_index); // usb-serial
         // reset after delivery, prepare for next data
-        reset_buffer();
+        reset_txbuf();
         DEBUG_WRITE('\n');
         #if TX_NOTIFY
         if(deviceConnected)
@@ -420,11 +440,11 @@ void loop_ble()
       else // Packet not yet complete for delivery. Still in serial2 available, Check timeout.
       {
         #if VALID_CHARS_ONLY
-        if(recv_us-prev_recv_us > RECV_TIMEOUT_US || recv_acceptable[txValue] == 0)
+        if(recv_us-prev_recv_us > RECV_TIMEOUT_US || txbuf_acceptable[txValue] == 0)
         {
           // discard buffer on timeout
           // rx_indicate = false; // trying to increase chance of BLE retry
-          reset_buffer();
+          reset_txbuf();
         }
         #endif
       }
@@ -434,12 +454,29 @@ void loop_ble()
   {
       // this tries to prevent TX while RX
       // usb-serial is much faster than 9600
-      if(time_us-recv_us > 1000 || packet_complete_for_delivery) // 1ms silence is about 9600 baud, prevent sending too fast
+      if(Serial.available()) // usb-serial
       {
-        if(Serial.available()) // usb-serial
+        rxValue = Serial.read();
+        if(rxValue == ':')
+          reset_rxbuf();
+        rxbuf[rxbuf_index++] = rxValue;
+        rxbuf_complete_for_delivery = rxbuf_index >= RXBUF_LEN || rxValue == '\r';
+        if(/* time_us-recv_us > 1000 && */ rxbuf_complete_for_delivery)
         {
-          Serial2.write(Serial.read());
+          expect_fw_version = memcmp(rxbuf, ":e1\r", rxbuf_index) == 0;
+          if(memcmp(rxbuf, "AT+CWMODE_CUR?\r\n", rxbuf_index) == 0) // this is problematic command
+            Serial2.write(":e1\r"); // rewritten as non-problematic command :e1
+          else if(rewrite_aux_encoder && memcmp(rxbuf, ":W2050000\r", rxbuf_index) == 0) // this is problematic command
+            Serial2.write(":W2040000\r"); // rewritten as non problematic command
+          else
+            Serial2.write(rxbuf, rxbuf_index);
+          reset_rxbuf();
           // recv_us = time_us; // because of half-duplex echo, Serial2.available will follow
+        }
+        else // rxbuf not yet complete for delivery
+        {
+          if(rxbuf_acceptable[rxValue] == 0)
+            reset_rxbuf();
         }
       }
   }
@@ -462,7 +499,7 @@ void loop_ble()
     oldDeviceConnected = deviceConnected;
     // reset connection tracking states
     rx_indicate = false;
-    reset_buffer();
+    reset_txbuf();
   }
   // connecting
   if (deviceConnected && !oldDeviceConnected)
@@ -472,7 +509,7 @@ void loop_ble()
     DEBUG_PRINTLN("Connected");
     // reset connection tracking states
     rx_indicate = false;
-    reset_buffer();
+    reset_txbuf();
   }
   digitalWrite(LED_BUILTIN, (deviceConnected | ((((time_us>>16) & 15) == 0)) ) ^ LED_OFF); // disconnected: blink, connected: on
 }
