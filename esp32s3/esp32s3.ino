@@ -9,9 +9,9 @@
 #define TXD2 43
 #define BAUD 9600
 // from RX deliver only packets containing valid chars 0:OFF 1:ON
-#define VALID_CHARS_ONLY 0
+#define VALID_CHARS_ONLY 1
 // cancel TX->RX serial echo 0:OFF 1:ON
-#define CANCEL_ECHO 0
+#define CANCEL_ECHO 1
 
 // debug prints
 #if 0
@@ -438,7 +438,7 @@ void loop_ble()
         Serial.write(txbuf, txbuf_index); // usb-serial
         // reset after delivery, prepare for next data
         reset_txbuf();
-        prev_tx2_us = time_us - TX2_SPACE_US; // HACK now next tx2 can start immediately.
+        // prev_tx2_us = time_us - TX2_SPACE_US; // HACK now next tx2 can start immediately.
         DEBUG_WRITE('\n');
         #if TX_NOTIFY
         if(deviceConnected)
@@ -456,6 +456,7 @@ void loop_ble()
         if(txbuf_acceptable[txValue] == 0)
           reset_txbuf();
         #endif
+        // prev_tx2_us = time_us; // hack to prevent collision
       }
       prev_recv_us = time_us;
   }
@@ -475,14 +476,15 @@ void loop_ble()
           reset_rxbuf();
         rxbuf[rxbuf_index++] = rxValue;
         rxbuf_complete_for_delivery = rxbuf_index >= RXBUF_LEN ||
-        ( time_us-prev_tx2_us > TX2_SPACE_US // next tx2 can start after previous tx2
-        && ((rxbuf[0] == ':' && rxValue == '\r') || rxValue == '\n') );
+        ( (rxbuf[0] == ':' && rxValue == '\r') || rxValue == '\n' );
         prev_rx_us = time_us;
         if(rxbuf_complete_for_delivery)
         {
           // code here has same function as the BLECharacteristicCallbacks with String
           // but because of rxbuf and memcmp it is written differently
           // todo unify both
+          if(time_us-prev_tx2_us > TX2_SPACE_US /*&& time_us-prev_recv_us > TX2_SPACE_US*/) // discards packets coming too fast
+          {
           expect_fw_version = memcmp(rxbuf, ":e1\r", rxbuf_index) == 0;
           if(memcmp(rxbuf, "AT+CWMODE_CUR?\r\n", rxbuf_index) == 0) // this is problematic command
             Serial2.write(":e1\r"); // rewritten as non-problematic command :e1
@@ -490,6 +492,7 @@ void loop_ble()
             Serial2.write(":W2040000\r"); // rewritten as non problematic command
           else
             Serial2.write(rxbuf, rxbuf_index);
+          }
           reset_rxbuf();
           prev_tx2_us = time_us;
           // recv_us = time_us; // because of half-duplex echo, Serial2.available will follow
