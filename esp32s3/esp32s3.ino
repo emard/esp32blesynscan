@@ -8,6 +8,29 @@
 #define RXD2 44
 #define TXD2 43
 #define BAUD 9600
+
+// [us] USB read time (throttle fast usb-serial, 1042 us = 9600 baud, 0 disable)
+#define USB_RX_CHAR_US 0
+// [us] RJ-12 discard packets coming faster on Serial2.write, 0 disable
+#define RJ12_TX_PACKET_US 0
+
+// [us] timeout on RJ12 receive, reset txbuf buffer
+#define RJ12_RX_TIMEOUT_US 60000000
+// [us] timeout on USB receive, reset rxbuf buffer
+#define USB_RX_TIMEOUT_US 60000000
+
+// TXBUF_LEN 0  to disable
+// TXBUF_LEN > 0 to enable (TX_INDICATE needs it)
+// recommend TXBUF_LEN 32 with TX_INDICATE 1
+// [bytes] length of TX buffer
+// conditions when buffer is delivered
+// with optional notify/indicate signal:
+// first "=" must be received then "\r" (CR)
+// todo: timout, buffer full
+#define TXBUF_LEN   32
+// RX buffer is for usb-serial receive
+#define RXBUF_LEN   32
+
 // from RX deliver only packets containing valid chars 0:OFF 1:ON
 #define VALID_CHARS_ONLY 1
 // cancel TX->RX serial echo 0:OFF 1:ON
@@ -41,12 +64,6 @@
     Based on Neil Kolban example for IDF: https://github.com/nkolban/esp32-snippets/blob/master/cpp_utils/tests/BLE%20Tests/SampleNotify.cpp
     Ported to Arduino ESP32 by Evandro Copercini
 
-   Install:
-   Board manager -> esp32 by espressif
-
-   Select board:
-   Board -> esp32 -> ESP32 Dev Module
-
    Create a BLE server that, once we receive a connection, will send periodic notifications.
    The service advertises itself as: 6E400001-B5A3-F393-E0A9-E50E24DCCA9E
    Has a characteristic of: 6E400002-B5A3-F393-E0A9-E50E24DCCA9E - used for receiving data with "WRITE"
@@ -68,6 +85,8 @@
 
    32-bit Attribute UUID replaces the x's in the following:
    xxxxxxxx-0000-1000-8000-00805F9B34FB
+
+   hcitool lescan
 
    https://github.com/Jakeler/ble-serial
    source ble-venv/bin/activate
@@ -96,23 +115,6 @@ BLECharacteristic *pRxCharacteristic;
 #define TX_NOTIFY   0
 #define TX_INDICATE 1
 
-// TXBUF_LEN 0  to disable
-// TXBUF_LEN > 0 to enable (TX_INDICATE needs it)
-// recommend TXBUF_LEN 32 with TX_INDICATE 1
-// [bytes] length of TX buffer
-// conditions when buffer is delivered
-// with optional notify/indicate signal:
-// first "=" must be received then "\r" (CR)
-// todo: timout, buffer full
-#define TXBUF_LEN   32
-// RX buffer is for usb-serial receive
-#define RXBUF_LEN   32
-// [us] timeout on Serial2 receive, reset txbuf buffer
-#define RECV_TIMEOUT_US 100000
-// [us] timeout on Serial receive, reset rxbuf buffer
-#define RX_TIMEOUT_US 100000
-// [us] spacing from previous Serial2.write to next Serial2.write
-#define TX2_SPACE_US 0
 
 // direction synscan->mount
 // enable one or none
@@ -131,9 +133,9 @@ bool oldDeviceConnected = false;
 
 uint8_t txbuf[TXBUF_LEN+2], rxbuf[RXBUF_LEN+2]; // +2 to terminate with \n\0 for debug priting
 uint32_t txbuf_index = 0, rxbuf_index = 0;
-int32_t prev_recv_us = 0, recv_us = 0;
-int32_t prev_rx_us = 0, rx_us = 0;
-int32_t prev_tx2_us = 0, tx2_us = 0;
+int32_t prev_rj12_rx_us = 0;
+int32_t next_rj12_tx_us = 0;
+int32_t next_usb_rx_us = 0;
 uint8_t txbuf_acceptable[256], rxbuf_acceptable[256];
 bool expect_fw_version = false;
 bool rewrite_aux_encoder = false;
@@ -295,6 +297,15 @@ void init_rxbuf_acceptable()
   rxbuf_acceptable['\r'] = 1;
 }
 
+void init_usb_timing()
+{
+  // reset serial time tracking
+  int32_t time_us = micros();
+  prev_rj12_rx_us = time_us;
+  next_rj12_tx_us = time_us;
+  next_usb_rx_us  = time_us;
+}
+
 void setup_ble()
 {
   Serial.begin(); // on ESP32S3 this is usb-serial
@@ -396,125 +407,117 @@ void setup_ble()
   DEBUG_PRINTLN(BLE_NAME);
   init_txbuf_acceptable();
   init_rxbuf_acceptable();
-
-  // reset serial time tracking
-  int32_t time_us = micros();
-  recv_us = time_us;
-  prev_recv_us = time_us;
-  prev_tx2_us = time_us;
-  tx2_us = time_us;
-  prev_rx_us = time_us;
+  init_usb_timing();
 }
 
 void loop_ble()
 {
   uint8_t txValue, rxValue;
-  int32_t time_us = micros();
+  int32_t time_us;
   static bool txbuf_complete_for_delivery = true, rxbuf_complete_for_delivery = true;
 
+  // RJ-12 serial read
+  time_us = micros();
   if(Serial2.available())
   {
-      digitalWrite(LED_BUILTIN, LED_OFF);  // turn the LED on
-      txValue = Serial2.read();
-      // recv_us = time_us;
-      if(txValue == '=' || txValue == '!')
-      {
-        response_detected = true;
-        #if CANCEL_ECHO
-        txbuf_index = 0;
-        #endif
-      }
-      txbuf[txbuf_index++] = txValue;
-      if(response_detected)
-        DEBUG_WRITE(txValue);
-      txbuf_complete_for_delivery = txbuf_index >= TXBUF_LEN || (response_detected && txValue == '\r');
-      if(txbuf_complete_for_delivery)
-      {
-        // deliver data now
-        if(deviceConnected)
-          pTxCharacteristic->setValue(txbuf, txbuf_index); // txbuf_index is the length
-        if(expect_fw_version)
-          rewrite_aux_encoder = memcmp(txbuf,"=0210A1\r",txbuf_index) == 0;
-        Serial.write(txbuf, txbuf_index); // usb-serial
-        // reset after delivery, prepare for next data
+    digitalWrite(LED_BUILTIN, LED_OFF);  // turn the LED on
+    txValue = Serial2.read();
+    if(txValue == '=' || txValue == '!')
+    {
+      response_detected = true;
+      #if CANCEL_ECHO
+      txbuf_index = 0;
+      #endif
+    }
+    txbuf[txbuf_index++] = txValue;
+    txbuf_complete_for_delivery = txbuf_index >= TXBUF_LEN || (response_detected && txValue == '\r');
+    if(txbuf_complete_for_delivery)
+    {
+      // deliver data now
+      if(deviceConnected)
+        pTxCharacteristic->setValue(txbuf, txbuf_index); // txbuf_index is the length
+      if(expect_fw_version)
+        rewrite_aux_encoder = memcmp(txbuf,"=0210A1\r",txbuf_index) == 0;
+      Serial.write(txbuf, txbuf_index); // usb-serial
+      // reset after delivery, prepare for next data
+      reset_txbuf();
+      #if TX_NOTIFY
+      if(deviceConnected)
+        pTxCharacteristic->notify();
+      #endif
+      #if TX_INDICATE
+      if(deviceConnected)
+        pTxCharacteristic->indicate();
+      #endif
+    }
+    else // Packet not yet complete for delivery. Still in serial2 available,
+    {
+      #if VALID_CHARS_ONLY
+      if(txbuf_acceptable[txValue] == 0)
         reset_txbuf();
-        // prev_tx2_us = time_us - TX2_SPACE_US; // HACK now next tx2 can start immediately.
-        DEBUG_WRITE('\n');
-        #if TX_NOTIFY
-        if(deviceConnected)
-          pTxCharacteristic->notify();
-        #endif
-        #if TX_INDICATE
-        if(deviceConnected)
-          pTxCharacteristic->indicate();
-        #endif
-        delay(1);  // bluetooth stack will go into congestion, if too many packets are sent
-      }
-      else // Packet not yet complete for delivery. Still in serial2 available,
-      {
-        #if VALID_CHARS_ONLY
-        if(txbuf_acceptable[txValue] == 0)
-          reset_txbuf();
-        #endif
-        // prev_tx2_us = time_us; // hack to prevent collision
-      }
-      prev_recv_us = time_us;
+      #endif
+    }
+    prev_rj12_rx_us = time_us;
   }
-  else // not Serial2.available()
+  else // RJ-12 Serial2 not available
   {
-      if(time_us-prev_recv_us > RECV_TIMEOUT_US)
-      {
+      if(time_us-prev_rj12_rx_us > RJ12_RX_TIMEOUT_US)
         reset_txbuf();
-        // prev_recv_us = time_us;
-      }
-      // this tries to prevent TX2 while RX2 from sniffing the protocol
-      // usb-serial is much faster than 9600
-      if(Serial.available()) // usb-serial
+  }
+
+  time_us = micros();
+  // this tries to prevent TX2 while RX2 from sniffing the protocol
+  // usb-serial is much faster than 9600
+  // USB serial read
+  if(Serial.available() && time_us-next_usb_rx_us > 0) // usb-serial read at limited rate, throttle r12-write
+  {
+    rxValue = Serial.read();
+    if(rxValue == ':')
+      reset_rxbuf();
+    rxbuf[rxbuf_index++] = rxValue;
+    rxbuf_complete_for_delivery = rxbuf_index >= RXBUF_LEN ||
+    ( (rxbuf[0] == ':' && rxValue == '\r') || rxValue == '\n' );
+    if(rxbuf_complete_for_delivery)
+    {
+      // code here has same function as the BLECharacteristicCallbacks with String
+      // but because of rxbuf and memcmp it is written differently
+      // todo unify both
+      if(time_us-next_rj12_tx_us > 0) // discards packets coming too fast
       {
-        rxValue = Serial.read();
-        if(rxValue == ':')
-          reset_rxbuf();
-        rxbuf[rxbuf_index++] = rxValue;
-        rxbuf_complete_for_delivery = rxbuf_index >= RXBUF_LEN ||
-        ( (rxbuf[0] == ':' && rxValue == '\r') || rxValue == '\n' );
-        prev_rx_us = time_us;
-        if(rxbuf_complete_for_delivery)
-        {
-          // code here has same function as the BLECharacteristicCallbacks with String
-          // but because of rxbuf and memcmp it is written differently
-          // todo unify both
-          if(time_us-prev_tx2_us > TX2_SPACE_US /*&& time_us-prev_recv_us > TX2_SPACE_US*/) // discards packets coming too fast
-          {
-          expect_fw_version = memcmp(rxbuf, ":e1\r", rxbuf_index) == 0;
-          if(memcmp(rxbuf, "AT+CWMODE_CUR?\r\n", rxbuf_index) == 0) // this is problematic command
-            Serial2.write(":e1\r"); // rewritten as non-problematic command :e1
-          else if(rewrite_aux_encoder && memcmp(rxbuf, ":W2050000\r", rxbuf_index) == 0) // this is problematic command
-            Serial2.write(":W2040000\r"); // rewritten as non problematic command
-          else
-            Serial2.write(rxbuf, rxbuf_index);
-          }
-          reset_rxbuf();
-          prev_tx2_us = time_us;
-          // recv_us = time_us; // because of half-duplex echo, Serial2.available will follow
-        }
-        else // rxbuf not yet complete for delivery
-        {
-          #if VALID_CHARS_ONLY
-          if(rxbuf_acceptable[rxValue] == 0)
-            reset_rxbuf();
-          #endif
-        }
+        expect_fw_version = memcmp(rxbuf, ":e1\r", rxbuf_index) == 0;
+        if(memcmp(rxbuf, "AT+CWMODE_CUR?\r\n", rxbuf_index) == 0) // this is problematic command
+          Serial2.write(":e1\r"); // rewritten as non-problematic command :e1
+        else if(rewrite_aux_encoder && memcmp(rxbuf, ":W2050000\r", rxbuf_index) == 0) // this is problematic command
+          Serial2.write(":W2040000\r"); // rewritten as non problematic command
+        else
+          Serial2.write(rxbuf, rxbuf_index);
       }
-      else // Serial not available
-      {
-        // if timeout reset rxbuf
-        if(time_us-prev_rx_us > RX_TIMEOUT_US)
-        {
-          reset_rxbuf();
-          //prev_rx_us = time_us;
-        }
-      }
-      // prev_rx_us=rx_us;
+      #if 1
+      else
+        Serial.write("\r"); // response to discarded packet
+      #endif
+      reset_rxbuf();
+      next_rj12_tx_us += RJ12_TX_PACKET_US;
+      time_us = micros();
+      if(next_rj12_tx_us < time_us)
+        next_rj12_tx_us = time_us + RJ12_TX_PACKET_US;
+    }
+    else // rxbuf not yet complete for delivery
+    {
+      #if VALID_CHARS_ONLY
+      if(rxbuf_acceptable[rxValue] == 0)
+        reset_rxbuf();
+      #endif
+    }
+    next_usb_rx_us += USB_RX_CHAR_US;
+    time_us = micros();
+    if(next_usb_rx_us < time_us)
+      next_usb_rx_us = time_us + USB_RX_CHAR_US;
+  }
+  else // usb Serial not available
+  {
+    if(time_us-next_usb_rx_us > USB_RX_TIMEOUT_US)
+      reset_rxbuf();
   }
 
   #if RX_INDICATE
