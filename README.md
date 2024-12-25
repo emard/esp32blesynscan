@@ -6,8 +6,8 @@ UART 3.3V TTL is connected to SkyWatcher Virtuoso 90 Heritage
 mount. Works for android, linux and windows.
 
 ESP32S3 USB-C port can be used as direct USB-SERIAL to the
-mount when BLE is not connected. It works on linux but doesn't
-work on android.
+mount when BLE is not connected. On linux it works great.
+On android it connects but it is unreliable.
 
 # Install
 
