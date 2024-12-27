@@ -103,6 +103,13 @@ part numbers and pinouts
        └──┘          └──┘
     front view    front view
 
+    1        N.C.
+    2 yellow TX       (3.3V) (mount receives)
+    3 green  Vpp+     ( 12V)
+    4 red    RX       (3.3V) (mount sends)
+    5 black  GND
+    6        N.N.
+
     Voltage converter 4.5-36V -> 3.3V
     Mouser P/N: 919-R-78K3.3-0.5 7$
 
