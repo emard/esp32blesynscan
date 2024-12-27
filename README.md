@@ -90,7 +90,21 @@ Minimal schematic (ESP32S3)
 
 part numbers and pinouts
 
-    Mouser P/N: 919-R-78K3.3-0.5 = 4.5-36V -> 3.3V
+    RJ-11 or RJ-12 Connector
+    Mouser P/N: 538-95501-2661   0.5$
+    Mouser P/N: 523-RJE031660310 1$
+    Mouser P/N: 490-CRJ051-1-TH  2$
+
+      RJ-12         RJ-11
+    ┌────────┐    ┌────────┐
+    │ 123456 │    │  2345  │
+    │        │    │        │
+    └──┐  ┌──┘    └──┐  ┌──┘
+       └──┘          └──┘
+    front view    front view
+
+    Voltage converter 4.5-36V -> 3.3V
+    Mouser P/N: 919-R-78K3.3-0.5 7$
 
                      RECOM 
                  R-78K3.3-0.5
@@ -101,7 +115,8 @@ part numbers and pinouts
                 └─────────────┘
                   bottom view
 
-    Mouser P/N: 713-113991114    = XIAO ESP32S2
+    XIAO ESP32S3 MINI
+    Mouser P/N: 713-113991114    7$
 
                  XIAO  ESP32S3
                 ┌─────────────┐
@@ -115,14 +130,15 @@ part numbers and pinouts
                 └─────────────┘
                     top view  
 
+
 # Connection
 
 Looking at female RJ-12 socket on the mount:
-          
+
     ┌────────┐
     │ 123456 │
     │        │
-    └──┐  ┌──┘ 
+    └──┐  ┌──┘
        └──┘
 
     1 blue   N.C.
@@ -151,6 +167,10 @@ RJ-12 6-pin because pins 1 and 6 are not connected.
 ![bot](/pic/bot.jpg)
 
 # WARNING WARNING WARNING
+
+RJ12 pinout on the adapter matches the pinout
+on the mount, so the "straight" wired cable
+should be used.
 
 There are different RJ-11 and RJ-12 cables,
 with [straight and cross wiring](/doc/straight-vs-cross-cable.pdf).
