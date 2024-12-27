@@ -104,9 +104,9 @@ part numbers and pinouts
     front view    front view
 
     1        N.C.
-    2 yellow TX       (3.3V) (mount receives)
+    2 yellow TX       (3.3V) (esp32 sends)
     3 green  Vpp+     ( 12V)
-    4 red    RX       (3.3V) (mount sends)
+    4 red    RX       (3.3V) (esp32 receives)
     5 black  GND
     6        N.N.
 
