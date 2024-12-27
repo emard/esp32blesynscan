@@ -105,7 +105,7 @@ part numbers and pinouts
 
     1        N.C.
     2 yellow TX       (3.3V) (esp32 sends)
-    3 green  Vpp+     ( 12V)
+    3 green  Vpp+     ( 12V) (esp32 draws power)
     4 red    RX       (3.3V) (esp32 receives)
     5 black  GND
     6        N.N.
@@ -150,7 +150,7 @@ Looking at female RJ-12 socket on the mount:
 
     1 blue   N.C.
     2 yellow TX       (3.3V) (mount receives)
-    3 green  Vpp+     ( 12V)
+    3 green  Vpp+     ( 12V) (mount provides power)
     4 red    RX       (3.3V) (mount sends)
     5 black  GND
     6 white  Reserved (3.3V)
