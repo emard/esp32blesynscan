@@ -167,11 +167,11 @@ actually indicate RX/TX on ESP32.
 RJ-11 4-pin socket can be used instead of
 RJ-12 6-pin because pins 1 and 6 are not connected.
 
-(note old pic's before adding BAT42)
-
 ![top](/pic/top.jpg)
 
 ![bot](/pic/bot.jpg)
+
+![esp32s3](/pic/esp32s3.jpg)
 
 # WARNING WARNING WARNING
 
