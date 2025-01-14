@@ -1,12 +1,25 @@
 # SynScan_BLE Micropython version
 
 The same functionality as arduino but
-written in micropython.
-Response is sligthy slower than arduino
-version.
+written in 100 lines of micropython.
 
-When UART timeout is set to less than 10 ms
-then synscan will not connect.
+It was possible to simplify code logic
+because UART always must send someting
+to motor hardware to get response. Motor
+hardware is otherwise quiet.
+
+So when BLE receives request from synscan,
+it sends it over UART and waits timeout of
+10ms for UART response. Received response
+is sent back to synscan. 
+
+Code doesn't have independent TX and RX threads. 
+
+Response is sligthy slower than arduino
+version. It could be because of UART
+timeout of 10 ms. But when timeout is set
+to less than 10 ms then synscan will not
+connect.
 
 install
 
