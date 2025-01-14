@@ -87,9 +87,9 @@ class BLE():
         self.ble.gatts_notify(0, self.tx, data + '\n')
 
     def advertiser(self):
-        name = bytearray(self.name, 'UTF-8')
-        manufacturer_data=bytearray("h.54806524", "UTF-8")
-        advertise_data = bytearray('\x02\x01\x02', 'UTF-8') + \
+        name = bytearray(self.name, "UTF-8")
+        manufacturer_data = b"h.54806524"
+        advertise_data = b'\x02\x01\x02' + \
                          bytearray((len(name) + 1, 0x09)) + name + \
                          bytearray((len(manufacturer_data)+1, 0xFF)) + manufacturer_data
         #print(advertise_data)
