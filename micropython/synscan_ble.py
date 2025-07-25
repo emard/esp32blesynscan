@@ -60,18 +60,18 @@ class BLE():
                 if SLOW:
                   # prevent reboots at 5V power
                   # MANUAL SLEW SPEED
-                  # instead of manual slew 9 use slew 8
+                  # instead of manual slew 9 use slew 8.5
                   if from_ble == b":I1500000\r": # AZ
-                      from_ble = b":I16A0000\r"
+                      from_ble = b":I1600000\r"
                   elif from_ble == b":I2500000\r": # ALT
-                      from_ble = b":I26A0000\r"
+                      from_ble = b":I2600000\r"
                   # GOTO SLEW SPEED
                   # M-commands (brake) don't have any effect
-                  # replace them with long goto slew 8
+                  # replace them with long goto slew 8.5
                   elif from_ble == b":M1AC0D00\r": # AZ
-                      from_ble = b":T16A0000\r"
+                      from_ble = b":T1600000\r"
                   elif from_ble == b":M2AC0D00\r": # ALT
-                      from_ble = b":T26A0000\r"
+                      from_ble = b":T2600000\r"
             self.uart.write(from_ble)
             from_uart = self.uart.read()
             if from_uart:

@@ -255,28 +255,28 @@ class MyCallbacks : public BLECharacteristicCallbacks
       #if SLOW
       // prevent reboots at 5V power
       // MANUAL SLEW SPEED
-      // instead of manual slew 9 use slew 8
+      // instead of manual slew 9 use slew 8.5
       else if(rewrite_aux_encoder && rxValue == ":I1500000\r") // AZ manual speed 9
       {
-        Serial2.write(":I16A0000\r"); // rewritten as AZ manual speed 8
+        Serial2.write(":I1600000\r"); // rewritten as AZ manual speed 8.5
         DEBUG_WRITE2(rxValue.c_str(), rxValue.length());
       }
       else if(rewrite_aux_encoder && rxValue == ":I2500000\r") // ALT manual speed 9
       {
-        Serial2.write(":I26A0000\r"); // rewritten as ALT manual speed 8
+        Serial2.write(":I26000000\r"); // rewritten as ALT manual speed 8.5
         DEBUG_WRITE2(rxValue.c_str(), rxValue.length());
       }
       // GOTO SLEW SPEED
       // M-commands (brake) don't have any effect
-      // replace them with long goto slew 8
+      // replace them with long goto slew 8.5
       else if(rewrite_aux_encoder && rxValue == ":M1AC0D00\r") // AZ brake
       {
-        Serial2.write(":T16A0000\r"); // rewritten as AZ long goto speed 8
+        Serial2.write(":T1600000\r"); // rewritten as AZ long goto speed 8
         DEBUG_WRITE2(rxValue.c_str(), rxValue.length());
       }
       else if(rewrite_aux_encoder && rxValue == ":M2AC0D00\r") // ALT brake
       {
-        Serial2.write(":T26A0000\r"); // rewritten as ALT long goto speed 8
+        Serial2.write(":T2600000\r"); // rewritten as ALT long goto speed 8
         DEBUG_WRITE2(rxValue.c_str(), rxValue.length());
       }
       #endif // SLOW
@@ -523,18 +523,18 @@ void loop_ble()
         #if SLOW
         // prevent reboots at 5V power
         // MANUAL SLEW SPEED
-        // instead of manual slew 9 use slew 8
+        // instead of manual slew 9 use slew 8.5
         else if(rewrite_aux_encoder && memcmp(rxbuf, ":I1500000\r", rxbuf_index) == 0) // AZ manual speed 9
-          Serial2.write(":I16A0000\r"); // rewritten as AZ manual speed 8
+          Serial2.write(":I1600000\r"); // rewritten as AZ manual speed 8
         else if(rewrite_aux_encoder && memcmp(rxbuf, ":I2500000\r", rxbuf_index) == 0) // ALT manual speed 9
-          Serial2.write(":I26A0000\r"); // rewritten as ALT manual speed 8
+          Serial2.write(":I2600000\r"); // rewritten as ALT manual speed 8
         // GOTO SLEW SPEED
         // M-commands (brake) don't have any effect
-        // replace them with long goto slew 8
+        // replace them with long goto slew 8.5
         else if(rewrite_aux_encoder && memcmp(rxbuf, ":M1AC0D00\r", rxbuf_index) == 0) // AZ brake
-          Serial2.write(":T16A0000\r"); // rewritten as AZ long goto speed 8
+          Serial2.write(":T1600000\r"); // rewritten as AZ long goto speed 8
         else if(rewrite_aux_encoder && memcmp(rxbuf, ":M2AC0D00\r", rxbuf_index) == 0) // ALT brake
-          Serial2.write(":T26A0000\r"); // rewritten as ALT long goto speed 8
+          Serial2.write(":T2600000\r"); // rewritten as ALT long goto speed 8
         #endif // SLOW
         else
           Serial2.write(rxbuf, rxbuf_index);
