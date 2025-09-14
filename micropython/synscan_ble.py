@@ -45,6 +45,36 @@ class BLE():
     def disconnected(self):
         self.led(0)
 
+    def read_flush(self):
+      n=self.uart.any() # chars available
+      if n: # read all available and discard
+        self.uart.read(n)
+
+    # read from "=" to "\r"
+    def read_until_cr(self):
+      r=b""
+      while True:
+        a=self.uart.read(1) # at least 1 char or timeout
+        if a: # success
+          if CANCEL_ECHO:
+            if a.find(b"=")>=0:
+              r=b"" # reset
+          r+=a # append 1 char
+          if a.find(b"\r")>=0:
+            return r
+          n=self.uart.any() # more chars available
+          if n: # more to read
+            a=self.uart.read(n)
+            r+=a
+            if CANCEL_ECHO:
+              n=r.find(b"=")
+              if n>0:
+                r=r[n:] # delete all before "="
+            if a.find(b"\r")>=0:
+              return r
+        else: # timeout
+          return r
+
     def ble_irq(self, event, data):
         if event == 1:
             '''Central disconnected'''
@@ -79,16 +109,16 @@ class BLE():
                       from_ble = b":T1600000\r"
                   elif from_ble == b":M2AC0D00\r": # ALT
                       from_ble = b":T2600000\r"
+            self.read_flush()
             self.uart.write(from_ble)
-            from_uart = self.uart.read()
-            if from_uart:
-              if len(from_uart)>1:
-                if CANCEL_ECHO:
-                  # cancel echo: response starts after first "\r"
-                  from_uart = from_uart[from_uart.find(b"\r")+1:]
-                self.ble.gatts_write(self.tx, from_uart, True)
-                if from_ble == b":e1\r":
-                  self.motorfw = from_uart
+            #from_uart = self.uart.read()
+            if CANCEL_ECHO:
+              self.read_until_cr()
+            from_uart = self.read_until_cr()
+            if len(from_uart)>0:
+              self.ble.gatts_write(self.tx, from_uart, True)
+              if from_ble == b":e1\r":
+                self.motorfw = from_uart
             print(from_ble,from_uart)
             self.led(1)
 

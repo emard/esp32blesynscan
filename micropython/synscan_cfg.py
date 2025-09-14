@@ -6,7 +6,7 @@ if 1:
   PIN_LED=21 # XIAO LED inverse logic
   PIN_TX=43 # 10k/BAT42 to RJ-12 pin 2 yellow
   PIN_RX=44 # direct to RJ-12 pin 4 red
-  TIMEOUT=10 # [ms]
+  TIMEOUT=30 # [ms]
   CANCEL_ECHO=1 # 1 for mini
   SLOW=1 # 5V friendly and quiet
 
@@ -26,7 +26,7 @@ if 0:
   PIN_LED=2 # DevKit LED normal logic
   PIN_TX=17 # 10k/BAT42 to RJ-12 pin 2 yellow
   PIN_RX=16 # direct to RJ-12 pin 4 red
-  TIMEOUT=10 # [ms]
+  TIMEOUT=30 # [ms]
   CANCEL_ECHO=1 # 1 for mini
   SLOW=1 # 5V friendly and quiet
 
