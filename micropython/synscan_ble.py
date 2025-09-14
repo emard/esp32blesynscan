@@ -20,7 +20,9 @@ class BLE():
         dupterm(None,0) # detach micropython console from tx/rx uart
         self.ledpin = Pin(LED_PIN, Pin.OUT)
         self.name = name
-        self.uart = UART(1,baudrate=9600,tx=43,rx=44,timeout=10)
+        self.uart = UART(1,baudrate=9600,tx=43,rx=44,timeout=10) # ESP32S3 virtuoso mini
+        #self.uart = UART(1,baudrate=9600,tx=17,rx=16,timeout=10) # ESP32 virtuoso mini
+        #self.uart = UART(1,baudrate=9600,tx=16,rx=17,timeout=10) # ESP32 virtuoso GTi TX/RX swap
         self.motorfw = None
         self.ble = bluetooth.BLE()
         self.ble.active(True)
