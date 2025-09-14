@@ -36,10 +36,17 @@ connection before 12V pin. Hot-plugging
 can apply 12V to 3.3V pins and risk a
 permanent damage. Avoid hot-plugging.
 
-On the mount RX and TX seem as wired together
-making it a half-duplex serial port.
+On the mount "Virtuoso mini" RX and TX are labeled
+swapped and seems as wired together making it a
+half-duplex serial port and ESP32 should cancel echo.
 ESP32 TX line should "simulate" open collector
-output with a small low drop diode like BAT42.
+output with a resistor 10k and small low drop diode
+BAT42.
+
+On the mount "Virtuoso GTi" RX and TX are labeled
+normal and are not wired together making it a
+full-duplex serial port without echo.
+ESP32 TX line should connect directly to ESP32.
 
 In the mount manual see RJ-12 pinout.
 Conenct RJ-12 RX/TX with short straight
@@ -54,18 +61,18 @@ First prototype (ESP32)
                 │IN        OUT│
                 │12V  GND 3.3V│
                 └─────────────┘
-                  │    │    │          
-                  │    │    ├───────────────┐
-      MOUNT       │    │    │      10k      │   ESP32
-    ┌───────┐     │    │    ░    ┌─░░░░─┐   │  ┌───────┐
-    │    12V│─────┘    │    ░10k │      │   └──│3.3V   │
-    │       │          │    │    │ BAT42│      │       │
-    │     TX│──────────│────│────┴──>∫──┴───┬──│TX2    │
-    │       │          │    │               │  │       │
-    │     RX│──────────│────┼───────────────│──│RX2    │
-    │       │          │ ┌>Z┘            ┌>Z┘  │       │
-    │    GND│──────────┴─┴───────────────┴─────│GND    │
-    └───────┘            3.6V            3.6V  └───────┘
+                  │    │    │
+      MOUNT       │    │    └───────────────┐
+     MINI/GTi     │    │           10k      │   ESP32
+    ┌───────┐     │    │         ┌─░░░░─┐   │  ┌───────┐
+    │    12V│─────┘    │         │      │   └──│3.3V   │
+    │       │          │         │ BAT42│      │       │
+    │     TX│──────────│─────────┼──>∫──┴──────│TX2    │
+    │       │          │         └─────────────│RX1    │
+    │     RX│──────────│───────────────────────│RX2    │
+    │       │          │                       │       │
+    │    GND│──────────┴───────────────────────│GND    │
+    └───────┘                                  └───────┘
 
 Minimal schematic (ESP32S3)
 
@@ -76,17 +83,17 @@ Minimal schematic (ESP32S3)
                 │IN        OUT│
                 └─────────────┘
                   │    │    │
-                  │    │    └─────────┐
-      MOUNT       │    │              │   ESP32S3      
-    ┌───────┐     │    │              │  ┌───────┐      
-    │    12V│─────┘    │      10k     └──│3.3V   │      
-    │       │          │    ┌─░░░░─┐     │       │      
-    │     TX│──────────│────┴──>∫──┴─────│TX     │      
-    │       │          │      BAT43      │       │      
-    │     RX│──────────│─────────────────│RX     │      
-    │       │          │                 │       │      
-    │    GND│──────────┴─────────────────│GND    │      
-    └───────┘                            └───────┘      
+      MOUNT       │    │    └─────────┐
+     MINI/GTi     │    │              │   ESP32S3
+    ┌───────┐     │    │              │  ┌───────┐
+    │    12V│─────┘    │   10k/BAT42  └──│3.3V   │
+    │       │          │    ┌─░░░░─┐     │       │
+    │     TX│──────────│────┼──>∫──┴─────│TX     │
+    │       │          │    └────────────│RX1    │
+    │     RX│──────────│─────────────────│RX     │
+    │       │          │                 │       │
+    │    GND│──────────┴─────────────────│GND    │
+    └───────┘                            └───────┘
 
 part numbers and pinouts
 
@@ -104,9 +111,9 @@ part numbers and pinouts
     front view    front view
 
     1        N.C.
-    2 yellow TX       (3.3V) (esp32 sends)
+    2 yellow TX       (3.3V) (esp32 sends to "mini", receives from "GTi")
     3 green  Vpp+     ( 12V) (esp32 draws power)
-    4 red    RX       (3.3V) (esp32 receives)
+    4 red    RX       (3.3V) (esp32 receives from "mini", sends to "GTi")
     5 black  GND
     6        N.N.
 
@@ -132,7 +139,7 @@ part numbers and pinouts
                 │3        3.3V│
                 │4           9│
                 │5           8│
-                │6           7│
+                │6  RX1      7│
                 │43 TX   RX 44│
                 └─────────────┘
                     top view  
@@ -149,19 +156,28 @@ Looking at female RJ-12 socket on the mount:
        └──┘
 
     1 blue   N.C.
-    2 yellow TX       (3.3V) (mount receives)
+    2 yellow TX       (3.3V) (mount "mini" receives, "GTi" sends)
     3 green  Vpp+     ( 12V) (mount provides power)
-    4 red    RX       (3.3V) (mount sends)
+    4 red    RX       (3.3V) (mount "mini" sends, "GTi" receives)
     5 black  GND
     6 white  Reserved (3.3V)
 
-RX/TX roles on the mount are swapped and
-actually indicate RX/TX on ESP32.
+RX/TX roles on the mount "Virtuoso mini" are swapped and
+actually indicate RX2/TX2 on ESP32.
 
-      mount        ESP32
-    -----------    ----------
-    2 yellow TX    TX2 GPIO17
+    Virtuoso mini  ESP32
+    -------------  ----------
+    2 yellow TX    TX2 GPIO17 (over resistor/diode)
     4 red    RX    RX2 GPIO16
+    5 black  GND   GND
+
+RX/TX roles on the mount "Virtuoso GTi" are labeled normal,
+here we swap TX2/RX2 on ESP32.
+
+    Virtuoso GTi   ESP32
+    ------------   ----------
+    2 yellow TX    RX2 GPIO17 (direct)
+    4 red    RX    TX2 GPIO16
     5 black  GND   GND
 
 RJ-11 4-pin socket can be used instead of
