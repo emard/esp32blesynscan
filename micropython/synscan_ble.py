@@ -8,41 +8,22 @@
 
 from os import dupterm
 from machine import Pin, UART
-from time import sleep
 import bluetooth
+import synscan_cfg
 
-# ESP32S3 Virtuoso Mini
-if 1:
-  LED_PIN=21 # XIAO LED inverse logic
-  PIN_TX=43
-  PIN_RX=44
-  TIMEOUT=10 # [ms]
-  CANCEL_ECHO=1 # 1 for mini
-  SLOW=1 # 5V friendly and quiet
-
-# ESP32 Virtuoso Mini
-if 0:
-  LED_PIN=2
-  PIN_TX=17
-  PIN_RX=16
-  TIMEOUT=10 # [ms]
-  CANCEL_ECHO=1 # 1 for mini
-  SLOW=1 # 5V friendly and quiet
-
-# ESP32 Virtuoso GTi
-if 0:
-  LED_PIN=2 # DevKit LED normal logic
-  PIN_TX=16
-  PIN_RX=17
-  TIMEOUT=30 # [ms]
-  CANCEL_ECHO=0 # 0 for GTi
-  SLOW=0 # 12V fast
+NAME=synscan_cfg.NAME # BLE client name max 14 chars
+PIN_LED=synscan_cfg.PIN_LED # board LED
+PIN_TX=synscan_cfg.PIN_TX # board transmits
+PIN_RX=synscan_cfg.PIN_RX # board receives
+TIMEOUT=synscan_cfg.TIMEOUT # [ms]
+CANCEL_ECHO=synscan_cfg.CANCEL_ECHO # 1:cancel 0:dont
+SLOW=synscan_cfg.SLOW # 1:slow 0:fast
 
 class BLE():
 
     def __init__(self, name):
         dupterm(None,0) # detach micropython console from tx/rx uart
-        self.ledpin = Pin(LED_PIN, Pin.OUT)
+        self.ledpin = Pin(PIN_LED, mode=Pin.OUT)
         self.name = name
         #self.uart = UART(1,baudrate=9600,tx=43,rx=44,timeout=10) # ESP32S3 virtuoso mini
         #self.uart = UART(1,baudrate=9600,tx=17,rx=16,timeout=10) # ESP32 virtuoso mini
@@ -99,18 +80,16 @@ class BLE():
                   elif from_ble == b":M2AC0D00\r": # ALT
                       from_ble = b":T2600000\r"
             self.uart.write(from_ble)
-            #sleep(0.02)
-            for i in range(0,1):
-              from_uart = self.uart.read()
-              if from_uart:
-                if len(from_uart)>1:
+            from_uart = self.uart.read()
+            if from_uart:
+              if len(from_uart)>1:
+                if CANCEL_ECHO:
                   # cancel echo: response starts after first "\r"
-                  if CANCEL_ECHO:
-                    from_uart = from_uart[from_uart.find(b"\r")+1:]
-                  self.ble.gatts_write(self.tx, from_uart, True)
-                  if from_ble == b":e1\r":
-                    self.motorfw = from_uart
-              print(from_ble,from_uart)
+                  from_uart = from_uart[from_uart.find(b"\r")+1:]
+                self.ble.gatts_write(self.tx, from_uart, True)
+                if from_ble == b":e1\r":
+                  self.motorfw = from_uart
+            print(from_ble,from_uart)
             self.led(1)
 
     def register(self):
@@ -145,4 +124,4 @@ class BLE():
         self.ble.gap_advertise(100, advertise_data)
 
 # run
-ble = BLE("synscan_ble.py")
+ble = BLE(NAME)
