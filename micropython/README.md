@@ -24,3 +24,12 @@ connect.
 install
 
     mpremote cp synscan_ble.py main.py :/
+
+# Onboard Editor
+
+ESP32 can run small [VT100 terminal editor](https://github.com/robert-hh/Micropython-Editor)
+
+Automatic install from internet using mpremote mip:
+
+    mpremote mip install github:robert-hh/Micropython-Editor
+    >>> from pye import pye
