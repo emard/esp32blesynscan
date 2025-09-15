@@ -13,11 +13,8 @@ import synscan_cfg
 
 NAME=synscan_cfg.NAME # BLE client name max 14 chars
 PIN_LED=synscan_cfg.PIN_LED # board LED
-PIN_TX=synscan_cfg.PIN_TX # board transmits
-PIN_RX=synscan_cfg.PIN_RX # board receives
-TIMEOUT=synscan_cfg.TIMEOUT # [ms]
-CANCEL_ECHO=synscan_cfg.CANCEL_ECHO # 1:cancel 0:dont
 SLOW=synscan_cfg.SLOW # 1:slow 0:fast
+UART_INIT=synscan_cfg.UART_INIT
 
 class BLE():
 
@@ -27,7 +24,9 @@ class BLE():
         self.name = name
         #self.uart = UART(1,baudrate=9600,tx=43,rx=44,timeout=10) # ESP32S3 virtuoso mini
         #self.uart = UART(1,baudrate=9600,tx=17,rx=16,timeout=10) # ESP32 virtuoso mini
-        self.uart = UART(1,baudrate=9600,tx=PIN_TX,rx=PIN_RX,timeout=TIMEOUT) # ESP32 virtuoso GTi TX/RX swap
+        #self.uart = UART(1,baudrate=9600,tx=PIN_TX,rx=PIN_RX,timeout=TIMEOUT) # ESP32 virtuoso GTi TX/RX swap
+        self.uart_autodetect()
+        self.read_flush()
         self.motorfw = None
         self.ble = bluetooth.BLE()
         self.ble.active(True)
@@ -45,33 +44,37 @@ class BLE():
     def disconnected(self):
         self.led(0)
 
+    def uart_autodetect(self):
+      for j in range(len(UART_INIT)):
+        self.uart = UART_INIT[j]()
+        n = 0
+        for i in range(3):
+          self.read_flush()
+          self.uart.write(b":e1\r")
+          a = self.uart.read()
+          print(a)
+          if a:
+            if a.find(b"=")>=0: # response contains "=" -> uart works
+              n += 1
+              if n >= 2:
+                return
+
     def read_flush(self):
       n=self.uart.any() # chars available
       if n: # read all available and discard
         self.uart.read(n)
 
     # read from "=" to "\r"
-    def read_until_cr(self):
+    def read_eq_cr(self):
       r=b""
       while True:
-        a=self.uart.read(1) # at least 1 char or timeout
+        a=self.uart.read(1) # 1 char or timeout
         if a: # success
-          if CANCEL_ECHO:
-            if a.find(b"=")>=0:
-              r=b"" # reset
+          if a[0]==61: # "="
+            r=b"" # reset
           r+=a # append 1 char
-          if a.find(b"\r")>=0:
+          if r[0]==61 and r[-1]==13: # "=...\r"
             return r
-          n=self.uart.any() # more chars available
-          if n: # more to read
-            a=self.uart.read(n)
-            r+=a
-            if CANCEL_ECHO:
-              n=r.find(b"=")
-              if n>0:
-                r=r[n:] # delete all before "="
-            if a.find(b"\r")>=0:
-              return r
         else: # timeout
           return r
 
@@ -112,9 +115,7 @@ class BLE():
             self.read_flush()
             self.uart.write(from_ble)
             #from_uart = self.uart.read()
-            if CANCEL_ECHO:
-              self.read_until_cr()
-            from_uart = self.read_until_cr()
+            from_uart = self.read_eq_cr()
             if len(from_uart)>0:
               self.ble.gatts_write(self.tx, from_uart, True)
               if from_ble == b":e1\r":
