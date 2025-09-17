@@ -15,6 +15,7 @@ NAME=synscan_cfg.NAME # BLE client name max 14 chars
 PIN_LED=synscan_cfg.PIN_LED # board LED
 SLOW=synscan_cfg.SLOW # 1:slow 0:fast
 UART_INIT=synscan_cfg.UART_INIT
+VIRTUOSO_AZ_ENC_FW_FIX=synscan_cfg.VIRTUOSO_AZ_ENC_FW_FIX
 
 class BLE():
 
@@ -95,7 +96,8 @@ class BLE():
             if self.motorfw == b"=0210A1\r": # Virtuoso Mini
                 # prevent constant azimuth rotation
                 # force always using AZ AUX encoders
-                if from_ble == b":W2050000\r":
+                if VIRTUOSO_AZ_ENC_FW_FIX:
+                  if from_ble == b":W2050000\r":
                     from_ble = b":W2040000\r"
                 if SLOW:
                   # prevent reboots at 5V power
