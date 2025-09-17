@@ -64,7 +64,7 @@ class BLE():
       if n: # read all available and discard
         self.uart.read(n)
 
-    # read from "=" to "\r"
+    # read from "=" or "!" to "\r"
     def read_eq_cr(self):
       r=b""
       while True:
@@ -73,7 +73,7 @@ class BLE():
           if a[0]==61: # "="
             r=b"" # reset
           r+=a # append 1 char
-          if r[0]==61 and r[-1]==13: # "=...\r"
+          if (r[0]==61 or r[0]==33) and r[-1]==13: # "=...\r" or "!..\r"
             return r
         else: # timeout
           return r
@@ -92,7 +92,7 @@ class BLE():
             from_ble = self.ble.gatts_read(self.rx)
             if from_ble == b"AT+CWMODE_CUR?\r\n":
                 from_ble = b":e1\r"
-            if self.motorfw == b"=0210A1\r":
+            if self.motorfw == b"=0210A1\r": # Virtuoso Mini
                 # prevent constant azimuth rotation
                 # force always using AZ AUX encoders
                 if from_ble == b":W2050000\r":
@@ -112,6 +112,22 @@ class BLE():
                       from_ble = b":T1600000\r"
                   elif from_ble == b":M2AC0D00\r": # ALT
                       from_ble = b":T2600000\r"
+            if self.motorfw == b"=0324AF\r": # Virtuoso GTi
+                if SLOW:
+                  # prevent reboots at 5V power
+                  # MANUAL SLEW SPEED
+                  # instead of manual slew 9 use slew 8.5
+                  if from_ble == b":I1C80700\r": # AZ
+                      from_ble = b":I1700000\r"
+                  elif from_ble == b":I2C80700\r": # ALT
+                      from_ble = b":I2700000\r"
+                  # GOTO SLEW SPEED
+                  # M-commands (brake) don't have any effect
+                  # replace them with long goto slew 8.5
+                  elif from_ble == b":M1AC0D00\r": # AZ
+                      from_ble = b":T1700000\r"
+                  elif from_ble == b":M2AC0D00\r": # ALT
+                      from_ble = b":T2700000\r"
             self.read_flush()
             self.uart.write(from_ble)
             #from_uart = self.uart.read()
