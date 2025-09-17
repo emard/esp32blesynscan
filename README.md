@@ -419,9 +419,12 @@ After each connect user must enable "Auxiliary Encoder"
 otherwise mount will start turning around azimuth axis
 and will never stop by itself (user should press cancel to stop).
 
-According to https://www.cloudynights.com/topic/941083-skywatcher-heritage-90-virtuoso-synscan-pro-compatibility/
+According to
+[BDN at Cloudy Nights](https://www.cloudynights.com/topic/941083-skywatcher-heritage-90-virtuoso-synscan-pro-compatibility/)
 this bug can be fixed by making USB-SERIAL adapter and flashing firmware
-"MC006_Tracking_V0216.MCF" firmware from stargazers lounge.
+[MC006_Tracking_V0216.MCF](https://stargazerslounge.com/topic/336944-firmware-for-the-virtuoso-skywatcher/)
+posted by Antoine1997 at Stargazer's Lounge.
+
 Although this firmware also has version 2.16.A1 it
 is different and fixes the encoders problem. Warning
 flashing firmware using WiFi dongle will brick the board and
