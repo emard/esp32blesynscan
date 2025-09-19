@@ -103,17 +103,22 @@ class BLE():
                   # prevent reboots at 5V power
                   # MANUAL SLEW SPEED
                   # instead of manual slew 9 use slew 8.5
+                  # warning main encoder looses counts
+                  # with speeds faster than 6
                   if from_ble == b":I1500000\r": # AZ
                       from_ble = b":I1600000\r"
                   elif from_ble == b":I2500000\r": # ALT
                       from_ble = b":I2600000\r"
                   # GOTO SLEW SPEED
                   # M-commands (brake) don't have any effect
-                  # replace them with long goto slew 8.5
+                  # replace them with slow long goto speed commands
+                  # main AZ  encoders loose counts with < 1C00000
+                  # main ALT encoders loose counts with < 1600000
+                  # auxiliary AZ/ALT encoders can count full speed
                   elif from_ble == b":M1AC0D00\r": # AZ
-                      from_ble = b":T1600000\r"
+                      from_ble = b":T1C00000\r"
                   elif from_ble == b":M2AC0D00\r": # ALT
-                      from_ble = b":T2600000\r"
+                      from_ble = b":T2800000\r"
             if self.motorfw == b"=0324AF\r": # Virtuoso GTi
                 if SLOW:
                   # prevent reboots at 5V power
