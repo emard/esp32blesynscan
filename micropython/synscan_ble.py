@@ -6,6 +6,10 @@
 # from micropython cmdline:
 # import synscan_ble
 
+# TODO different speeds for main and auxiliary encoders
+# on main encoders request: set slow goto speed
+# on auxiliary encoders request: set fast goto speed
+
 from os import dupterm
 from machine import Pin, UART
 import bluetooth
@@ -17,18 +21,22 @@ SLOW=synscan_cfg.SLOW # 1:slow 0:fast
 UART_INIT=synscan_cfg.UART_INIT
 VIRTUOSO_AZ_ENC_FW_FIX=synscan_cfg.VIRTUOSO_AZ_ENC_FW_FIX
 
-class BLE():
+class synscan():
 
+    # name is client name
     def __init__(self, name):
         dupterm(None,0) # detach micropython console from tx/rx uart
         self.ledpin = Pin(PIN_LED, mode=Pin.OUT)
-        self.name = name
+        self.name = name # client name
         #self.uart = UART(1,baudrate=9600,tx=43,rx=44,timeout=10) # ESP32S3 virtuoso mini
         #self.uart = UART(1,baudrate=9600,tx=17,rx=16,timeout=10) # ESP32 virtuoso mini
         #self.uart = UART(1,baudrate=9600,tx=PIN_TX,rx=PIN_RX,timeout=TIMEOUT) # ESP32 virtuoso GTi TX/RX swap
-        self.uart_autodetect()
-        self.read_flush()
+        self.wire_autodetect()
+        self.wire_rx_flush()
         self.motorfw = None
+        self.init_ble()
+
+    def init_ble(self):
         self.ble = bluetooth.BLE()
         self.ble.active(True)
         self.disconnected()
@@ -45,28 +53,30 @@ class BLE():
     def disconnected(self):
         self.led(0)
 
-    def uart_autodetect(self):
+    def wire_autodetect(self):
       for j in range(len(UART_INIT)):
         self.uart = UART_INIT[j]()
-        n = 0
-        for i in range(3):
-          self.read_flush()
-          self.uart.write(b":e1\r")
-          a = self.uart.read()
-          print(a)
-          if a:
-            if a.find(b"=")>=0: # response contains "=" -> uart works
-              n += 1
-              if n >= 2:
-                return
+        n = 0 # count succsesful
+        for i in range(4):
+          self.wire_rx_flush()
+          self.wire_tx(b":e1\r")
+          a = self.wire_rx()
+          # print(a)
+          if len(a): # successful
+            # uart works
+            n += 1
+            if n >= 2: # two successful in a row
+              return
+          else: # not successful
+            n = 0 # reset successful
 
-    def read_flush(self):
+    def wire_rx_flush(self):
       n=self.uart.any() # chars available
       if n: # read all available and discard
         self.uart.read(n)
 
     # read from "=" or "!" to "\r"
-    def read_eq_cr(self):
+    def wire_rx(self):
       r=b""
       while True:
         a=self.uart.read(1) # 1 char or timeout
@@ -79,6 +89,86 @@ class BLE():
         else: # timeout
           return r
 
+    def wire_tx(self,data):
+      self.uart.write(data)
+
+    # return data bytes
+    # data_bytes = air_rx()
+    def air_rx(self):
+      if self.rx: # read from BLE
+        return self.ble.gatts_read(self.rx)
+      else: # read from wifi
+        return b""
+
+    # send data bytes
+    # air_tx(bytes)
+    def air_tx(self,data):
+      if self.tx: # send to BLE
+        self.ble.gatts_write(self.tx, data, True)
+      else: # send to wifi
+        return
+
+    def air_wire_rxtx(self):
+      self.led(0)
+      from_air = self.air_rx()
+      if from_air == b"AT+CWMODE_CUR?\r\n":
+          from_air = b":e1\r"
+      if self.motorfw == b"=0210A1\r": # Virtuoso Mini
+          # if main encoders don't work (firmware bug)
+          # to prevent constant azimuth rotation
+          # force always using auxiliary encoders
+          if VIRTUOSO_AZ_ENC_FW_FIX:
+            if from_air == b":W1050000\r": # request for AZ main encoders
+              from_air = b":W1040000\r"# rewrite as AZ auxiliary encoders
+            if from_air == b":W2050000\r": # requested for ALT main encoders
+              from_air = b":W2040000\r"# rewrite as ALT auxiliary encoders
+          if SLOW:
+            # prevent reboots at 5V power
+            # MANUAL SLEW SPEED
+            # instead of manual slew 9 use slew 8.5
+            # warning main encoder looses counts
+            # with speeds faster than 6
+            if from_air == b":I1500000\r": # AZ
+                from_air = b":I1600000\r"
+            elif from_air == b":I2500000\r": # ALT
+                from_air = b":I2600000\r"
+            # GOTO SLEW SPEED
+            # M-commands (brake) don't have any effect
+            # replace them with slow long goto speed commands
+            # main AZ  encoders loose counts with < 1C00000
+            # main ALT encoders loose counts with < 1600000
+            # auxiliary AZ/ALT encoders can count full speed
+            elif from_air == b":M1AC0D00\r": # AZ
+                from_air = b":T1C00000\r"
+            elif from_air == b":M2AC0D00\r": # ALT
+                from_air = b":T2800000\r"
+      if self.motorfw == b"=0324AF\r": # Virtuoso GTi
+          if SLOW:
+            # prevent reboots at 5V power
+            # MANUAL SLEW SPEED
+            # instead of manual slew 9 use slew 8.5
+            if from_air == b":I1C80700\r": # AZ
+                from_air = b":I1700000\r"
+            elif from_air == b":I2C80700\r": # ALT
+                from_air = b":I2700000\r"
+            # GOTO SLEW SPEED
+            # M-commands (brake) don't have any effect
+            # replace them with long goto slew 8.5
+            elif from_air == b":M1AC0D00\r": # AZ
+                from_air = b":T1700000\r"
+            elif from_air == b":M2AC0D00\r": # ALT
+                from_air = b":T2700000\r"
+      self.wire_rx_flush()
+      self.wire_tx(from_air)
+      #from_wire = self.uart.read()
+      from_wire = self.wire_rx()
+      if len(from_wire)>0:
+        self.air_tx(from_wire)
+        if from_air == b":e1\r":
+          self.motorfw = from_wire
+      print(from_air,from_wire)
+      self.led(1)
+
     def ble_irq(self, event, data):
         if event == 1:
             '''Central disconnected'''
@@ -89,62 +179,7 @@ class BLE():
             self.disconnected()
         elif event == 3:
             '''New message received'''
-            self.led(0)
-            from_ble = self.ble.gatts_read(self.rx)
-            if from_ble == b"AT+CWMODE_CUR?\r\n":
-                from_ble = b":e1\r"
-            if self.motorfw == b"=0210A1\r": # Virtuoso Mini
-                # prevent constant azimuth rotation
-                # force always using AZ AUX encoders
-                if VIRTUOSO_AZ_ENC_FW_FIX:
-                  if from_ble == b":W2050000\r":
-                    from_ble = b":W2040000\r"
-                if SLOW:
-                  # prevent reboots at 5V power
-                  # MANUAL SLEW SPEED
-                  # instead of manual slew 9 use slew 8.5
-                  # warning main encoder looses counts
-                  # with speeds faster than 6
-                  if from_ble == b":I1500000\r": # AZ
-                      from_ble = b":I1600000\r"
-                  elif from_ble == b":I2500000\r": # ALT
-                      from_ble = b":I2600000\r"
-                  # GOTO SLEW SPEED
-                  # M-commands (brake) don't have any effect
-                  # replace them with slow long goto speed commands
-                  # main AZ  encoders loose counts with < 1C00000
-                  # main ALT encoders loose counts with < 1600000
-                  # auxiliary AZ/ALT encoders can count full speed
-                  elif from_ble == b":M1AC0D00\r": # AZ
-                      from_ble = b":T1C00000\r"
-                  elif from_ble == b":M2AC0D00\r": # ALT
-                      from_ble = b":T2800000\r"
-            if self.motorfw == b"=0324AF\r": # Virtuoso GTi
-                if SLOW:
-                  # prevent reboots at 5V power
-                  # MANUAL SLEW SPEED
-                  # instead of manual slew 9 use slew 8.5
-                  if from_ble == b":I1C80700\r": # AZ
-                      from_ble = b":I1700000\r"
-                  elif from_ble == b":I2C80700\r": # ALT
-                      from_ble = b":I2700000\r"
-                  # GOTO SLEW SPEED
-                  # M-commands (brake) don't have any effect
-                  # replace them with long goto slew 8.5
-                  elif from_ble == b":M1AC0D00\r": # AZ
-                      from_ble = b":T1700000\r"
-                  elif from_ble == b":M2AC0D00\r": # ALT
-                      from_ble = b":T2700000\r"
-            self.read_flush()
-            self.uart.write(from_ble)
-            #from_uart = self.uart.read()
-            from_uart = self.read_eq_cr()
-            if len(from_uart)>0:
-              self.ble.gatts_write(self.tx, from_uart, True)
-              if from_ble == b":e1\r":
-                self.motorfw = from_uart
-            print(from_ble,from_uart)
-            self.led(1)
+            self.air_wire_rxtx()
 
     def register(self):
         # Nordic UART Service (NUS)
@@ -178,4 +213,4 @@ class BLE():
         self.ble.gap_advertise(100, advertise_data)
 
 # run
-ble = BLE(NAME)
+synscan = synscan(NAME)
