@@ -23,7 +23,7 @@ connect.
 
 install
 
-    mpremote cp synscan_ble.py main.py :/
+    mpremote cp synscan_cfg.py synscan.py main.py :/
 
 # Onboard Editor
 
