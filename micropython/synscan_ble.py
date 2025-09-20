@@ -19,7 +19,8 @@ NAME=synscan_cfg.NAME # BLE client name max 14 chars
 PIN_LED=synscan_cfg.PIN_LED # board LED
 SLOW=synscan_cfg.SLOW # 1:slow 0:fast
 UART_INIT=synscan_cfg.UART_INIT
-VIRTUOSO_AZ_ENC_FW_FIX=synscan_cfg.VIRTUOSO_AZ_ENC_FW_FIX
+ALWAYS_AUX_ENC=synscan_cfg.ALWAYS_AUX_ENC
+ENC_SPEED_CTRL=synscan_cfg.ENC_SPEED_CTRL
 
 class synscan():
 
@@ -34,6 +35,9 @@ class synscan():
         self.wire_autodetect()
         self.wire_rx_flush()
         self.motorfw = None
+        # defalut slow goto for ENC_SPEED_CTRL=0
+        self.goto_az_speed = b":T1C00000\r"
+        self.goto_alt_speed = b":T2800000\r"
         self.init_ble()
 
     def init_ble(self):
@@ -117,11 +121,20 @@ class synscan():
           # if main encoders don't work (firmware bug)
           # to prevent constant azimuth rotation
           # force always using auxiliary encoders
-          if VIRTUOSO_AZ_ENC_FW_FIX:
-            if from_air == b":W1050000\r": # request for AZ main encoders
-              from_air = b":W1040000\r"# rewrite as AZ auxiliary encoders
-            if from_air == b":W2050000\r": # requested for ALT main encoders
-              from_air = b":W2040000\r"# rewrite as ALT auxiliary encoders
+          if ALWAYS_AUX_ENC:
+            if from_air == b":W1050000\r": # request for AZ main encoder
+              from_air = b":W1040000\r"# rewrite as AZ auxiliary encoder
+            if from_air == b":W2050000\r": # request for ALT main encoder
+              from_air = b":W2040000\r"# rewrite as ALT auxiliary encoder
+          if ENC_SPEED_CTRL:
+            if from_air == b":W1050000\r": # request for AZ main encoder
+              self.goto_az_speed = b":T1C00000\r"
+            if from_air == b":W2050000\r": # request for ALT main encoder
+              self.goto_alt_speed = b":T2800000\r"
+            if from_air == b":W1040000\r": # request for AZ auxiliary encoder
+              self.goto_az_speed = b":T1600000\r"
+            if from_air == b":W2040000\r": # request for ALT auxiliary encoders
+              self.goto_alt_speed = b":T2600000\r"
           if SLOW:
             # prevent reboots at 5V power
             # MANUAL SLEW SPEED
@@ -139,9 +152,9 @@ class synscan():
             # main ALT encoders loose counts with < 1600000
             # auxiliary AZ/ALT encoders can count full speed
             elif from_air == b":M1AC0D00\r": # AZ
-                from_air = b":T1C00000\r"
+                from_air = self.goto_az_speed
             elif from_air == b":M2AC0D00\r": # ALT
-                from_air = b":T2800000\r"
+                from_air = self.goto_alt_speed
       if self.motorfw == b"=0324AF\r": # Virtuoso GTi
           if SLOW:
             # prevent reboots at 5V power
