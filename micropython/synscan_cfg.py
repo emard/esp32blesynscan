@@ -4,7 +4,7 @@ from machine import Pin, UART
 
 # ESP32S3
 if 1:
-  NAME="synscan_ble.py"
+  NAME="synscan.py"
   PIN_LED=21 # XIAO LED inverse logic
   PIN_RJ12_4_RX_RED=44 # direct
   PIN_RJ12_2_TX_YELLOW_RD=43 # over 10k/BAT42
@@ -13,10 +13,11 @@ if 1:
   ALWAYS_AUX_ENC=0 # FW 2.16.A1 after flashing MC006_Tracking_V0216.MCF
   #ALWAYS_AUX_ENC=1 # FW 2.16.A1 before flashing MC006_Tracking_V0216.MCF
   ENC_SPEED_CTRL=1 # main encoders slow goto, auxiliary encoders fast goto
+  BLE=1 # 0:WiFi 1:BLE
 
 # ESP32
 if 0:
-  NAME="synscan_ble.py"
+  NAME="synscan.py"
   PIN_LED=2 # DevKit LED normal logic
   PIN_RJ12_4_RX_RED=16 # direct
   PIN_RJ12_2_TX_YELLOW_RD=17 # over 10k/BAT42 (but not on board)
@@ -24,6 +25,7 @@ if 0:
   SLOW=1 # 5V friendly and quiet
   ALWAYS_AUX_ENC=0 # allow switcing main/auxiliary encoders
   ENC_SPEED_CTRL=0 # same goto speed for main and auxiliary encoders
+  BLE=1 # 0:WiFi 1:BLE
 
 # Virtuoso Mini
 def uart_half_duplex():
