@@ -95,16 +95,16 @@ class synscan():
     # return data bytes
     # data_bytes = air_rx()
     def air_rx(self):
-      if self.rx: # read from BLE
-        return self.ble.gatts_read(self.rx)
+      if self.ble_rx: # read from BLE
+        return self.ble.gatts_read(self.ble_rx)
       else: # read from wifi
         return b""
 
     # send data bytes
     # air_tx(bytes)
     def air_tx(self,data):
-      if self.tx: # send to BLE
-        self.ble.gatts_write(self.tx, data, True)
+      if self.ble_tx: # send to BLE
+        self.ble.gatts_write(self.ble_tx, data, True)
       else: # send to wifi
         return
 
@@ -198,10 +198,7 @@ class synscan():
 
         BLE_UART = (BLE_SERVICE, (BLE_TX, BLE_RX,))
         SERVICES = (BLE_UART, )
-        ((self.tx, self.rx,), ) = self.ble.gatts_register_services(SERVICES)
-
-    #def send(self, data):
-    #    self.ble.gatts_notify(0, self.tx, data)
+        ((self.ble_tx, self.ble_rx,), ) = self.ble.gatts_register_services(SERVICES)
 
     def advertiser(self):
         name = bytearray(self.name, "UTF-8")
