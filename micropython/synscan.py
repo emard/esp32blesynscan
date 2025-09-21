@@ -18,7 +18,7 @@ NAME=synscan_cfg.NAME # BLE client name max 14 chars
 PIN_LED=synscan_cfg.PIN_LED # board LED
 SLOW=synscan_cfg.SLOW # 1:slow 0:fast
 UART_INIT=synscan_cfg.UART_INIT
-ALWAYS_AUX_ENC=synscan_cfg.ALWAYS_AUX_ENC
+FORCE_ENC=synscan_cfg.FORCE_ENC
 ENC_SPEED_CTRL=synscan_cfg.ENC_SPEED_CTRL
 BLE=synscan_cfg.BLE
 
@@ -117,10 +117,12 @@ def wire_txrx(from_air):
   if from_air.startswith(b"AT"):
     from_air = b":e1\r"
   if motorfw == b"=0210A1\r": # Virtuoso Mini
-    # if main encoders don't work (firmware bug)
-    # to prevent constant azimuth rotation
-    # force always using auxiliary encoders
-    if ALWAYS_AUX_ENC:
+    if FORCE_ENC==1: # always main encoders
+      if from_air == b":W1040000\r": # request for AZ auxiliary encoder
+        from_air = b":W1050000\r"# rewrite as AZ main encoder
+      if from_air == b":W2040000\r": # request for ALT auxiliary encoder
+        from_air = b":W2050000\r"# rewrite as ALT main encoder
+    if FORCE_ENC==2: # always auxiliary encoders
       if from_air == b":W1050000\r": # request for AZ main encoder
         from_air = b":W1040000\r"# rewrite as AZ auxiliary encoder
       if from_air == b":W2050000\r": # request for ALT main encoder

@@ -10,10 +10,11 @@ if 1:
   PIN_RJ12_2_TX_YELLOW_RD=43 # over 10k/BAT42
   PIN_RJ12_2_TX_YELLOW=6 # direct
   SLOW=1 # 5V friendly and quiet
-  ALWAYS_AUX_ENC=0 # FW 2.16.A1 after flashing MC006_Tracking_V0216.MCF
-  #ALWAYS_AUX_ENC=1 # FW 2.16.A1 before flashing MC006_Tracking_V0216.MCF
+  FORCE_ENC=0 # 0:main/auxiliary 1:main 2:auxiliary
+  # FW 2.16.A1 after flashing MC006_Tracking_V0216.MCF
+  #FORCE_ENC=2 # FW 2.16.A1 before flashing MC006_Tracking_V0216.MCF
   ENC_SPEED_CTRL=1 # main encoders slow goto, auxiliary encoders fast goto
-  BLE=1 # 0:WiFi 1:BLE
+  BLE=0 # 0:WiFi 1:BLE
 
 # ESP32
 if 0:
@@ -23,7 +24,9 @@ if 0:
   PIN_RJ12_2_TX_YELLOW_RD=17 # over 10k/BAT42 (but not on board)
   PIN_RJ12_2_TX_YELLOW=17 # direct
   SLOW=1 # 5V friendly and quiet
-  ALWAYS_AUX_ENC=0 # allow switcing main/auxiliary encoders
+  FORCE_ENC=0 # 0:main/auxiliary 1:main 2:auxiliary
+  # FW 2.16.A1 after flashing MC006_Tracking_V0216.MCF
+  #FORCE_ENC=2 # FW 2.16.A1 before flashing MC006_Tracking_V0216.MCF
   ENC_SPEED_CTRL=0 # same goto speed for main and auxiliary encoders
   BLE=1 # 0:WiFi 1:BLE
 
