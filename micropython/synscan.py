@@ -60,7 +60,7 @@ def wire_autodetect():
   for j in range(len(UART_INIT)):
     uart = UART_INIT[j]()
     n = 0 # count succsesful
-    for i in range(4):
+    for i in range(3):
       wire_rx_flush()
       wire_tx(b":e1\r")
       a = wire_rx()
@@ -68,10 +68,10 @@ def wire_autodetect():
       if len(a): # successful
         # uart works
         n += 1
-        if n >= 2: # two successful in a row
+        if n >= 2: # two successful
           return
-      else: # not successful
-        n = 0 # reset successful
+      #else: # not successful
+      #  n = 0 # reset successful
 
 def wire_rx_flush():
   n=uart.any() # chars available
@@ -81,7 +81,7 @@ def wire_rx_flush():
 # read from "=" or "!" to "\r"
 def wire_rx():
   r=b""
-  while True:
+  for i in range(32): # limit length to max 32 chars
     a=uart.read(1) # 1 char or timeout
     if a: # success
       if a[0]==61: # "="
@@ -91,6 +91,7 @@ def wire_rx():
         return r
     else: # timeout
       return r
+  return r # return at limited length
 
 def wire_tx(data):
   uart.write(data)
@@ -113,7 +114,7 @@ def air_tx(data):
 
 def wire_txrx(from_air):
   global motorfw, goto_az_speed, goto_alt_speed
-  if from_air == b"AT+CWMODE_CUR?\r\n":
+  if from_air.startswith(b"AT"):
     from_air = b":e1\r"
   if motorfw == b"=0210A1\r": # Virtuoso Mini
     # if main encoders don't work (firmware bug)
@@ -180,8 +181,10 @@ def wire_txrx(from_air):
   return from_wire
 
 def udp_recv(udp):
-  data, source = udp.recvfrom(256)
+  led(0)
+  data, source = udp.recvfrom(32)
   udp.sendto(wire_txrx(data), source)
+  led(1)
 
 def ble_irq(event, data):
   if event == 1:
