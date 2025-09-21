@@ -11,7 +11,7 @@
 # on auxiliary encoders request: set fast goto speed
 
 from os import dupterm
-from machine import Pin, UART
+from machine import Pin, UART, Timer
 import synscan_cfg
 
 NAME=synscan_cfg.NAME # BLE client name max 14 chars
@@ -23,7 +23,7 @@ ENC_SPEED_CTRL=synscan_cfg.ENC_SPEED_CTRL
 BLE=synscan_cfg.BLE
 
 def init_wifi():
-  global ap, udp_socket, ble_tx, ble_rx
+  global ap, udp_socket, ble_tx, ble_rx, led_timer
   ble_tx, ble_rx = None, None
   ap = network.WLAN(network.AP_IF)
   ap.active(True)
@@ -37,9 +37,11 @@ def init_wifi():
   udp_socket.bind(('', 11880))
   _SO_REGISTER_HANDLER = const(20)
   udp_socket.setsockopt(socket.SOL_SOCKET, _SO_REGISTER_HANDLER, udp_recv)
+  led_timer=Timer(0)
+  led_timer.init(mode=Timer.PERIODIC, period=1000, callback=led_wifi)
 
-def led_wifi():
- if ap.isconnected()=True:
+def led_wifi(dummy):
+ if ap.isconnected()==True:
    led(1)
  else:
    led(0)
@@ -74,7 +76,7 @@ def wire_autodetect():
       a = wire_rx()
       # print(a)
       if len(a):
-        if a[0]==33: # begins with "=", successful
+        if a[0]==61: # begins with "=", successful
           # uart works
           n += 1
           if n >= 2: # two successful
@@ -105,22 +107,6 @@ def wire_rx():
 
 def wire_tx(data):
   uart.write(data)
-
-# return data bytes
-# data_bytes = air_rx()
-def air_rx():
-  if ble_rx: # read from BLE
-    return ble.gatts_read(ble_rx)
-  else: # read from wifi
-    return b""
-
-# send data bytes
-# air_tx(bytes)
-def air_tx(data):
-  if ble_tx: # send to BLE
-    ble.gatts_write(ble_tx, data, True)
-  else: # send to wifi
-    return
 
 def wire_txrx(from_air):
   global motorfw, goto_az_speed, goto_alt_speed
@@ -188,7 +174,7 @@ def wire_txrx(from_air):
   from_wire = wire_rx()
   if len(from_wire)>0:
     if from_air == b":e1\r":
-      if from_wire[0]==33: # response should start with "="
+      if from_wire[0]==61: # response should start with "="
         motorfw = from_wire
       else: # uart autodetect retries ":e1\r"
         from_wire = wire_autodetect()
@@ -197,8 +183,11 @@ def wire_txrx(from_air):
 
 def udp_recv(udp):
   led(0)
-  data, source = udp.recvfrom(32)
-  udp.sendto(wire_txrx(data), source)
+  request, source = udp.recvfrom(32)
+  if len(request):
+    response = wire_txrx(request)
+    if len(response):
+      udp.sendto(response, source)
   led(1)
 
 def ble_irq(event, data):
