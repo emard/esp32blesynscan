@@ -176,8 +176,9 @@ def wire_txrx(from_air):
     if from_air == b":e1\r":
       if from_wire[0]==61: # response should start with "="
         motorfw = from_wire
-      else: # uart autodetect retries ":e1\r"
-        from_wire = wire_autodetect()
+      # WiFi mode doesn't like wire_autodetect() here
+      #else: # uart autodetect retries ":e1\r"
+      #  from_wire = wire_autodetect()
   print(from_air,from_wire)
   return from_wire
 
