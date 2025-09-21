@@ -31,11 +31,18 @@ def init_wifi():
   while ap.active() == False:
     pass
   print(ap.ifconfig())
+  # TODO timer irq every 2s call led_wifi()
   udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   udp_socket.bind(('', 11880))
   _SO_REGISTER_HANDLER = const(20)
   udp_socket.setsockopt(socket.SOL_SOCKET, _SO_REGISTER_HANDLER, udp_recv)
+
+def led_wifi():
+ if ap.isconnected()=True:
+   led(1)
+ else:
+   led(0)
 
 def init_ble():
   global ble
@@ -60,18 +67,21 @@ def wire_autodetect():
   for j in range(len(UART_INIT)):
     uart = UART_INIT[j]()
     n = 0 # count succsesful
+    a = b""
     for i in range(3):
       wire_rx_flush()
       wire_tx(b":e1\r")
       a = wire_rx()
       # print(a)
-      if len(a): # successful
-        # uart works
-        n += 1
-        if n >= 2: # two successful
-          return
-      #else: # not successful
-      #  n = 0 # reset successful
+      if len(a):
+        if a[0]==33: # begins with "=", successful
+          # uart works
+          n += 1
+          if n >= 2: # two successful
+            return a
+      #  else: # not successful
+      #    n = 0 # reset successful
+    return a
 
 def wire_rx_flush():
   n=uart.any() # chars available
@@ -178,7 +188,10 @@ def wire_txrx(from_air):
   from_wire = wire_rx()
   if len(from_wire)>0:
     if from_air == b":e1\r":
-      motorfw = from_wire
+      if from_wire[0]==33: # response should start with "="
+        motorfw = from_wire
+      else: # uart autodetect retries ":e1\r"
+        from_wire = wire_autodetect()
   print(from_air,from_wire)
   return from_wire
 
