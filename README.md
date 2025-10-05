@@ -11,6 +11,9 @@ On android it connects but it is unreliable.
 
 # Install
 
+Currently "micropython" directory contains latest developent
+to install continue with README.md there.
+
 "esp32/btblesynscan" supports both Bluetooth
 Classic and Bluetooth Low Energy on ESP32.
 "esp32s3" supports Bluetooth Low Energy on ESP32S3.
