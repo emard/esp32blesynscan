@@ -68,19 +68,19 @@ b":M2AC0D00\r": b":T2001000\r", # ALT brake -> ALT goto speed
 # terrestrial object but they don't, so
 # goto az=180° alt=180° and manually pointing
 # to the same object, experimentally is found that:
-# az=0° alt=0° and az=179°22' alt=176°04' point to the same object, so
-# counts per rev az  should be: 0x0D331A*(179+22/60)/180
-# counts per rev alt should be: 0x0D331A*(176+ 4/60)/180
+# az=0° alt=0° and az=179°17' alt=175°57' point to the same object, so
+# counts per rev az  should be: 0x0D331A*(179+17/60)/180
+# counts per rev alt should be: 0x0D331A*(175+57/60)/180
 
 # for Virtuoso GTi FW 3.36.AF, 3.40.AF
 REPLACE_RESPONSE_GTI={
   b":a1\r": # Inquire counts per revolution of AZ
   {
-    b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(179+22/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
+    b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(179+17/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
   },
   b":a2\r": # Inquire counts per revolution of ALT
   {
-    b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(176+ 4/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
+    b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(175+57/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
   },
 }
 
