@@ -21,6 +21,8 @@ UART_INIT=synscan_cfg.UART_INIT
 FORCE_ENC=synscan_cfg.FORCE_ENC
 ENC_SPEED_CTRL=synscan_cfg.ENC_SPEED_CTRL
 BLE=synscan_cfg.BLE
+CPR_AZ=synscan_cfg.CPR_AZ
+CPR_ALT=synscan_cfg.CPR_ALT
 
 def init_wifi():
   global ap, udp_socket, ble_tx, ble_rx, led_timer
@@ -112,7 +114,7 @@ def wire_txrx(from_air):
   global motorfw, goto_az_speed, goto_alt_speed
   if from_air.startswith(b"AT"):
     from_air = b":e1\r"
-  if motorfw == b"=0210A1\r": # Virtuoso Mini
+  if motorfw == b"=0210A1\r": # Virtuoso Mini 2.16.A1
     if FORCE_ENC==1: # always main encoders
       if from_air == b":W1040000\r": # request for AZ auxiliary encoder
         from_air = b":W1050000\r"# rewrite as AZ main encoder
@@ -152,7 +154,26 @@ def wire_txrx(from_air):
         from_air = goto_az_speed
       elif from_air == b":M2AC0D00\r": # ALT
         from_air = goto_alt_speed
-  if motorfw == b"=0324AF\r": # Virtuoso GTi
+  if motorfw == b"=0324AF\r": # Virtuoso GTi 3.36.AF
+    if FORCE_ENC==1: # always main encoders
+      if from_air == b":W1040000\r": # request for AZ auxiliary encoder
+        from_air = b":W1050000\r"# rewrite as AZ main encoder
+      if from_air == b":W2040000\r": # request for ALT auxiliary encoder
+        from_air = b":W2050000\r"# rewrite as ALT main encoder
+    if FORCE_ENC==2: # always auxiliary encoders
+      if from_air == b":W1050000\r": # request for AZ main encoder
+        from_air = b":W1040000\r"# rewrite as AZ auxiliary encoder
+      if from_air == b":W2050000\r": # request for ALT main encoder
+        from_air = b":W2040000\r"# rewrite as ALT auxiliary encoder
+    #if ENC_SPEED_CTRL:
+    #  if from_air == b":W1050000\r": # request for AZ main encoder
+    #    goto_az_speed = b":H10D5D00\r"
+    #  if from_air == b":W2050000\r": # request for ALT main encoder
+    #    goto_alt_speed = b":H20B5D00\r"
+    #  if from_air == b":W1040000\r": # request for AZ auxiliary encoder
+    #    goto_az_speed = b":H10D5D00\r"
+    #  if from_air == b":W2040000\r": # request for ALT auxiliary encoders
+    #    goto_alt_speed = b":H20B5D00\r"
     if SLOW:
       # prevent reboots at 5V power
       # MANUAL SLEW SPEED
@@ -164,10 +185,10 @@ def wire_txrx(from_air):
       # GOTO SLEW SPEED
       # M-commands (brake) don't have any effect
       # replace them with long goto slew 8.5
-      elif from_air == b":M1AC0D00\r": # AZ
-        from_air = b":T1700000\r"
-      elif from_air == b":M2AC0D00\r": # ALT
-        from_air = b":T2700000\r"
+      #elif from_air == b":H1DD5D00\r": # AZ
+      #  from_air = goto_az_speed
+      #elif from_air == b":H2DB5D00\r": # ALT
+      #  from_air = goto_alt_speed
   wire_rx_flush()
   wire_tx(from_air)
   #from_wire = uart.read()
@@ -179,6 +200,16 @@ def wire_txrx(from_air):
       # WiFi mode doesn't like wire_autodetect() here
       #else: # uart autodetect retries ":e1\r"
       #  from_wire = wire_autodetect()
+    # CPR_AZ = modify response to :a1 - count per revolution of azimuth
+    if CPR_AZ:
+      if from_air == b":a1\r": # Inquire counts per revolution AZ
+        if from_wire[0]==61: # orig response should start with "="
+          from_wire = CPR_AZ
+    # CPR_ALT = modify response to :a2 - count per revolution of altitude
+    if CPR_ALT:
+      if from_air == b":a2\r": # Inquire counts per revolution ALT
+        if from_wire[0]==61: # orig response should start with "="
+          from_wire = CPR_ALT
   print(from_air,from_wire)
   return from_wire
 
