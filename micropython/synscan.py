@@ -77,7 +77,7 @@ def wire_autodetect():
       wire_rx_flush()
       wire_tx(b":e1\r")
       a = wire_rx()
-      # print(a)
+      print(a)
       if len(a):
         if a[0]==61: # begins with "=", successful
           # uart works
@@ -86,7 +86,7 @@ def wire_autodetect():
             return a
       #  else: # not successful
       #    n = 0 # reset successful
-    return a
+  return a
 
 def wire_rx_flush():
   n=uart.any() # chars available
