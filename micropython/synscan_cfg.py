@@ -93,13 +93,15 @@ REPLACE={
 
 # Virtuoso Mini
 def uart_half_duplex():
+  print("trying half duplex")
   Pin(PIN_RJ12_2_TX_YELLOW, mode=Pin.IN, pull=None)
   return UART(1,baudrate=9600,tx=PIN_RJ12_2_TX_YELLOW_RD,rx=PIN_RJ12_4_RX_RED,timeout=30) # Virtuoso Mini
 
 # Virtuoso GTi
 def uart_full_duplex():
+  print("trying full duplex")
   Pin(PIN_RJ12_2_TX_YELLOW_RD, mode=Pin.IN, pull=None)
   return UART(1,baudrate=9600,tx=PIN_RJ12_4_RX_RED,rx=PIN_RJ12_2_TX_YELLOW,timeout=30) # Virtuoso GTi
 
-#UART_INIT = [uart_half_duplex, uart_full_duplex]
-UART_INIT = [uart_full_duplex,uart_half_duplex]
+UART_INIT = [uart_half_duplex, uart_full_duplex]
+#UART_INIT = [uart_full_duplex,uart_half_duplex]
