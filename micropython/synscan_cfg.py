@@ -55,6 +55,9 @@ REPLACE_COMMAND_GTI={
 # force auxiliary encoders
 #b":W1050000\r": b":W1040000\r", # rewrite AZ  main as AZ  auxiliary encoder
 #b":W2050000\r"; b":W2040000\r", # rewrite ALT main as ALT auxiliary encoder
+# SLOW GOTO
+b":M1AC0D00\r": b":T1001000\r", # AZ  brake -> AZ  goto speed
+b":M2AC0D00\r": b":T2001000\r", # ALT brake -> ALT goto speed
 }
 
 # GTi MC014 firmwares 3.36.AF 3.40.AF
@@ -98,5 +101,5 @@ def uart_full_duplex():
   Pin(PIN_RJ12_2_TX_YELLOW_RD, mode=Pin.IN, pull=None)
   return UART(1,baudrate=9600,tx=PIN_RJ12_4_RX_RED,rx=PIN_RJ12_2_TX_YELLOW,timeout=30) # Virtuoso GTi
 
-UART_INIT = [uart_half_duplex, uart_full_duplex]
-#UART_INIT = [uart_full_duplex,uart_half_duplex]
+#UART_INIT = [uart_half_duplex, uart_full_duplex]
+UART_INIT = [uart_full_duplex,uart_half_duplex]
