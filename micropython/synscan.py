@@ -94,7 +94,7 @@ def wire_rx_flush():
 # read from "=" or "!" to "\r"
 def wire_rx():
   r=b""
-  for i in range(32): # limit length to max 32 chars
+  for i in range(256): # limit length to max 256 chars
     a=uart.read(1) # 1 char or timeout
     if a: # success
       if a[0]==61: # "="
