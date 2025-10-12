@@ -164,11 +164,11 @@ b":a2\r": # FW 3.36.AF Inquire counts per revolution of ALT
 },
 b":X10002\r": # FW 3.40.AF Inquire counts per revolution of AZ
 { #                                        --->      <---
-  b"=000D331A\r": b"=%08X\r" % int(0x000D331A*(179+18/60)/180+0.5)
+  b"=000D331A\r": b"=%08X\r" % int(0x000D331A*(179+15/60)/180+0.5)
 },
-b":X20002\r": # FW 3.40.AF Inquire counts per revolution of AZ
+b":X20002\r": # FW 3.40.AF Inquire counts per revolution of ALT
 { #                                        --->      <---
-  b"=000D331A\r": b"=%08X\r" % int(0x000D331A*(175+52/60)/180+0.5)
+  b"=000D331A\r": b"=%08X\r" % int(0x000D331A*(175+59/60)/180+0.5)
 },
 }
 
