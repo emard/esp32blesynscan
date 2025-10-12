@@ -194,6 +194,7 @@ b"AT+GMR\r\n": # At Wifi connect, AT is replaced with b"" for response b""
 # Firmware selects replacement of command/response
 REPLACE={
 b"=0210A1\r": (REPLACE_COMMAND_MINI,        REPLACE_RESPONSE_MINI        ), # FW 2.16.A1
+b"=031AAF\r": (REPLACE_COMMAND_GTI,         REPLACE_RESPONSE_GTI         ), # FW 3.26.AF
 b"=0324AF\r": (REPLACE_COMMAND_GTI,         REPLACE_RESPONSE_GTI         ), # FW 3.36.AF
 b"=0328AF\r": (REPLACE_COMMAND_GTI,         REPLACE_RESPONSE_GTI         ), # FW 3.40.AF
 #b"=0328AF\r": (REPLACE_COMMAND_NONE, REPLACE_RESPONSE_NONE ), # FW 3.40.AF
