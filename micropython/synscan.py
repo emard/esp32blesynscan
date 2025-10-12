@@ -141,7 +141,7 @@ def wire_txrx(from_air):
 
 def udp_recv(udp):
   led(0)
-  request, source = udp.recvfrom(32)
+  request, source = udp.recvfrom(256)
   if len(request):
     response = wire_txrx(request)
     if len(response):
