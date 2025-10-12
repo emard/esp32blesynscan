@@ -72,7 +72,7 @@ b"AT+GMR\r\n": # At Wifi connect, AT is replaced with b"" for response b""
 }
 
 # for Virtuoso GTi FW 3.36.AF, 3.40.AF
-REPLACE_COMMAND_GTI_3_36_AF={
+REPLACE_COMMAND_GTI={
 # at WiFi connect, replace AT commands with b""
 b"AT+CWMODE_CUR?\r\n": b"",
 b"AT+GMR\r\n": b"",
@@ -86,13 +86,25 @@ b"AT+GMR\r\n": b"",
 
 # SLOW: quiet, correct counting, 5V support
 
-# MANUAL SLEW SPEED (larger hex number -> slower)
+# MANUAL SLEW SPEED (FW 3.36.AF larger hex number -> slower)
 b":I19F0A00\r": b":I1EE0C00\r", # AZ  8 -> 7.5
 b":I29F0A00\r": b":I2EE0C00\r", # ALT 8 -> 7.5
 b":I1F70700\r": b":I19F0A00\r", # AZ  9 -> 8
 b":I2F70700\r": b":I29F0A00\r", # ALT 9 -> 8
 
-# GOTO SLEW SPEED (larger hex number -> slower)
+# MANUAL SLEW SPEED (FW 3.40.AF larger hex number -> faster)
+# AZ  7  b':X10200000000003EBF4E\r'
+# ALT 7  b':X20200000000003EBF4E\r'
+# AZ  8  b':X10200000000005E1EF5\r'
+# ALT 8  b':X20200000000005E1EF5\r'
+# AZ  9  b':X10200000000007D7E9C\r'
+# ALT 9  b':X20200000000007D7E9C\r'
+b':X10200000000005E1EF5\r': b':X1020000000000500000\r', # AZ  8 -> 7.5
+b':X20200000000005E1EF5\r': b':X2020000000000500000\r', # ALT 8 -> 7.5
+b':X10200000000007D7E9C\r': b':X10200000000005E1EF5\r', # AZ  9 -> 8
+b':X20200000000007D7E9C\r': b':X20200000000005E1EF5\r', # ALT 9 -> 8
+
+# GOTO SLEW SPEED (FW 3.36.AF larger hex number -> slower)
 # 0.12 RPM slow silent
 #b":M1AC0D00\r": b":T1002000\r", # AZ  brake -> AZ  goto speed
 #b":M2AC0D00\r": b":T2002000\r", # ALT brake -> ALT goto speed
@@ -102,6 +114,8 @@ b":I2F70700\r": b":I29F0A00\r", # ALT 9 -> 8
 # 0.50 RPM fast
 b":M1AC0D00\r": b":T1000800\r", # AZ  brake -> AZ  goto speed
 b":M2AC0D00\r": b":T2000800\r", # ALT brake -> ALT goto speed
+
+# GOTO SLEW SPEED (FW 3.40.AF TODO)
 }
 
 # GTi MC014 firmwares 3.36.AF 3.40.AF
@@ -117,7 +131,7 @@ b":M2AC0D00\r": b":T2000800\r", # ALT brake -> ALT goto speed
 # counts per rev alt should be: 0x0D331A*(175+52/60)/180
 
 # for Virtuoso GTi FW 3.36.AF, 3.40.AF
-REPLACE_RESPONSE_GTI_3_36_AF={
+REPLACE_RESPONSE_GTI={
 # at WiFi connect answer to AT commands
 b"AT+CWMODE_CUR?\r\n": # At Wifi connect, AT is replaced with b"" for response b""
 { # rewrite the response
@@ -128,33 +142,44 @@ b"AT+GMR\r\n": # At Wifi connect, AT is replaced with b"" for response b""
   b"": b"AT version:2.2.0.0-dev(ca41ec4 - ESP32 - Sep 16 2020 11:28:17)\r\nSDK version:v4.0.1-193-ge7ac221b4\r\ncompile time(98b95fc):Oct 29 2020 11:23:25\r\nBin version:2.1.0(MINI-1)\r\n\r\nOK\r\n",
 },
 
-b":e1\r": # Inquire firmware version
-{ # instead of 3.40.AF report 3.36.AF, synscan will not use new X-commands
-  b"=0328AF\r": b"=0324AF\r",
-},
+# replace firmware version (to avoid new X-commands)
 
-b":e2\r": # Inquire firmware version, synscan will not use new X-commands
-{ # instead of 3.40.AF report 3.36.AF
-  b"=0328AF\r": b"=0324AF\r",
-},
+#b":e1\r": # Inquire firmware version
+#{ # instead of 3.40.AF report 3.36.AF, synscan will not use new X-commands
+#  b"=0328AF\r": b"=0324AF\r",
+#},
 
-b":a1\r": # Inquire counts per revolution of AZ
+#b":e2\r": # Inquire firmware version, synscan will not use new X-commands
+#{ # instead of 3.40.AF report 3.36.AF
+#  b"=0328AF\r": b"=0324AF\r",
+#},
+
+b":a1\r": # FW 3.36.AF Inquire counts per revolution of AZ
 { #                                       --->      <---
   b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(179+18/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
 },
-b":a2\r": # Inquire counts per revolution of ALT
+b":a2\r": # FW 3.36.AF Inquire counts per revolution of ALT
 { #                                       --->      <---
   b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(175+52/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
 },
+b":X10002\r": # FW 3.40.AF Inquire counts per revolution of AZ
+{ #                                        --->      <---
+  b"=000D331A\r": b"=%08X\r" % int(0x000D331A*(179+18/60)/180+0.5)
+},
+b":X20002\r": # FW 3.40.AF Inquire counts per revolution of AZ
+{ #                                        --->      <---
+  b"=000D331A\r": b"=%08X\r" % int(0x000D331A*(175+52/60)/180+0.5)
+},
 }
 
-REPLACE_COMMAND_GTI_3_40_AF={
+# transparent for testing 3.40.AF
+REPLACE_COMMAND_NONE={
 # at WiFi connect, replace AT commands with b""
 b"AT+CWMODE_CUR?\r\n": b"",
 b"AT+GMR\r\n": b"",
 }
 
-REPLACE_RESPONSE_GTI_3_40_AF={
+REPLACE_RESPONSE_NONE={
 # at WiFi connect answer to AT commands
 b"AT+CWMODE_CUR?\r\n": # At Wifi connect, AT is replaced with b"" for response b""
 { # rewrite the response
@@ -169,8 +194,9 @@ b"AT+GMR\r\n": # At Wifi connect, AT is replaced with b"" for response b""
 # Firmware selects replacement of command/response
 REPLACE={
 b"=0210A1\r": (REPLACE_COMMAND_MINI,        REPLACE_RESPONSE_MINI        ), # FW 2.16.A1
-b"=0324AF\r": (REPLACE_COMMAND_GTI_3_36_AF, REPLACE_RESPONSE_GTI_3_36_AF ), # FW 3.36.AF
-b"=0328AF\r": (REPLACE_COMMAND_GTI_3_40_AF, REPLACE_RESPONSE_GTI_3_40_AF ), # FW 3.40.AF
+b"=0324AF\r": (REPLACE_COMMAND_GTI,         REPLACE_RESPONSE_GTI         ), # FW 3.36.AF
+b"=0328AF\r": (REPLACE_COMMAND_GTI,         REPLACE_RESPONSE_GTI         ), # FW 3.40.AF
+#b"=0328AF\r": (REPLACE_COMMAND_NONE, REPLACE_RESPONSE_NONE ), # FW 3.40.AF
 }
 
 # Virtuoso Mini
