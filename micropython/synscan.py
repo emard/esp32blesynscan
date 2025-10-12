@@ -16,14 +16,10 @@ import synscan_cfg
 
 NAME=synscan_cfg.NAME # BLE client name max 14 chars
 PIN_LED=synscan_cfg.PIN_LED # board LED
-#SLOW=synscan_cfg.SLOW # 1:slow 0:fast
 UART_INIT=synscan_cfg.UART_INIT
-#FORCE_ENC=synscan_cfg.FORCE_ENC
-#ENC_SPEED_CTRL=synscan_cfg.ENC_SPEED_CTRL
 BLE=synscan_cfg.BLE
-#CPR_AZ=synscan_cfg.CPR_AZ
-#CPR_ALT=synscan_cfg.CPR_ALT
 REPLACE=synscan_cfg.REPLACE
+DEBUG=synscan_cfg.DEBUG
 
 def init_wifi():
   global ap, udp_socket, ble_tx, ble_rx, led_timer
@@ -33,7 +29,8 @@ def init_wifi():
   ap.config(essid=NAME, password="")
   while ap.active() == False:
     pass
-  print(ap.ifconfig())
+  if DEBUG:
+    print(ap.ifconfig())
   # TODO timer irq every 2s call led_wifi()
   udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -77,7 +74,8 @@ def wire_autodetect():
       wire_rx_flush()
       wire_tx(b":e1\r")
       a = wire_rx()
-      print(a)
+      if DEBUG:
+        print(a)
       if len(a):
         if a[0]==61: # begins with "=", successful
           # uart works
@@ -113,30 +111,32 @@ def wire_tx(data):
 
 def wire_txrx(from_air):
   global motorfw, goto_az_speed, goto_alt_speed
-  if from_air.startswith(b"AT"):
-    print(from_air)
-    from_air = b":e1\r"
   if motorfw in REPLACE:
     replace_command, replace_response = REPLACE[motorfw]
   else:
     replace_command, replace_response = {}, {}
   if from_air in replace_command:
-    from_air = replace_command[from_air]
+    from_air_replace = replace_command[from_air]
+  else:
+    from_air_replace = from_air
   wire_rx_flush()
-  wire_tx(from_air)
-  #from_wire = uart.read()
-  from_wire = wire_rx()
+  if len(from_air_replace):
+    wire_tx(from_air_replace)
+    from_wire = wire_rx()
+  else:
+    from_wire = b""
   if len(from_wire)>0:
-    if from_air == b":e1\r":
+    if from_air_replace == b":e1\r":
       if from_wire[0]==61: # response should start with "="
         motorfw = from_wire
       # WiFi mode doesn't like wire_autodetect() here
       #else: # uart autodetect retries ":e1\r"
       #  from_wire = wire_autodetect()
-    if from_air in replace_response:
-      if from_wire in replace_response[from_air]:
-        from_wire = replace_response[from_air][from_wire]
-  print(from_air,from_wire)
+  if from_air in replace_response:
+    if from_wire in replace_response[from_air]:
+      from_wire = replace_response[from_air][from_wire]
+  if DEBUG:
+    print(from_air,from_air_replace,from_wire)
   return from_wire
 
 def udp_recv(udp):
