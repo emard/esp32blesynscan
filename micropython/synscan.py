@@ -114,6 +114,7 @@ def wire_tx(data):
 def wire_txrx(from_air):
   global motorfw, goto_az_speed, goto_alt_speed
   if from_air.startswith(b"AT"):
+    print(from_air)
     from_air = b":e1\r"
   if motorfw in REPLACE:
     replace_command, replace_response = REPLACE[motorfw]
