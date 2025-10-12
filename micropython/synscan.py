@@ -50,6 +50,10 @@ def init_ble():
   global ble
   ble = bluetooth.BLE()
   ble.active(True)
+  # ble.config(mtu=512) # doesn't improve
+  if DEBUG:
+    mac = ble.config('mac')[1].hex().upper()
+    print("BLE MAC:",mac)
   disconnected()
   ble.irq(ble_irq)
   register()
@@ -181,6 +185,7 @@ def register():
   BLE_UART = (BLE_SERVICE, (BLE_TX, BLE_RX,))
   SERVICES = (BLE_UART, )
   ((ble_tx, ble_rx,), ) = ble.gatts_register_services(SERVICES)
+  ble.gatts_set_buffer(ble_rx, 256, True) # rxbuf 256 bytes for X-commands
 
 def advertiser():
   name = bytearray(NAME, "UTF-8")
