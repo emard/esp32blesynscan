@@ -198,9 +198,8 @@ dupterm(None,0) # detach micropython console from tx/rx uart
 #uart = UART(1,baudrate=9600,tx=43,rx=44,timeout=10) # ESP32S3 virtuoso mini
 #uart = UART(1,baudrate=9600,tx=17,rx=16,timeout=10) # ESP32 virtuoso mini
 #uart = UART(1,baudrate=9600,tx=PIN_TX,rx=PIN_RX,timeout=TIMEOUT) # ESP32 virtuoso GTi TX/RX swap
-wire_autodetect()
+motorfw = wire_autodetect()
 wire_rx_flush()
-motorfw = None
 # defalut slow goto for ENC_SPEED_CTRL=0
 goto_az_speed = b":T1C00000\r"
 goto_alt_speed = b":T2800000\r"
