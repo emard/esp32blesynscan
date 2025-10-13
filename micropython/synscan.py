@@ -17,6 +17,7 @@ import synscan_cfg
 NAME=synscan_cfg.NAME # BLE client name max 14 chars
 PIN_LED=synscan_cfg.PIN_LED # board LED
 UART_INIT=synscan_cfg.UART_INIT
+AP_CHANNEL=synscan_cfg.AP_CHANNEL
 BLE=synscan_cfg.BLE
 REPLACE=synscan_cfg.REPLACE
 DEBUG=synscan_cfg.DEBUG
@@ -26,7 +27,7 @@ def init_wifi():
   ble_tx, ble_rx = None, None
   ap = network.WLAN(network.AP_IF)
   ap.active(True)
-  ap.config(essid=NAME, password="")
+  ap.config(channel=AP_CHANNEL, essid=NAME, password="")
   while ap.active() == False:
     pass
   if DEBUG:
