@@ -27,7 +27,7 @@ def init_wifi():
   ble_tx, ble_rx = None, None
   ap = network.WLAN(network.AP_IF)
   ap.active(True)
-  ap.config(channel=AP_CHANNEL, essid=NAME, password="")
+  ap.config(channel=AP_CHANNEL, txpower=17, essid=NAME, password="")
   while ap.active() == False:
     pass
   if DEBUG:
