@@ -11,6 +11,7 @@ if 1:
   PIN_RJ12_2_TX_YELLOW_RD=43 # over 10k/BAT42
   PIN_RJ12_2_TX_YELLOW=6 # direct
   DEBUG=0 # debug prints
+  AP_CHANNEL=11
   BLE=1 # 0:WiFi 1:BLE
 
 # ESP32
@@ -21,6 +22,7 @@ if 0:
   PIN_RJ12_2_TX_YELLOW_RD=17 # over 10k/BAT42 (but not on board)
   PIN_RJ12_2_TX_YELLOW=17 # direct
   DEBUG=0 # debug prints
+  AP_CHANNEL=11
   BLE=1 # 0:WiFi 1:BLE
 
 # for Virtuoso Mini FW 2.16.A1
@@ -144,23 +146,23 @@ b"AT+GMR\r\n": # At Wifi connect, AT is replaced with b"" for response b""
 
 # replace firmware version (to avoid new X-commands)
 
-#b":e1\r": # Inquire firmware version
-#{ # instead of 3.40.AF report 3.36.AF, synscan will not use new X-commands
-#  b"=0328AF\r": b"=0324AF\r",
-#},
+b":e1\r": # Inquire firmware version
+{ # instead of 3.40.AF report 3.36.AF, synscan will not use new X-commands
+  b"=0328AF\r": b"=0324AF\r",
+},
 
-#b":e2\r": # Inquire firmware version, synscan will not use new X-commands
-#{ # instead of 3.40.AF report 3.36.AF
-#  b"=0328AF\r": b"=0324AF\r",
-#},
+b":e2\r": # Inquire firmware version, synscan will not use new X-commands
+{ # instead of 3.40.AF report 3.36.AF
+  b"=0328AF\r": b"=0324AF\r",
+},
 
 b":a1\r": # FW 3.36.AF Inquire counts per revolution of AZ
 { #                                       --->      <---
-  b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(179+18/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
+  b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(179+17/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
 },
 b":a2\r": # FW 3.36.AF Inquire counts per revolution of ALT
 { #                                       --->      <---
-  b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(175+52/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
+  b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(175+46/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
 },
 b":X10002\r": # FW 3.40.AF Inquire counts per revolution of AZ
 { #                                        --->      <---
