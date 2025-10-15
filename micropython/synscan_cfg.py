@@ -144,16 +144,20 @@ b"AT+GMR\r\n": # At Wifi connect, AT is replaced with b"" for response b""
   b"": b"AT version:2.2.0.0-dev(ca41ec4 - ESP32 - Sep 16 2020 11:28:17)\r\nSDK version:v4.0.1-193-ge7ac221b4\r\ncompile time(98b95fc):Oct 29 2020 11:23:25\r\nBin version:2.1.0(MINI-1)\r\n\r\nOK\r\n",
 },
 
-# replace firmware version (to avoid new X-commands)
+# report different firmware version
+# 3.36.AF avoids new X-commands
+# 2.16.A1 has initial E and F commands, aux encoders work
 
 b":e1\r": # Inquire firmware version
-{ # instead of 3.40.AF report 3.36.AF, synscan will not use new X-commands
-  b"=0328AF\r": b"=0324AF\r",
+{ # report different firmware version
+  #b"=0328AF\r": b"=0324AF\r", # 3.40.AF -> 3.36.AF, avoid X
+  b"=0328AF\r": b"=0324AF\r", # 3.40.AF -> 2.16.A1, avoid X and fix aux
 },
 
-b":e2\r": # Inquire firmware version, synscan will not use new X-commands
-{ # instead of 3.40.AF report 3.36.AF
-  b"=0328AF\r": b"=0324AF\r",
+b":e2\r": # Inquire firmware version
+{ # report different firmware version
+  #b"=0328AF\r": b"=0324AF\r", # 3.40.AF -> 3.36.AF, avoid X
+  b"=0328AF\r": b"=0324AF\r", # 3.40.AF -> 2.16.A1, avoid X and fix aux
 },
 
 b":a1\r": # FW 3.36.AF Inquire counts per revolution of AZ
