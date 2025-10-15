@@ -146,18 +146,18 @@ b"AT+GMR\r\n": # At Wifi connect, AT is replaced with b"" for response b""
 
 # report different firmware version
 # 3.36.AF avoid X commands
-# 2.16.A1 avoid X, use E and F, aux encoders work
+# 2.16.A1 avoid X, use E and F
 
 b":e1\r": # Inquire firmware version
 { # report different firmware version
   #b"=0328AF\r": b"=0324AF\r", # 3.40.AF -> 3.36.AF, avoid X
-  b"=0328AF\r": b"=0210A1\r", # 3.40.AF -> 2.16.A1, avoid X and fix aux
+  b"=0328AF\r": b"=0210A1\r", # 3.40.AF -> 2.16.A1, avoid X and use E and F
 },
 
 b":e2\r": # Inquire firmware version
 { # report different firmware version
   #b"=0328AF\r": b"=0324AF\r", # 3.40.AF -> 3.36.AF, avoid X
-  b"=0328AF\r": b"=0210A1\r", # 3.40.AF -> 2.16.A1, avoid X and fix aux
+  b"=0328AF\r": b"=0210A1\r", # 3.40.AF -> 2.16.A1, avoid X and use E and F
 },
 
 b":a1\r": # FW 3.36.AF Inquire counts per revolution of AZ
