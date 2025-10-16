@@ -1,7 +1,7 @@
 # SynScan_BLE Micropython version
 
 The same functionality as arduino but
-written in 100 lines of micropython.
+written in 200 lines of micropython.
 
 It was possible to simplify code logic
 because UART always must send someting
