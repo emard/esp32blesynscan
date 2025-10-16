@@ -33,3 +33,42 @@ Automatic install from internet using mpremote mip:
 
     mpremote mip install github:robert-hh/Micropython-Editor
     >>> from pye import pye
+
+# Troubleshooting
+
+Virtuoso Mini with MC006:
+
+According to
+[BDN at Cloudy Nights](https://www.cloudynights.com/topic/941083-skywatcher-heritage-90-virtuoso-synscan-pro-compatibility/)
+this bug can be fixed by making USB-SERIAL adapter and flashing firmware
+[MC006_Tracking_V0216.MCF](https://stargazerslounge.com/topic/336944-firmware-for-the-virtuoso-skywatcher/)
+posted by Antoine1997 at Stargazer's Lounge.
+
+Virtuoso GTi with MC014:
+
+Flash firmware 3.40.AF but and synscan_cfg.py has
+appropriate fixes, this includes slowing down manual
+and goto slew, adjusting number of pulses per revolution
+and rewriting firmware version to 3.36.AF to avoid using
+of new X-commands.
+
+CPU of MC014 misses encoder pulses, it is probably because
+interrupt is used to count pulses instead of using hardware
+counting like PCNT on ESP32 which may also be available on ESP8266.
+which is mounted on MC014 PCB.
+
+Best is to avoid switching to aux controllers during first 15 minutes,
+while WiFi LED on the mount is blinking.
+After 15 minutes WiFi LED will turn ON constantly, WiFi will be
+off and interrupts will have more chance to catch encoder pulses.
+so then it is good time to try aux encoders.
+
+Encoders will then correctly work when synscan commands are send
+from application to the mount and mount is moving slow according
+to synscan_cfg.py slew speed setup.
+
+But when clutches are released for manually pointing telescope
+aka "Freedom Find" mode then aux controllers will start
+loosing counts and that means that "Freedom Find" actually
+doesn't work for MC014 hardware with currently tried firmwares
+3.36.AF and 3.40.AF.
