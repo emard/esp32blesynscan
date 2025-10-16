@@ -1,14 +1,10 @@
 # micropython >= 1.25
 
 # from linux cmdline:
-# mpremote run synscan_ble.py
+# mpremote run synscan.py
 
 # from micropython cmdline:
-# import synscan_ble
-
-# TODO different speeds for main and auxiliary encoders
-# on main encoders request: set slow goto speed
-# on auxiliary encoders request: set fast goto speed
+# import synscan
 
 from os import dupterm
 from machine import Pin, UART, Timer
@@ -115,7 +111,7 @@ def wire_tx(data):
   uart.write(data)
 
 def wire_txrx(from_air):
-  global motorfw, goto_az_speed, goto_alt_speed
+  global motorfw
   if motorfw in REPLACE:
     replace_command, replace_response = REPLACE[motorfw]
   else:
@@ -201,14 +197,9 @@ def advertiser():
 
 ledpin = Pin(PIN_LED, mode=Pin.OUT)
 dupterm(None,0) # detach micropython console from tx/rx uart
-#uart = UART(1,baudrate=9600,tx=43,rx=44,timeout=10) # ESP32S3 virtuoso mini
-#uart = UART(1,baudrate=9600,tx=17,rx=16,timeout=10) # ESP32 virtuoso mini
-#uart = UART(1,baudrate=9600,tx=PIN_TX,rx=PIN_RX,timeout=TIMEOUT) # ESP32 virtuoso GTi TX/RX swap
 motorfw = wire_autodetect()
 wire_rx_flush()
 # defalut slow goto for ENC_SPEED_CTRL=0
-goto_az_speed = b":T1C00000\r"
-goto_alt_speed = b":T2800000\r"
 if BLE:
   import bluetooth
   init_ble()
