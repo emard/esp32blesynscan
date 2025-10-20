@@ -150,31 +150,35 @@ b"AT+GMR\r\n": # At Wifi connect, AT is replaced with b"" for response b""
 
 b":e1\r": # Inquire firmware version
 { # report different firmware version
-  b"=0328AF\r": b"=0324AF\r", # 3.40.AF -> 3.36.AF, avoid X
+  #b"=0328AF\r": b"=0324AF\r", # 3.40.AF -> 3.36.AF, avoid X
   #b"=0328AF\r": b"=0210A1\r", # 3.40.AF -> 2.16.A1, avoid X and use E and F
 },
 
 b":e2\r": # Inquire firmware version
 { # report different firmware version
-  b"=0328AF\r": b"=0324AF\r", # 3.40.AF -> 3.36.AF, avoid X
+  #b"=0328AF\r": b"=0324AF\r", # 3.40.AF -> 3.36.AF, avoid X
   #b"=0328AF\r": b"=0210A1\r", # 3.40.AF -> 2.16.A1, avoid X and use E and F
 },
 
+# fine tuning counts per revolution
+# 10 mm eyepiece, center object to (0, 0), thighten AZ/ALT axis
+# goto (180, 180), edit target to re-center: (180 0, 180 3)
+# next_tuning = current_tuning + re_center - (180,180)
 b":a1\r": # FW 3.36.AF Inquire counts per revolution of AZ
 { #                                       --->      <---
-  b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(179+17/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
+  b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(179+6/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
 },
 b":a2\r": # FW 3.36.AF Inquire counts per revolution of ALT
 { #                                       --->      <---
-  b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(175+46/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
+  b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(175+54/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
 },
 b":X10002\r": # FW 3.40.AF Inquire counts per revolution of AZ
 { #                                        --->      <---
-  b"=000D331A\r": b"=%08X\r" % int(0x000D331A*(179+15/60)/180+0.5)
+  b"=000D331A\r": b"=%08X\r" % int(0x000D331A*(179+6/60)/180+0.5)
 },
 b":X20002\r": # FW 3.40.AF Inquire counts per revolution of ALT
 { #                                        --->      <---
-  b"=000D331A\r": b"=%08X\r" % int(0x000D331A*(175+59/60)/180+0.5)
+  b"=000D331A\r": b"=%08X\r" % int(0x000D331A*(175+54/60)/180+0.5)
 },
 }
 
