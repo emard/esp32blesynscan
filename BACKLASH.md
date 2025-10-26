@@ -26,10 +26,11 @@ big screws while being very gentle with wires.
 With long flat screwdriver release the big cylindrical
 flat screw by turning 180° counter-clockwise.
 On the picture this flat screw is marked by red circle.
-There is a smaller black screw touching the big screw,
-this screw has hex hole for 2 mm Allen wrench and is fixed
-in place by counter-tightened 7 mm nut which is additionaly
-fixed with lacquer.
+
+Not visible on the picture is a smaller black screw
+touching the big screw, this screw has hex hole for
+2 mm Allen wrench and is fixed in place by counter-tightened
+7 mm nut which is additionaly fixed with lacquer.
 
 With Hex Fork wrench and Hex Allen wrench break the
 lacquer and release hex nut to allow some space for
