@@ -5,9 +5,9 @@ in motor tranmission which visually manifests as
 telescope first goes a few arc minutes in counter
 direction than it goes in correct direction.
 
-Backlash can be reduced to almost visually unnoticealby
-by precisely adjusting distance between worm and
-sprocket wheel.
+Backlash can be reduced to be almost visually
+unnoticeable by precisely adjusting distance
+between worm and sprocket wheel.
 
 Tools required:
 
@@ -18,30 +18,32 @@ Tools required:
 
 ![backlash](/pic/motor-worm-backlash-adjustment.jpg)
 
-Backlash can be adjusted with minimal disassembly,
-no wires need to be removed but hood has to be released
-carefully being very gentle with wires.
+Backlash can be adjusted by minimal disassembly,
+no wires need to be removed but hood has to be
+released carefully and held by hands while unscrewing
+big screws while being very gentle with wires.
 
-With long flat screwdriver release by turning 180°
-counter-clockwise a big cylindric flat metallic screw,
-on the picture marked by red circle. There is a smaller
-black screw touching this big screw, this screw has hex
-hole for Allen wrench and is fixed in place by
-counter-tightened nut which is additionaly fixed
-with lacquer.
+With long flat screwdriver release the big cylindrical
+flat screw by turning 180° counter-clockwise.
+On the picture this flat screw is marked by red circle.
+There is a smaller black screw touching the big screw,
+this screw has hex hole for 2 mm Allen wrench and is fixed
+in place by counter-tightened 7 mm nut which is additionaly
+fixed with lacquer.
 
 With Hex Fork wrench and Hex Allen wrench break the
-lackquer and release hex nut to allow some space for
-adjustment like 1 mm.
+lacquer and release hex nut to allow some space for
+adjustment, like 1 mm.
 
-Partially assemble the mount to leave hood open and
-to have all the rest parts in place to hold the telescope
-tube, launch synscan software, set software backlash
+Partially assemble the mount to leave hood open for
+access with Hex Allen wrench and to have neccesary
+parts in place to hold the telescope tube. Launch
+motor control software, set software backlash
 correction to zero and use cursors to move telescope
-by Visually monitoring backlash.
+by visually monitoring backlash.
 
 Change distance of the worm from sprocket wheel
-with turning the black screw with Hex Allen wrench
+by turning the black screw with Hex Allen wrench
 until backlash disappears.
 
 That,s it! After carefully tightening and assembling
