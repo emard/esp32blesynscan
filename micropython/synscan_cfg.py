@@ -5,18 +5,20 @@ from struct import pack
 
 # ESP32S3
 if 1:
-  NAME="synscan.py"
+  NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
+  PASS="" # for WiFi
   PIN_LED=21 # XIAO LED inverse logic
   PIN_RJ12_4_RX_RED=44 # direct
   PIN_RJ12_2_TX_YELLOW_RD=43 # over 10k/BAT42
   PIN_RJ12_2_TX_YELLOW=6 # direct
   DEBUG=0 # debug prints
-  AP_CHANNEL=10
+  AP_CHANNEL=10 # 0 for client, >0 for ap
   BLE=1 # 0:WiFi 1:BLE
 
 # ESP32
 if 0:
-  NAME="synscan.py"
+  NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
+  PASS="" # for WiFi
   PIN_LED=2 # DevKit LED normal logic
   PIN_RJ12_4_RX_RED=16 # direct
   PIN_RJ12_2_TX_YELLOW_RD=17 # over 10k/BAT42 (but not on board)

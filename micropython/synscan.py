@@ -11,6 +11,7 @@ from machine import Pin, UART, Timer
 import synscan_cfg
 
 NAME=synscan_cfg.NAME # BLE client name max 14 chars
+PASS=synscan_cfg.PASS # Wifi password min 8 chars
 PIN_LED=synscan_cfg.PIN_LED # board LED
 UART_INIT=synscan_cfg.UART_INIT
 AP_CHANNEL=synscan_cfg.AP_CHANNEL
@@ -19,16 +20,22 @@ REPLACE=synscan_cfg.REPLACE
 DEBUG=synscan_cfg.DEBUG
 
 def init_wifi():
-  global ap, udp_socket, ble_tx, ble_rx, led_timer
+  global wifi, udp_socket, ble_tx, ble_rx, led_timer
   ble_tx, ble_rx = None, None
-  ap = network.WLAN(network.AP_IF)
-  ap.active(True)
-  ap.config(channel=AP_CHANNEL, txpower=17, essid=NAME, password="")
-  while ap.active() == False:
+  if AP_CHANNEL:
+    wifi = network.WLAN(network.AP_IF)
+    wifi.active(False)
+    wifi.active(True)
+    wifi.config(channel=AP_CHANNEL, txpower=17, essid=NAME, password=PASS)
+  else:
+    wifi = network.WLAN(network.STA_IF)
+    wifi.active(False)
+    wifi.active(True)
+    wifi.connect(NAME, PASS)
+  while wifi.active() == False:
     pass
   if DEBUG:
-    print(ap.ifconfig())
-  # TODO timer irq every 2s call led_wifi()
+    print(wifi.ifconfig())
   udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   udp_socket.bind(('', 11880))
@@ -38,10 +45,16 @@ def init_wifi():
   led_timer.init(mode=Timer.PERIODIC, period=1000, callback=led_wifi)
 
 def led_wifi(dummy):
- if ap.isconnected()==True:
+ global wifi_connected
+ if wifi.isconnected()==True:
    led(1)
+   if(wifi_connected==False):
+     if DEBUG:
+       print(wifi.ifconfig())
+   wifi_connected=True
  else:
    led(0)
+   wifi_connected=False
 
 def init_ble():
   global ble
