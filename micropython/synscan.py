@@ -27,6 +27,8 @@ def init_wifi():
     wifi.active(False)
     wifi.active(True)
     wifi.config(channel=AP_CHANNEL, txpower=17, essid=NAME, password=PASS)
+    if DEBUG:
+      print(wifi.ifconfig())
   else:
     wifi = network.WLAN(network.STA_IF)
     wifi.active(False)
@@ -34,8 +36,6 @@ def init_wifi():
     wifi.connect(NAME, PASS)
   while wifi.active() == False:
     pass
-  if DEBUG:
-    print(wifi.ifconfig())
   udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   udp_socket.bind(('', 11880))
