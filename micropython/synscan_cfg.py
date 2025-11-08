@@ -24,7 +24,7 @@ if 0:
   PIN_RJ12_2_TX_YELLOW_RD=17 # over 10k/BAT42 (but not on board)
   PIN_RJ12_2_TX_YELLOW=17 # direct
   DEBUG=0 # debug prints
-  AP_CHANNEL=10
+  AP_CHANNEL=10 # 0 for client, >0 for ap
   BLE=1 # 0:WiFi 1:BLE
 
 # for Virtuoso Mini FW 2.16.A1
