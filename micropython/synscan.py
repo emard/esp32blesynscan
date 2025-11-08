@@ -160,7 +160,11 @@ def ble_irq(event, data):
   elif event == 3:
     '''New message received'''
     led(0)
+    # method 1 ("True" to notify, faster than method 2)
     ble.gatts_write(ble_tx, wire_txrx(ble.gatts_read(ble_rx)), True)
+    # method 2 (explicitely notify, slower than method 1)
+    #conn_handle,_=data
+    #ble.gatts_notify(conn_handle, ble_tx, wire_txrx(ble.gatts_read(ble_rx)))
     led(1)
 
 def register():
