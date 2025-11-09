@@ -284,7 +284,7 @@ class BLESimpleCentral:
         self._notify_callback = callback
 
 
-def demo():
+def run():
     ble = bluetooth.BLE()
     central = BLESimpleCentral(ble)
 
@@ -318,18 +318,15 @@ def demo():
 
     i = 0
     while central.is_connected():
-        try:
-            v = b":e" + str(1+(i&1)) + b"\r"
-            print("TX", v)
-            central.write(v, with_response)
-        except:
-            print("TX failed")
+        v = b":e" + str(1+(i&1)) + b"\r"
+        print("TX", v)
+        central.write(v, with_response)
         time.sleep_ms(2000 if with_response else 1000)
         #print("RX:", central.read())
         i += 1
 
     print("Disconnected")
 
-demo()
+run()
 #if __name__ == "__main__":
-#    demo()
+#    run()
