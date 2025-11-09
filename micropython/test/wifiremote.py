@@ -1,9 +1,15 @@
 # This example as wifi client
 # connects to remote synscan wifi access point
 
-# FIXME
+# ESP32S3 SPIRAM FIXME
 # connection to PC AP is unreliable, significant ping packet loss
 # no connection to SynScan
+
+# ESP32C3 WORKS
+# connection to SynScan OK
+# >>> wifiremote.udp_send(b":e1\r")
+# b':e1\r' ('192.168.4.1', 11880)
+# >>> b'=0328AF\r'
 
 import os
 from machine import Pin, Timer
@@ -28,6 +34,8 @@ def init_wifi_client():
   print("starting client")
   wifi = network.WLAN(network.STA_IF)
   wifi.active(False)
+  while wifi.active() == True:
+    pass
   wifi.active(True)
   while wifi.active() == False:
     pass
