@@ -1,10 +1,11 @@
 # This example as wifi client
-# should connects to remote synscan wifi access point
-# actually it doesn't connect, something's not working
+# connects to remote synscan wifi access point
 
-# FIXME no reply
+# FIXME
+# connection to PC AP is unreliable, significant ping packet loss
+# no connection to SynScan
 
-from os import dupterm
+import os
 from machine import Pin, Timer
 from time import sleep
 import network
@@ -14,10 +15,10 @@ ledpin = Pin(21, mode=Pin.OUT)
 NAME="SynScan_1234"
 PASS=""
 DEBUG=1
-ip_address = "192.168.4.2"
+ip_address = "192.168.48.171"
 subnet = "255.255.255.0"
-gateway = "192.168.4.1"
-dns = "192.168.4.1"
+gateway = "192.168.48.254"
+dns = "192.168.48.254"
 
 wifi_connected = False
 
@@ -28,11 +29,11 @@ def init_wifi_client():
   wifi = network.WLAN(network.STA_IF)
   wifi.active(False)
   wifi.active(True)
-  print("connecting to", NAME, PASS)
-  wifi.connect(NAME, PASS)
   while wifi.active() == False:
     pass
-  # wifi.ifconfig((ip_address, subnet, gateway, dns))
+  print("connecting to", NAME, PASS)
+  wifi.connect(NAME, PASS)
+  wifi.ifconfig()
   udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   udp_socket.bind(('', 11880))
@@ -77,5 +78,6 @@ def run():
 
 run()
 # sending ":e1\r"
+print(os.uname())
 print("wifiremote.udp_send(b\":e1\\r\")")
 # should reply with b'=0324AF\r'
