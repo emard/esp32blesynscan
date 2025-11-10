@@ -19,7 +19,9 @@ BLE=synscan_cfg.BLE
 REPLACE=synscan_cfg.REPLACE
 DEBUG=synscan_cfg.DEBUG
 MOTOR_SERVER=synscan_cfg.MOTOR_SERVER # for USB dongle
-LOG=0
+
+LOG=b"" # no log
+#LOG=b" " # accumulate log in synscan.LOG
 
 def init_wifi():
   global wifi, udp_socket, ble_tx, ble_rx, led_timer
@@ -101,7 +103,7 @@ def wire_autodetect():
       a = wire_rx()
       if DEBUG:
         print(a)
-      if len(a):
+      if a:
         if a[0]==61: # begins with "=", successful
           # uart works
           n += 1
@@ -134,13 +136,16 @@ def wire_rx():
 def wire_tx(data):
   uart.write(data)
 
-def replace_from_synscan(from_synscan):
-  global from_synscan_orig, from_synscan_replace, replace_command, replace_response
-  from_synscan_orig=from_synscan
+def motorfw_select_replace():
+  global replace_command, replace_response
   if motorfw in REPLACE:
     replace_command, replace_response = REPLACE[motorfw]
   else:
     replace_command, replace_response = {}, {}
+
+def replace_from_synscan(from_synscan):
+  global from_synscan_orig, from_synscan_replace
+  from_synscan_orig=from_synscan
   if from_synscan in replace_command:
     from_synscan_replace = replace_command[from_synscan]
   else:
@@ -149,10 +154,11 @@ def replace_from_synscan(from_synscan):
 
 def replace_from_motor(from_motor):
   global motorfw
-  if len(from_motor)>0:
+  if from_motor:
     if from_synscan_replace == b":e1\r":
       if from_motor[0]==61: # response should start with "="
         motorfw = from_motor
+        motorfw_select_replace()
       # WiFi mode doesn't like wire_autodetect() here
       #else: # uart autodetect retries ":e1\r"
       #  from_motor = wire_autodetect()
@@ -162,7 +168,7 @@ def replace_from_motor(from_motor):
   return from_motor
 
 def wire_txrx(from_synscan):
-  if len(from_synscan):
+  if from_synscan:
     wire_rx_flush()
     wire_tx(from_synscan)
     from_motor = wire_rx()
@@ -176,9 +182,9 @@ def wire_txrx_replace(from_synscan):
 def udp_server_recv(udp):
   led(0)
   request, source = udp.recvfrom(256)
-  if len(request):
+  if request:
     response = wire_txrx_replace(request)
-    if len(response):
+    if response:
       udp.sendto(response, source)
   led(1)
 
@@ -186,7 +192,7 @@ def udp_client_recv(udp):
   led(0)
   response, source = udp.recvfrom(256)
   response = replace_from_motor(response)
-  if len(response):
+  if response:
     print(response.decode("ASCII"),end="")
   led(1)
 
@@ -241,12 +247,12 @@ def advertiser():
   ble.gap_advertise(100, advertise_data)
 
 def usbclient():
-  global log
+  global LOG
   while 1:
     request=input("").encode("ASCII")
     if LOG:
-      log+=request
-    if len(request):
+      LOG+=request
+    if request:
       if gateway:
         request=replace_from_synscan(request+b"\r")
         udp_socket.sendto(request,(gateway,11880))
@@ -254,8 +260,9 @@ def usbclient():
 ledpin=Pin(PIN_LED, mode=Pin.OUT)
 dupterm(None,0) # detach micropython console from tx/rx uart
 motorfw=wire_autodetect()
+motorfw_select_replace()
 gateway=None
-log=b""
+
 wire_rx_flush()
 # defalut slow goto for ENC_SPEED_CTRL=0
 if BLE:
@@ -267,5 +274,7 @@ else:
   init_wifi()
   if MOTOR_SERVER: # motor present
     init_udp_server()
-  else:
+  else: # motor absent
     init_udp_client()
+    usbclient()
+    # Synscan > Settings > Connection Settings > Read Timeout (ms) > 2200 or higher like 3000
