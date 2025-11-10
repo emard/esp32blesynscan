@@ -15,7 +15,8 @@ from machine import Pin, Timer
 import network
 import socket
 
-ledpin = Pin(21, mode=Pin.OUT)
+#ledpin = Pin(2, mode=Pin.OUT) # esp32
+ledpin = Pin(21, mode=Pin.OUT) # esp32s3
 NAME="SynScan_1234" # connect to this AP name
 PASS="" # this password
 
