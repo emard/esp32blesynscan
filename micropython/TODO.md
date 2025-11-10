@@ -9,5 +9,5 @@
     [ ] wifi client, log udp traffic to find what is problem
     [ ] W10D8004: W20D8004: are motor power off commands
         no answer to :f1
-    [ ] works if timeout set to 5000 ms
+    [ ] works if timeout set to 2200 ms or higher
     [ ] usbserial resets esp32c3
