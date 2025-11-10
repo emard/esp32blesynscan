@@ -4,7 +4,8 @@ from machine import Pin, UART
 from struct import pack
 
 # ESP32S3
-if 0:
+if 1:
+  # for android provides BLE synscan (Bluetooth Low Energy)
   NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
   PASS="" # for WiFi
   PIN_LED=21 # XIAO LED inverse logic
@@ -17,7 +18,10 @@ if 0:
   BLE=1 # 0:WiFi 1:BLE
 
 # ESP32C3
-if 1:
+if 0:
+  # for linux
+  # connects to motor using wifi
+  # provides simple usb-serial port to the PC
   NAME="SynScan_3538" # BLE/WiFi visible name or Wifi user name
   PASS="" # for WiFi
   PIN_LED=10 # external LED on +3.3V (inverse logic)
@@ -156,15 +160,7 @@ b"AT+CWMODE_CUR?\r\n": # At Wifi connect, AT is replaced with b"" for response b
 { # rewrite the response
   b"": b"+CWMODE_CUR:2\r\n\r\nOK\r\n", # 1:station, 2:ap, 3:ap+station
 },
-b"AT+CWMODE_CUR?\r": # At Wifi connect, AT is replaced with b"" for response b""
-{ # rewrite the response
-  b"": b"+CWMODE_CUR:2\r\n\r\nOK\r\n", # 1:station, 2:ap, 3:ap+station
-},
 b"AT+GMR\r\n": # At Wifi connect, AT is replaced with b"" for response b""
-{ # rewrite the response
-  b"": b"AT version:2.2.0.0-dev(ca41ec4 - ESP32 - Sep 16 2020 11:28:17)\r\nSDK version:v4.0.1-193-ge7ac221b4\r\ncompile time(98b95fc):Oct 29 2020 11:23:25\r\nBin version:2.1.0(MINI-1)\r\n\r\nOK\r\n",
-},
-b"AT+GMR\r": # At Wifi connect, AT is replaced with b"" for response b""
 { # rewrite the response
   b"": b"AT version:2.2.0.0-dev(ca41ec4 - ESP32 - Sep 16 2020 11:28:17)\r\nSDK version:v4.0.1-193-ge7ac221b4\r\ncompile time(98b95fc):Oct 29 2020 11:23:25\r\nBin version:2.1.0(MINI-1)\r\n\r\nOK\r\n",
 },
@@ -226,7 +222,7 @@ b"AT+GMR\r\n": # At Wifi connect, AT is replaced with b"" for response b""
 },
 }
 
-# Firmware selects replacement of command/response
+# Firmware version reported by motor selects replacement of command/response
 REPLACE={
 b"=0210A1\r": (REPLACE_COMMAND_MINI,        REPLACE_RESPONSE_MINI        ), # FW 2.16.A1
 b"=031AAF\r": (REPLACE_COMMAND_GTI,         REPLACE_RESPONSE_GTI         ), # FW 3.26.AF
