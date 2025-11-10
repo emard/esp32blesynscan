@@ -4,7 +4,7 @@ from machine import Pin, UART
 from struct import pack
 
 # ESP32S3
-if 1:
+if 0:
   NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
   PASS="" # for WiFi
   PIN_LED=21 # XIAO LED inverse logic
@@ -13,7 +13,21 @@ if 1:
   PIN_RJ12_2_TX_YELLOW=6 # direct
   DEBUG=0 # debug prints
   AP_CHANNEL=10 # 0 for client, >0 for ap
+  MOTOR_SERVER=1 # 1:server 0:client (usb dongle)
   BLE=1 # 0:WiFi 1:BLE
+
+# ESP32C3
+if 1:
+  NAME="SynScan_3538" # BLE/WiFi visible name or Wifi user name
+  PASS="" # for WiFi
+  PIN_LED=10 # external LED on +3.3V (inverse logic)
+  PIN_RJ12_4_RX_RED=20 # direct
+  PIN_RJ12_2_TX_YELLOW_RD=21 # over 10k/BAT42
+  PIN_RJ12_2_TX_YELLOW=7 # direct
+  DEBUG=0 # debug prints
+  AP_CHANNEL=0 # 0 for client, >0 for ap
+  MOTOR_SERVER=0 # 1:server 0:client (usb dongle)
+  BLE=0 # 0:WiFi 1:BLE
 
 # ESP32
 if 0:
@@ -25,6 +39,7 @@ if 0:
   PIN_RJ12_2_TX_YELLOW=17 # direct
   DEBUG=0 # debug prints
   AP_CHANNEL=10 # 0 for client, >0 for ap
+  MOTOR_SERVER=1 # 1:server 0:client (usb dongle)
   BLE=1 # 0:WiFi 1:BLE
 
 # for Virtuoso Mini FW 2.16.A1
@@ -141,7 +156,15 @@ b"AT+CWMODE_CUR?\r\n": # At Wifi connect, AT is replaced with b"" for response b
 { # rewrite the response
   b"": b"+CWMODE_CUR:2\r\n\r\nOK\r\n", # 1:station, 2:ap, 3:ap+station
 },
+b"AT+CWMODE_CUR?\r": # At Wifi connect, AT is replaced with b"" for response b""
+{ # rewrite the response
+  b"": b"+CWMODE_CUR:2\r\n\r\nOK\r\n", # 1:station, 2:ap, 3:ap+station
+},
 b"AT+GMR\r\n": # At Wifi connect, AT is replaced with b"" for response b""
+{ # rewrite the response
+  b"": b"AT version:2.2.0.0-dev(ca41ec4 - ESP32 - Sep 16 2020 11:28:17)\r\nSDK version:v4.0.1-193-ge7ac221b4\r\ncompile time(98b95fc):Oct 29 2020 11:23:25\r\nBin version:2.1.0(MINI-1)\r\n\r\nOK\r\n",
+},
+b"AT+GMR\r": # At Wifi connect, AT is replaced with b"" for response b""
 { # rewrite the response
   b"": b"AT version:2.2.0.0-dev(ca41ec4 - ESP32 - Sep 16 2020 11:28:17)\r\nSDK version:v4.0.1-193-ge7ac221b4\r\ncompile time(98b95fc):Oct 29 2020 11:23:25\r\nBin version:2.1.0(MINI-1)\r\n\r\nOK\r\n",
 },
