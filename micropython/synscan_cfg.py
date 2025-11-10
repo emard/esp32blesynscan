@@ -19,9 +19,8 @@ if 1:
 
 # ESP32C3
 if 0:
-  # for linux
+  # for linux provides usb-serial port
   # connects to motor using wifi
-  # provides simple usb-serial port to the PC
   NAME="SynScan_3538" # BLE/WiFi visible name or Wifi user name
   PASS="" # for WiFi
   PIN_LED=10 # external LED on +3.3V (inverse logic)
