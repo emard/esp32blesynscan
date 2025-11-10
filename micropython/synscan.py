@@ -19,6 +19,7 @@ BLE=synscan_cfg.BLE
 REPLACE=synscan_cfg.REPLACE
 DEBUG=synscan_cfg.DEBUG
 MOTOR_SERVER=synscan_cfg.MOTOR_SERVER # for USB dongle
+LOG=0
 
 def init_wifi():
   global wifi, udp_socket, ble_tx, ble_rx, led_timer
@@ -172,36 +173,6 @@ def wire_txrx(from_synscan):
 def wire_txrx_replace(from_synscan):
   return replace_from_motor(wire_txrx(replace_from_synscan(from_synscan)))
 
-def wire_txrx_old(from_air):
-  global motorfw
-  if motorfw in REPLACE:
-    replace_command, replace_response = REPLACE[motorfw]
-  else:
-    replace_command, replace_response = {}, {}
-  if from_air in replace_command:
-    from_air_replace = replace_command[from_air]
-  else:
-    from_air_replace = from_air
-  wire_rx_flush()
-  if len(from_air_replace):
-    wire_tx(from_air_replace)
-    from_wire = wire_rx()
-  else:
-    from_wire = b""
-  if len(from_wire)>0:
-    if from_air_replace == b":e1\r":
-      if from_wire[0]==61: # response should start with "="
-        motorfw = from_wire
-      # WiFi mode doesn't like wire_autodetect() here
-      #else: # uart autodetect retries ":e1\r"
-      #  from_wire = wire_autodetect()
-  if from_air in replace_response:
-    if from_wire in replace_response[from_air]:
-      from_wire = replace_response[from_air][from_wire]
-  if DEBUG:
-    print(from_air,from_air_replace,from_wire)
-  return from_wire
-
 def udp_server_recv(udp):
   led(0)
   request, source = udp.recvfrom(256)
@@ -270,8 +241,11 @@ def advertiser():
   ble.gap_advertise(100, advertise_data)
 
 def usbclient():
+  global log
   while 1:
     request=input("").encode("ASCII")
+    if LOG:
+      log+=request
     if len(request):
       if gateway:
         request=replace_from_synscan(request+b"\r")
@@ -281,6 +255,7 @@ ledpin=Pin(PIN_LED, mode=Pin.OUT)
 dupterm(None,0) # detach micropython console from tx/rx uart
 motorfw=wire_autodetect()
 gateway=None
+log=b""
 wire_rx_flush()
 # defalut slow goto for ENC_SPEED_CTRL=0
 if BLE:
