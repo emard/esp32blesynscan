@@ -145,7 +145,22 @@ part numbers and pinouts
                 │6  RX1      7│
                 │43 TX   RX 44│
                 └─────────────┘
-                    top view  
+                    top view
+
+    XIAO ESP32C3 MINI
+    Mouser P/N: 713-113991054    5$
+
+                 XIAO  ESP32C3
+                ┌─────────────┐
+                │2    USB   5V│
+                │3         GND│
+                │4        3.3V│
+                │5          10│
+                │6           9│
+                │7  RX1      8│
+                │21 TX   RX 20│
+                └─────────────┘
+                    top view
 
 
 # Connection
