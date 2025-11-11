@@ -45,7 +45,8 @@ other chips ESP32 and ESP32C3 have not been tried yet.
 # WiFi to USB-Serial Motor Client
 
 Primary use is for linux. Works on Windows and Android too.
-Linux BLE-serial written in python doesn't work.
+Linux BLE-serial written in python doesn't work so this USB
+to WiFi bridge is very practical.
 ESP32 connects to mount using WiFi
 and modifies protocol to fix issues.
 
