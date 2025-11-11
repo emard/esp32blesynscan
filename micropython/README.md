@@ -17,7 +17,7 @@ to avoid using long X-commands.
 # BLE Motor Server
 
 Primary use is for Android. Works on Windows.
-Linux ble-serial written in python doesn't work.
+Linux BLE-serial written in python doesn't work.
 Mount lacks BLE support and using its WiFi
 is not practical, complicated routing etc.
 
@@ -37,12 +37,14 @@ to get response. Motor hardware is otherwise quiet.
 
 # WiFi to USB-Serial Motor Client
 
-Primary use is for linux. Works on Android too.
-Linux currently lacks good BLE-serial support.
-ESP32 connects to remoute mount using WiFi
+Primary use is for linux. Works on Windows and Android too.
+Linux BLE-serial written in python doesn't work.
+ESP32 connects to mount using WiFi
 and modifies protocol to fix issues.
 
-Works on ESP32, ESP32C3.
+Works on ESP32, ESP32C3. Doesn't work on ESP32S3.
+Micropython versions from 1.23.0 to 1.26.1 have been
+tried but ESP32S3 doesn't connect to WiFi.
 
 SynScan Pro works under wine and it can use Serial to connect.
 
