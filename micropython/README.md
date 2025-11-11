@@ -17,7 +17,7 @@ to avoid using long X-commands.
 # BLE Motor Server
 
 Primary use is for Android. Works on Windows.
-Linux ble-serial in python doesn't work.
+Linux ble-serial written in python doesn't work.
 Mount lacks BLE support and using its WiFi
 is not practical, complicated routing etc.
 
