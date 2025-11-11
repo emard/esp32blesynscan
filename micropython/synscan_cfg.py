@@ -18,7 +18,6 @@ if uname()[4].endswith("ESP32S3"):
   MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
   BLE=1 # 0:WiFi 1:BLE
 
-# ESP32C3
 if uname()[4].endswith("ESP32C3"):
   # for linux provides usb-serial port
   # connects to motor using wifi
