@@ -14,6 +14,28 @@ point to the same object as 0°.
 Fake version number for synscan
 to avoid using long X-commands.
 
+# Install
+
+    mpremote cp synscan_cfg.py synscan.py main.py :/
+
+# Configure
+
+Almost everything is configurable. Edit
+
+    synscan_cfg.py
+
+Using your favourite text editor on PC.
+ESP32 has good editor written in micropython.
+
+# Onboard Editor
+
+ESP32 can run small [VT100 terminal editor](https://github.com/robert-hh/Micropython-Editor)
+
+Automatic install from internet using mpremote mip:
+
+    mpremote mip install github:robert-hh/Micropython-Editor
+    >>> from pye import pye
+
 # BLE Motor Server
 
 Primary use is for Android. Works on Windows.
@@ -54,14 +76,19 @@ Works on ESP32, ESP32C3. Doesn't work on ESP32S3.
 Micropython versions from 1.23.0 to 1.26.1 have been
 tried but ESP32S3 doesn't connect to WiFi.
 
-SynScan Pro works under wine and it can use Serial to connect.
+Android: SynScan Pro connects with default serial settings
+
+    SynScan Pro > Settings > Connection Settings > Serial
+
+Linux: SynScan Pro works under wine when you find COM port
+and set serial read timeout to 3-5 seconds.
 
 To find out which serial port on wine is for synscan:
 
     ls -al ~/.wine/dosdevices
     lrwxrwxrwx 1 user user   12 Oct  10 23:52 com5 -> /dev/ttyACM0
 
-Port is COM5 - it can vary.
+Port is COM5 (last number can vary).
 
 Set Serial Read Timeout to 2200 ms or
 higher like 3000 or 5000 ms. When Synscan initiates
@@ -72,28 +99,6 @@ ESP32 to boot and connect to mount WiFi.
 
     SynScan Pro > Settings > Connection Settings > Serial
     SynScan Pro > Settings > Connection Settings > Read Timeout (ms) > 2200 or higher like 3000
-
-# Install
-
-    mpremote cp synscan_cfg.py synscan.py main.py :/
-
-# Configure
-
-Almost everything is configurable. Edit
-
-    synscan_cfg.py
-
-Using your favourite text editor on PC.
-ESP32 has good editor written in micropython.
-
-# Onboard Editor
-
-ESP32 can run small [VT100 terminal editor](https://github.com/robert-hh/Micropython-Editor)
-
-Automatic install from internet using mpremote mip:
-
-    mpremote mip install github:robert-hh/Micropython-Editor
-    >>> from pye import pye
 
 # Troubleshooting
 
