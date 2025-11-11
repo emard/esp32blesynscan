@@ -16,8 +16,10 @@ to avoid using long X-commands.
 
 # BLE Motor Server
 
-Primary use is for android. Mount lacks BLE support and
-using WiFi is not practical.
+Primary use is for Android. Works on Windows.
+Linux ble-serial in python doesn't work.
+Mount lacks BLE support and using its WiFi
+is not practical, complicated routing etc.
 
 BLE connects in few seconds, works stable and reliable.
 WiFi on android is free to be used for internet
@@ -35,7 +37,7 @@ to get response. Motor hardware is otherwise quiet.
 
 # WiFi to USB-Serial Motor Client
 
-Primary use is for linux.
+Primary use is for linux. Works on Android too.
 Linux currently lacks good BLE-serial support.
 ESP32 connects to remoute mount using WiFi
 and modifies protocol to fix issues.
