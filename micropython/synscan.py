@@ -263,7 +263,7 @@ def usbserial():
   while 1:
     request=input("").encode("ASCII")
     if request:
-      print(wire_txrx(request+b"\r").decode("ASCII"),end="")
+      print(wire_txrx_replace(request+b"\r").decode("ASCII"),end="")
       if LOG:
         LOG+=request
 
