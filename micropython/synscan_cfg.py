@@ -2,9 +2,9 @@
 
 from machine import Pin, UART
 from struct import pack
+from os import uname
 
-# ESP32S3
-if 1:
+if uname()[4].endswith("ESP32S3"):
   # for android provides BLE synscan (Bluetooth Low Energy)
   WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
   NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
@@ -19,7 +19,7 @@ if 1:
   BLE=1 # 0:WiFi 1:BLE
 
 # ESP32C3
-if 0:
+if uname()[4].endswith("ESP32C3"):
   # for linux provides usb-serial port
   # connects to motor using wifi
   WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
@@ -34,8 +34,7 @@ if 0:
   MOTOR_SERVER=0 # 1:server (esp32 on motor) 0:client (esp32 on PC)
   BLE=0 # 0:WiFi 1:BLE
 
-# ESP32
-if 0:
+if uname()[4].endswith("ESP32"):
   WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
   NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
   PASS="" # for WiFi
