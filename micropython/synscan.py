@@ -264,7 +264,6 @@ motorfw_select_replace()
 gateway=None
 
 wire_rx_flush()
-# defalut slow goto for ENC_SPEED_CTRL=0
 if BLE:
   import bluetooth
   init_ble()
@@ -272,9 +271,9 @@ else:
   import network
   import socket
   init_wifi()
-  if MOTOR_SERVER: # motor present
+  if MOTOR_SERVER:
     init_udp_server()
-  else: # motor absent
+  else:
     init_udp_client()
     usbclient()
     # Synscan > Settings > Connection Settings > Read Timeout (ms) > 2200 or higher like 3000
