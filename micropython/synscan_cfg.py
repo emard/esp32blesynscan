@@ -13,6 +13,7 @@ if 1:
   PIN_RJ12_2_TX_YELLOW_RD=43 # over 10k/BAT42
   PIN_RJ12_2_TX_YELLOW=6 # direct
   DEBUG=0 # debug prints
+  WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
   AP_CHANNEL=10 # 0 for client, >0 for ap
   MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
   BLE=1 # 0:WiFi 1:BLE
@@ -28,6 +29,7 @@ if 0:
   PIN_RJ12_2_TX_YELLOW_RD=21 # over 10k/BAT42
   PIN_RJ12_2_TX_YELLOW=7 # direct
   DEBUG=0 # debug prints
+  WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
   AP_CHANNEL=0 # 0 for client, >0 for ap
   MOTOR_SERVER=0 # 1:server (esp32 on motor) 0:client (esp32 on PC)
   BLE=0 # 0:WiFi 1:BLE
@@ -41,6 +43,7 @@ if 0:
   PIN_RJ12_2_TX_YELLOW_RD=17 # over 10k/BAT42 (but not on board)
   PIN_RJ12_2_TX_YELLOW=17 # direct
   DEBUG=0 # debug prints
+  WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
   AP_CHANNEL=10 # 0 for client, >0 for ap
   MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
   BLE=1 # 0:WiFi 1:BLE

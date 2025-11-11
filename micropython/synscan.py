@@ -15,6 +15,7 @@ PASS=synscan_cfg.PASS # Wifi password min 8 chars
 PIN_LED=synscan_cfg.PIN_LED # board LED
 UART_INIT=synscan_cfg.UART_INIT
 AP_CHANNEL=synscan_cfg.AP_CHANNEL
+WIRELESS=synscan_cfg.WIRELESS
 BLE=synscan_cfg.BLE
 REPLACE=synscan_cfg.REPLACE
 DEBUG=synscan_cfg.DEBUG
@@ -250,12 +251,20 @@ def usbclient():
   global LOG
   while 1:
     request=input("").encode("ASCII")
-    if LOG:
-      LOG+=request
     if request:
       if gateway:
         request=replace_from_synscan(request+b"\r")
         udp_socket.sendto(request,(gateway,11880))
+      if LOG:
+        LOG+=request
+
+def usbserial():
+  while 1
+    request=input("").encode("ASCII")
+    if request:
+      print(wire_txrx(request+b"\r").decode("ASCII"),end="")
+      if LOG:
+        LOG+=request
 
 ledpin=Pin(PIN_LED, mode=Pin.OUT)
 dupterm(None,0) # detach micropython console from tx/rx uart
@@ -264,16 +273,19 @@ motorfw_select_replace()
 gateway=None
 
 wire_rx_flush()
-if BLE:
-  import bluetooth
-  init_ble()
-else:
-  import network
-  import socket
-  init_wifi()
-  if MOTOR_SERVER:
-    init_udp_server()
+if WIRELESS:
+  if BLE:
+    import bluetooth
+    init_ble()
   else:
-    init_udp_client()
-    usbclient()
-    # Synscan > Settings > Connection Settings > Read Timeout (ms) > 2200 or higher like 3000
+    import network
+    import socket
+    init_wifi()
+    if MOTOR_SERVER:
+      init_udp_server()
+    else:
+      init_udp_client()
+      usbclient()
+      # Synscan > Settings > Connection Settings > Read Timeout (ms) > 2200 or higher like 3000
+else: # directly wired USB-SERIAL
+  usbserial()
