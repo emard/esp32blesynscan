@@ -17,23 +17,15 @@ USB-SERIAL UART 3.3V TTL based on PL2303 or FT232R chip.
 
 # Install
 
-Currently "micropython" directory contains latest developent.
-To install, continue with README.md there.
+"micropython" directory contains latest developent.
+To install, continue with micropython/README.md
 
-"esp32/btblesynscan" supports both Bluetooth
-Classic and Bluetooth Low Energy on ESP32.
-"esp32s3" supports Bluetooth Low Energy on ESP32S3.
+"Arduino" directory contains old code which should be
+upgraded with features micropython code has.
+To install, continue with Arduino/README.md
 
-From board manager Install esp32 by espressif.
-Select board "ESP32 Dev Module" or "XIAO_ESP32S3".
-
-Copy "btblesynscan.ino" to directory "~Arduino/esp32blesynscan/btblesynscan/btblesynscan.ino"
-Copy "esp32s3.ino" to directory "~Arduino/esp32blesynscan/esp32s3/esp32s3.ino"
-
-From Arduino, open project "~/Arduino/esp32blesynscan/btblesynscan",
-or "~/Arduino/esp32blesynscan/esp32s3"
-compile and upload to ESP32 board connected with Micro USB Cable (ESP32)
-or USB-C Cable (ESP32S3).
+Bluetooth Classic is available only for Arduino.
+Micropython doesn't support Bluetooth Classic.
 
 # Electrical
 
@@ -250,7 +242,7 @@ about 70 mA.
 
 Synscan works in BLE mode.
 
-SynScan pro -> Settings -> Connect Settings -> BLE.
+SynScan pro -> Settings -> Connection Settings -> BLE
 
 If device no longer appears in connect list and 
 you want to retry connecting, then android application
