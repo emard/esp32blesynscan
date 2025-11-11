@@ -90,15 +90,23 @@ To find out which serial port on wine is for synscan:
 
 Port is COM5 (last number can vary).
 
-Set Serial Read Timeout to 2200 ms or
-higher like 3000 or 5000 ms. When Synscan initiates
-connection to serial port it probably toggles DTR
-or does something to serial port which causes ESP32
-to restart. Read timeout should be long enough for
+Wine SynScan Pro needs increased serial parameters to connect:
+
+    Resend Tries * Serial Read Timeout = 10 seconds
+
+When Synscan initiates connection to serial port it
+probably toggles DTR or does something to serial port
+which causes ESP32 to restart.
+Read timeout should be long enough for
 ESP32 to boot and connect to mount WiFi.
 
     SynScan Pro > Settings > Connection Settings > Serial
-    SynScan Pro > Settings > Connection Settings > Read Timeout (ms) > 2200 or higher like 3000
+    SynScan Pro > Settings > Connection Settings > Resend Tries      > 2
+    SynScan Pro > Settings > Connection Settings > Read Timeout (ms) > 5000
+or
+    SynScan Pro > Settings > Connection Settings > Serial
+    SynScan Pro > Settings > Connection Settings > Resend Tries      > 10
+    SynScan Pro > Settings > Connection Settings > Read Timeout (ms) > 1000
 
 # Troubleshooting
 
