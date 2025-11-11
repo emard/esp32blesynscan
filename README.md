@@ -1,18 +1,25 @@
 # ESP32 blesyncscan
 
-Arduino ESP32 Bluetooth Classic and Bluetooth Low Energy
-UART bridge for SynScan Pro 2.5.2.
+Micropython ESP32, ESP32S3, ESP32C3 Bluetooth Low Energy (BLE)
+Motor server, WiFi Motor Server and USB-WiFi Motor Client for
+SynScan Pro on Windows, Linux, Android.
+Arduino ESP32 Bluetooth Classic UART bridge for SynScan Pro
+under Wine on Linux.
 UART 3.3V TTL is connected to SkyWatcher Virtuoso 90 Heritage
-mount. Works for android, linux and windows.
+or Virtuoso GTi mount.
 
-ESP32S3 USB-C port can be used as direct USB-SERIAL to the
-mount when BLE is not connected. On linux it works great.
-On android it connects but it is unreliable.
+ESP32C3 USB-C port can be used as direct USB-SERIAL on PC
+connected to Motor over wire or remote USB-SERIAL over WiFi.
+
+Do not use this to upgrade Motor firmware.
+Motor firmware should be upgraded over wire using
+USB-SERIAL UART 3.3V TTL based on PL2303 or FT232R chip.
 
 # Install
 
 Currently "micropython" directory contains latest developent
 to install continue with README.md there.
+
 
 "esp32/btblesynscan" supports both Bluetooth
 Classic and Bluetooth Low Energy on ESP32.
