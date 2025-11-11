@@ -5,7 +5,7 @@ Motor server, WiFi Motor Server and USB-WiFi Motor Client for
 SynScan Pro on Windows, Linux, Android.
 Arduino ESP32 Bluetooth Classic UART bridge for SynScan Pro
 under Wine on Linux.
-UART 3.3V TTL is connected to SkyWatcher Virtuoso 90 Heritage
+UART 3.3V TTL is connected to SkyWatcher Virtuoso mini
 or Virtuoso GTi mount.
 
 ESP32C3 USB-C port can be used as direct USB-SERIAL on PC
@@ -17,9 +17,8 @@ USB-SERIAL UART 3.3V TTL based on PL2303 or FT232R chip.
 
 # Install
 
-Currently "micropython" directory contains latest developent
-to install continue with README.md there.
-
+Currently "micropython" directory contains latest developent.
+To install, continue with README.md there.
 
 "esp32/btblesynscan" supports both Bluetooth
 Classic and Bluetooth Low Energy on ESP32.
