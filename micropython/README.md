@@ -68,7 +68,7 @@ higher like 3000 or 5000 ms. When Synscan initiates
 connection to serial port it probably toggles DTR
 or does something to serial port which causes ESP32
 to restart. Read timeout should be long enough for
-ESP32 to connect to mount WiFi.
+ESP32 to boot and connect to mount WiFi.
 
     Synscan > Settings > Connection Settings > Read Timeout (ms) > 2200 or higher like 3000
 
