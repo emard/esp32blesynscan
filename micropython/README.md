@@ -8,8 +8,8 @@ Slow speed for encoders to reliably
 track position without loosing counts.
 
 Fine tune counts per revolution.
-turning both axes for 180° should
-point to the same point as 0°.
+Turning both axes for 180° should
+point to the same object as 0°.
 
 Fake version number for synscan
 to avoid using long X-commands.
@@ -26,8 +26,8 @@ access or camera.
 Works on ESP32, ESP32S3, ESP32C3.
 
 When BLE receives request from synscan,
-it sends it over UART and waits timeout of
-10ms for UART response. Received response
+it sends it over UART and waits some timeout 30 ms or 200 ms
+for UART response. Received response
 is sent back to synscan. 
 
 UART should send someting to motor hardware
@@ -52,16 +52,26 @@ To find out which serial port on wine is for synscan:
 Port is COM5 - it can vary.
 
 Set Serial Read Timeout to 2200 ms or
-higher like 3000 or 5000 ms. When connect to
-serial starts probably DTR is toggled so ESP32C3
-is restarted and the read timeout should be long
-enough for ESP32C3 to connect to mount WiFi.
+higher like 3000 or 5000 ms. When Synscan initiates
+connection to serial port it probably toggles DTR
+or does something to serial port which causes ESP32
+to restart. Read timeout should be long enough for
+ESP32 to connect to mount WiFi.
 
     Synscan > Settings > Connection Settings > Read Timeout (ms) > 2200 or higher like 3000
 
 # Install
 
     mpremote cp synscan_cfg.py synscan.py main.py :/
+
+# Configure
+
+Almost everything is configurable. Edit
+
+    synscan_cfg.py
+
+Using your favourite text editor on PC.
+ESP32 has good editor written in micropython.
 
 # Onboard Editor
 
