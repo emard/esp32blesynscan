@@ -34,7 +34,22 @@ ESP32 can run small [VT100 terminal editor](https://github.com/robert-hh/Micropy
 Automatic install from internet using mpremote mip:
 
     mpremote mip install github:robert-hh/Micropython-Editor
+
+Edit config file:
+
     >>> from pye import pye
+    >>> pye("synscan_cfg.py")
+
+quick editor help
+
+    ctrl-q        quit
+    ctrl-s        save
+    backspace     delete left of cursor
+    arrows        move cursor
+    shift-arrows  select block
+    del           delete selected block
+    ctrl-c        copy   selected block
+    ctrl-v        paste  selected block
 
 # BLE Motor Server
 
