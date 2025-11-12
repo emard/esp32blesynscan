@@ -92,7 +92,7 @@ Port is COM5 (last number can vary).
 
 Wine SynScan Pro needs increased serial parameters to connect:
 
-    Resend Tries * Serial Read Timeout = 10 seconds
+    Resend Tries * Serial Read Timeout > 9 seconds
 
 When Synscan initiates connection to serial port it
 probably toggles DTR or does something to serial port
