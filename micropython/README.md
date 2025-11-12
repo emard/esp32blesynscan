@@ -64,7 +64,7 @@ load editor:
     MemoryError: memory allocation failed, allocating 285 bytes
 
 workaround: Get micropython prompt with ctrl-c, then
-while holding ctrl type quickly "dc" to soft reboot
+while holding ctrl type quickly "dccc" to soft reboot
 and immediately interrupt "main.py" before
 "import synscan". It should be possible to
 load editor then:
@@ -72,7 +72,7 @@ load editor then:
     ctrl-c
     ...
     >>>
-    ctrl-dc
+    ctrl-dccc
     ...
     >>> from pye import pye
     >>> pye("synscan_cfg.py")
