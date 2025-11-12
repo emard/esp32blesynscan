@@ -51,6 +51,32 @@ quick editor help
     ctrl-c        copy   selected block
     ctrl-v        paste  selected block
 
+Troubleshooting
+
+ESP32-WROOM and ESP32C3 dont have PSRAM so
+memory is tight. After "import synscan"
+there will be not enough free memory to
+load editor:
+
+    >>> from pye import pye
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    MemoryError: memory allocation failed, allocating 285 bytes
+
+workaround: Get micropython prompt with ctrl-c, then
+while holding ctrl type quickly "dc" to soft reboot
+and immediately interrupt "main.py" before
+"import synscan". It should be possible to
+load editor then:
+
+    ctrl-c
+    ...
+    >>>
+    ctrl-dc
+    ...
+    >>> from pye import pye
+    >>> pye("synscan_cfg.py")
+
 # BLE Motor Server
 
 Primary use is for Android. Works on Windows.
