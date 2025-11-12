@@ -104,7 +104,7 @@ Primary use is to make additional networking
 connectivity and compatibility. It can be WiFi
 client while mount is WiFi Server.
 
-Works on ESP32C3. ESP32 has not been tried yet.
+Works on ESP32, ESP32C3.
 
 Currently it doesn't work reliable on ESP32S3.
 Multiple retries required to connect. Packet loss
