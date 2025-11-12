@@ -103,7 +103,9 @@ ESP32 to boot and connect to mount WiFi.
     SynScan Pro > Settings > Connection Settings > Serial
     SynScan Pro > Settings > Connection Settings > Resend Tries      > 2
     SynScan Pro > Settings > Connection Settings > Read Timeout (ms) > 5000
+
 or
+
     SynScan Pro > Settings > Connection Settings > Serial
     SynScan Pro > Settings > Connection Settings > Resend Tries      > 10
     SynScan Pro > Settings > Connection Settings > Read Timeout (ms) > 1000
