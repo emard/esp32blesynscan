@@ -15,33 +15,48 @@ if uname()[4].endswith("ESP32S3"):
   NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
   PASS="" # for WiFi
   DEBUG=0 # debug prints
+  LOG="" # log file name, "" to disable
   AP_CHANNEL=10 # 0 for client, >0 for ap
   MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
   BLE=1 # 0:WiFi 1:BLE
 
 if uname()[4].endswith("ESP32C3"):
-  # for linux provides usb-serial port
   # connects to motor using wifi
   PIN_LED=10 # external LED on +3.3V (inverse logic)
   PIN_RJ12_4_RX_RED=20 # direct
   PIN_RJ12_2_TX_YELLOW_RD=21 # over 10k/BAT42
   PIN_RJ12_2_TX_YELLOW=7 # direct
-  # BLE Motor Server
-  WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
-  NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
-  PASS="" # for WiFi
-  DEBUG=0 # debug prints
-  AP_CHANNEL=10 # 0 for client, >0 for ap
-  MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
-  BLE=1 # 0:WiFi 1:BLE
-  # WiFi Motor Client to USB-Serial
-  #WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
-  #NAME="SynScan_3538" # BLE/WiFi visible name or Wifi user name
-  #PASS="" # for WiFi
-  #DEBUG=0 # debug prints
-  #AP_CHANNEL=0 # 0 for client, >0 for ap
-  #MOTOR_SERVER=0 # 1:server (esp32 on motor) 0:client (esp32 on PC)
-  #BLE=0 # 0:WiFi 1:BLE
+  if 1:
+    # Motor Server - BLE Server
+    WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
+    NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
+    PASS="" # for WiFi
+    DEBUG=0 # debug prints
+    LOG="" # log file name, "" to disable
+    AP_CHANNEL=10 # 0 for client, >0 for ap
+    MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
+    BLE=1 # 0:WiFi 1:BLE
+  if 0:
+    # Motor Server - WiFi Client
+    WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
+    NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
+    PASS="" # for WiFi
+    DEBUG=0 # debug prints
+    LOG="" # log file name, "" to disable
+    AP_CHANNEL=0 # 0 for client, >0 for ap
+    MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
+    BLE=0 # 0:WiFi 1:BLE
+  if 0:
+    # Motor Client - WiFi Client - USB-Serial
+    # for linux provides usb-serial port
+    WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
+    NAME="SynScan_3538" # BLE/WiFi visible name or Wifi user name
+    PASS="" # for WiFi
+    DEBUG=0 # debug prints
+    LOG="" # log file name, "" to disable
+    AP_CHANNEL=0 # 0 for client, >0 for ap
+    MOTOR_SERVER=0 # 1:server (esp32 on motor) 0:client (esp32 on PC)
+    BLE=0 # 0:WiFi 1:BLE
 
 if uname()[4].endswith("ESP32"):
   PIN_LED=2 # DevKit LED normal logic
@@ -53,6 +68,7 @@ if uname()[4].endswith("ESP32"):
   NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
   PASS="" # for WiFi
   DEBUG=0 # debug prints
+  LOG="" # log file name, "" to disable
   AP_CHANNEL=10 # 0 for client, >0 for ap
   MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
   BLE=1 # 0:WiFi 1:BLE
