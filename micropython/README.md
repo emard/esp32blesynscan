@@ -106,6 +106,10 @@ client while mount is WiFi Server.
 
 Works on ESP32, ESP32C3.
 
+To print IP
+
+    synscan.wifi.ifconfig()
+
 Currently it doesn't work reliable on ESP32S3.
 Multiple retries required to connect. Packet loss
 and timeout too long to be practical (30 seconds).

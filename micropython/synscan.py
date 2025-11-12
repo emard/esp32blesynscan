@@ -19,10 +19,8 @@ WIRELESS=synscan_cfg.WIRELESS
 BLE=synscan_cfg.BLE
 REPLACE=synscan_cfg.REPLACE
 DEBUG=synscan_cfg.DEBUG
-MOTOR_SERVER=synscan_cfg.MOTOR_SERVER # for USB dongle
-
-LOG=b"" # no log
-#LOG=b" " # accumulate log in synscan.LOG
+LOG=synscan_cfg.LOG
+MOTOR_SERVER=synscan_cfg.MOTOR_SERVER
 
 def init_wifi():
   global wifi, udp_socket, ble_tx, ble_rx, led_timer
@@ -56,7 +54,7 @@ def init_udp_client():
   udp_socket.setsockopt(socket.SOL_SOCKET, _SO_REGISTER_HANDLER, udp_client_recv)
 
 def led_wifi(dummy):
- global wifi_connected, gateway
+ global wifi_connected, gateway, motorfw
  if wifi.isconnected()==True:
    led(1)
    if(wifi_connected==False):
@@ -184,9 +182,13 @@ def udp_server_recv(udp):
   led(0)
   request, source = udp.recvfrom(256)
   if request:
+    if LOG:
+      log.write(request+b"\n")
     response = wire_txrx_replace(request)
     if response:
       udp.sendto(response, source)
+      if LOG:
+        log.write(response+b"\n")
   led(1)
 
 def udp_client_recv(udp):
@@ -195,21 +197,36 @@ def udp_client_recv(udp):
   response = replace_from_motor(response)
   if response:
     print(response.decode("ASCII"),end="")
+    if LOG:
+      log.write(response+b"\n")
   led(1)
 
 def ble_irq(event, data):
   if event == 1:
-    '''Central disconnected'''
+    '''Central connected'''
     connected()
+    if LOG:
+      log.write(b"connected\n")
   elif event == 2:
     '''Central disconnected'''
     advertiser()
     disconnected()
+    if LOG:
+      log.write(b"disconnected\n")
+      log.flush()
   elif event == 3:
     '''New message received'''
     led(0)
     # method 1 ("True" to notify, faster than method 2)
-    ble.gatts_write(ble_tx, wire_txrx_replace(ble.gatts_read(ble_rx)), True)
+    request=ble.gatts_read(ble_rx)
+    if request:
+      if LOG:
+        log.write(request+b"\n")
+      response=wire_txrx_replace(request)
+      if response:
+        ble.gatts_write(ble_tx, response, True)
+        if LOG:
+          log.write(response+b"\n")
     # method 2 (explicitely notify, slower than method 1)
     #conn_handle,_=data
     #ble.gatts_notify(conn_handle, ble_tx, wire_txrx_replace(ble.gatts_read(ble_rx)))
@@ -248,31 +265,36 @@ def advertiser():
   ble.gap_advertise(100, advertise_data)
 
 def usbclient():
-  global LOG
   while 1:
-    request=input("").encode("ASCII")
+    request=input("").encode("ASCII") # input strips "\r"
     if request:
+      if LOG:
+        log.write(request+b"\r\n")
       if gateway:
         request=replace_from_synscan(request+b"\r")
-        udp_socket.sendto(request,(gateway,11880))
-      if LOG:
-        LOG+=request
+        if request:
+          udp_socket.sendto(request,(gateway,11880))
 
 def usbserial():
-  global LOG
   while 1:
-    request=input("").encode("ASCII")
+    request=input("").encode("ASCII") # input strips "\r"
     if request:
-      print(wire_txrx_replace(request+b"\r").decode("ASCII"),end="")
       if LOG:
-        LOG+=request
+        log.write(request+b"\r\n")
+      response=wire_txrx_replace(request+b"\r")
+      if response:
+        print(response.decode("ASCII"),end="")
+        if LOG:
+          log.write(response+b"\n")
 
 ledpin=Pin(PIN_LED, mode=Pin.OUT)
 dupterm(None,0) # detach micropython console from tx/rx uart
 motorfw=wire_autodetect()
 motorfw_select_replace()
 gateway=None
-
+if LOG:
+  log=open(LOG,"a+")
+  log.write("boot\n")
 wire_rx_flush()
 if WIRELESS:
   if BLE:
