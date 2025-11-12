@@ -57,15 +57,20 @@ def led_wifi(dummy):
  global wifi_connected, gateway, motorfw
  if wifi.isconnected()==True:
    led(1)
-   if(wifi_connected==False):
+   if wifi_connected==False:
      if DEBUG:
        print(wifi.ifconfig())
        # ("    IP     ", "   NETMASK   ", "  GATEWAY  ", "    DNS    ")
        # ("192.168.4.2", "255.255.255.0", "192.168.4.1", "192.168.4.1")
    gateway = wifi.ifconfig()[2] # udp_send() to gateway IP
    wifi_connected=True
+   if LOG:
+     log.flush()
  else:
    led(0)
+   if wifi_connected==True:
+     if LOG:
+       log.flush()
    wifi_connected=False
 
 def init_ble():
@@ -292,6 +297,7 @@ dupterm(None,0) # detach micropython console from tx/rx uart
 motorfw=wire_autodetect()
 motorfw_select_replace()
 gateway=None
+wifi_connected=False
 if LOG:
   log=open(LOG,"a+")
   log.write("boot\n")
