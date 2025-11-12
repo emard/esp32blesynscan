@@ -74,10 +74,15 @@ to get response. Motor hardware is otherwise quiet.
 
 # WiFi Motor Server
 
+Primary use is to make additional networking
+connectivity and compatibility. It can be WiFi
+client while mount is WiFi Server.
+
+Works on ESP32C3. ESP32 has not been tried yet.
+
 Currently it doesn't work reliable on ESP32S3.
 Multiple retries required to connect. Packet loss
 and timeout too long to be practical (30 seconds).
-other chips ESP32 and ESP32C3 have not been tried yet.
 
 # WiFi to USB-Serial Motor Client
 
