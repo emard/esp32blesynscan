@@ -10,15 +10,29 @@ if uname()[4].endswith("ESP32S3"):
   PIN_RJ12_4_RX_RED=44 # direct
   PIN_RJ12_2_TX_YELLOW_RD=43 # over 10k/BAT42
   PIN_RJ12_2_TX_YELLOW=6 # direct
-  # BLE Motor Server
-  WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
-  NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
-  PASS="" # for WiFi
-  DEBUG=0 # debug prints
-  LOG="" # log file name, "" to disable
-  AP_CHANNEL=10 # 0 for client, >0 for ap
-  MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
-  BLE=1 # 0:WiFi 1:BLE
+  if 1:
+    # BLE Motor Server
+    WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
+    NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
+    PASS="" # for WiFi
+    DEBUG=0 # debug prints
+    LOG="" # log file name, "" to disable
+    AP_CHANNEL=10 # 0 for client, >0 for ap
+    MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
+    BLE=1 # 0:WiFi 1:BLE
+  if 0:
+    # Motor Server - direct wire - USB-Serial - PC or Android
+    # autodetect doesn't work - at end of this file choose one:
+    # UART_INIT = [uart_half_duplex] # Virtoso Mini
+    # UART_INIT = [uart_full_duplex] # Virtoso GTi
+    WIRELESS=0 # 0:usb-serial wired directly 1:WiFi or BLE
+    NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
+    PASS="" # for WiFi
+    DEBUG=0 # debug prints
+    LOG="" # log file name, "" to disable
+    AP_CHANNEL=0 # 0 for client, >0 for ap
+    MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
+    BLE=0 # 0:WiFi 1:BLE
 
 if uname()[4].endswith("ESP32C3"):
   # connects to motor using wifi
@@ -272,4 +286,6 @@ def uart_full_duplex():
   Pin(PIN_RJ12_2_TX_YELLOW_RD, mode=Pin.IN, pull=None)
   return UART(1,baudrate=9600,tx=PIN_RJ12_4_RX_RED,rx=PIN_RJ12_2_TX_YELLOW,timeout=200) # Virtuoso GTi
 
-UART_INIT = [uart_half_duplex, uart_full_duplex]
+UART_INIT = [uart_half_duplex, uart_full_duplex] # Autodetect
+#UART_INIT = [uart_half_duplex] # Virtoso Mini
+#UART_INIT = [uart_full_duplex] # Virtoso GTi
