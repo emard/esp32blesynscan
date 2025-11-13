@@ -158,6 +158,7 @@ def replace_from_synscan(from_synscan):
 
 def replace_from_motor(from_motor):
   global motorfw
+  from_motor=from_motor.strip()+b"\r" # cleanup junk
   if from_motor:
     if from_synscan_replace == b":e1\r":
       if from_motor[0]==61: # response should start with "="
