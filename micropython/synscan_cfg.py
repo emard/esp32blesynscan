@@ -60,6 +60,9 @@ if 0:
   MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
   BLE=0 # 0:WiFi 1:BLE
 
+TIMEOUT=3600 # [s] no connection sleep for battery saving
+SLEEP=82800  # [s] how long to sleep
+
 if uname()[4].endswith("ESP32S3"):
   # for android provides BLE synscan (Bluetooth Low Energy)
   if 0: # old

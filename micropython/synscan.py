@@ -7,20 +7,8 @@
 # import synscan
 
 from os import dupterm
-from machine import Pin, UART, Timer
-import synscan_cfg
-
-NAME=synscan_cfg.NAME # BLE client name max 14 chars
-PASS=synscan_cfg.PASS # Wifi password min 8 chars
-PIN_LED=synscan_cfg.PIN_LED # board LED
-UART_INIT=synscan_cfg.UART_INIT
-AP_CHANNEL=synscan_cfg.AP_CHANNEL
-WIRELESS=synscan_cfg.WIRELESS
-BLE=synscan_cfg.BLE
-REPLACE=synscan_cfg.REPLACE
-DEBUG=synscan_cfg.DEBUG
-LOG=synscan_cfg.LOG
-MOTOR_SERVER=synscan_cfg.MOTOR_SERVER
+from machine import Pin, UART, Timer, deepsleep
+from synscan_cfg import NAME,PASS,PIN_LED,UART_INIT,AP_CHANNEL,WIRELESS,BLE,REPLACE,DEBUG,LOG,MOTOR_SERVER,TIMEOUT,SLEEP
 
 def reset_wifi():
   for a in (False, True):
@@ -56,25 +44,39 @@ def init_udp_server():
 def init_udp_client():
   udp_socket.setsockopt(socket.SOL_SOCKET, _SO_REGISTER_HANDLER, udp_client_recv)
 
+def sleep_now(dummy):
+  deepsleep(1000*SLEEP)
+
+# count idle seconds and sleep
+idle=0 # [s] idle seconds
+def idle_sleep(dummy):
+  global idle
+  idle+=1
+  if idle>TIMEOUT:
+    idle=0
+    sleep_now(0)
+
 def led_wifi(dummy):
- global wifi_connected, gateway, motorfw
- if wifi.isconnected()==True:
-   led(1)
-   if wifi_connected==False:
-     if DEBUG:
-       print(wifi.ifconfig())
-       # ("    IP     ", "   NETMASK   ", "  GATEWAY  ", "    DNS    ")
-       # ("192.168.4.2", "255.255.255.0", "192.168.4.1", "192.168.4.1")
-   gateway = wifi.ifconfig()[2] # udp_send() to gateway IP
-   wifi_connected=True
-   if LOG:
-     log.flush()
- else:
-   led(0)
-   if wifi_connected==True:
-     if LOG:
-       log.flush()
-   wifi_connected=False
+  global wifi_connected, gateway, motorfw, idle
+  if wifi.isconnected()==True:
+    led(1)
+    if wifi_connected==False:
+      if DEBUG:
+        print(wifi.ifconfig())
+        # ("    IP     ", "   NETMASK   ", "  GATEWAY  ", "    DNS    ")
+        # ("192.168.4.2", "255.255.255.0", "192.168.4.1", "192.168.4.1")
+    gateway = wifi.ifconfig()[2] # udp_send() to gateway IP
+    wifi_connected=True
+    idle=0
+    if LOG:
+      log.flush()
+  else:
+    led(0)
+    if wifi_connected==True:
+      if LOG:
+        log.flush()
+    wifi_connected=False
+    idle_sleep(0)
 
 def init_ble():
   global ble
@@ -93,9 +95,14 @@ def led(val):
   ledpin.value(val^1)
 
 def connected():
+  global idle_timer
+  idle_timer.deinit()
   led(1)
 
 def disconnected():
+  global idle_timer
+  idle_timer=Timer(0)
+  idle_timer.init(mode=Timer.ONE_SHOT, period=1000*TIMEOUT, callback=sleep_now)
   led(0)
 
 def wire_autodetect():
