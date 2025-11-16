@@ -1,20 +1,20 @@
 // box to insert pcb and fix with 2 screws
 
-pcb_size = [19,39,1.6]; // size of PCB
+pcb_size = [19,41,1.6]; // size of PCB
 
-box_inner = [22,40,21+3];
+box_inner = [22,42,21+2.5];
 thick = 2;
 
-rail_top   = [2,40,2];
-rail_bot   = [2.5,40,2];
-rail_spc   = 2;
+rail_top   = [2,42,2];
+rail_bot   = [2.5,42,2];
+rail_spc   = 2.5;
 
 pcb_bottom = 2.5+3; // space from bottom
 usb_pos = 14; // from PCB bottom
 
 module pcb()
 {
-  translate([0,0,box_inner[2]/2-rail_bot[2]/2-pcb_bottom])
+  translate([0,-thick,box_inner[2]/2-rail_bot[2]/2-pcb_bottom])
   cube(pcb_size,center=true);
 }
 
@@ -29,9 +29,9 @@ module rail_old()
 
 module rail(i)
 {
-  translate([-i*rail_bot[0]/2,0,rail_bot[2]/2+rail_spc/2])
+  translate([-i*rail_bot[0]/2,(rail_bot[1]-box_inner[1]-thick)/2,rail_bot[2]/2+rail_spc/2])
     cube(rail_bot,center=true);
-  translate([-i*rail_top[0]/2,0,-rail_top[2]/2-rail_spc/2])
+  translate([-i*rail_top[0]/2,(rail_top[1]-box_inner[1]-thick)/2,-rail_top[2]/2-rail_spc/2])
     cube(rail_top,center=true);
 }
 
@@ -51,8 +51,8 @@ module usb_connector_cut()
 
 module rj12_connector_cut_rear()
 {
-  translate([0,box_inner[1]/2,+box_inner[2]/2-pcb_bottom-10])
-  cube([15,10,16],center=true);
+  translate([0,box_inner[1]/2,+box_inner[2]/2-pcb_bottom-8.5])
+  cube([15,10,14],center=true);
 }
 
 module rj12_connector_cut_side()
@@ -77,8 +77,8 @@ module box()
     translate([0,-thick,0])
     cube(box_inner,center=true);
     // usb_connector_cut();
-    //rj12_connector_cut_rear();
-    rj12_connector_cut_side();
+    rj12_connector_cut_rear();
+    //rj12_connector_cut_side();
     // screw_holes();
   }
   rails();
