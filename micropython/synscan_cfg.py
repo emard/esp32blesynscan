@@ -4,96 +4,8 @@ from machine import Pin, UART
 from struct import pack
 from os import uname
 
-if uname()[4].endswith("ESP32S3"):
-  # for android provides BLE synscan (Bluetooth Low Energy)
-  if 0: # old
-    PIN_LED=21 # XIAO LED inverse logic
-    PIN_RJ12_4_RX_RED=44 # direct
-    PIN_RJ12_4_RX_RED_RD=7 # over 10k/BAT42
-    PIN_RJ12_2_TX_YELLOW_RD=43 # over 10k/BAT42
-    PIN_RJ12_2_TX_YELLOW=6 # direct
-  if 1: # new
-    PIN_LED=21 # XIAO LED inverse logic
-    PIN_RJ12_4_RX_RED=44 # direct
-    PIN_RJ12_4_RX_RED_RD=7 # over 10k/BAT42
-    PIN_RJ12_2_TX_YELLOW_RD=6 # over 10k/BAT42
-    PIN_RJ12_2_TX_YELLOW=43 # direct
-  if 1:
-    # BLE Motor Server
-    WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
-    NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
-    PASS="" # for WiFi
-    DEBUG=0 # debug prints
-    LOG="" # log file name, "" to disable
-    AP_CHANNEL=10 # 0 for client, >0 for ap
-    MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
-    BLE=1 # 0:WiFi 1:BLE
-  if 0:
-    # Motor Server - direct wire - USB-Serial - PC or Android
-    # autodetect doesn't work - at end of this file choose one:
-    # UART_INIT = [uart_half_duplex] # Virtoso Mini
-    # UART_INIT = [uart_full_duplex] # Virtoso GTi
-    WIRELESS=0 # 0:usb-serial wired directly 1:WiFi or BLE
-    NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
-    PASS="" # for WiFi
-    DEBUG=0 # debug prints
-    LOG="" # log file name, "" to disable
-    AP_CHANNEL=0 # 0 for client, >0 for ap
-    MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
-    BLE=0 # 0:WiFi 1:BLE
-
-if uname()[4].endswith("ESP32C3"):
-  # connects to motor using wifi
-  if 0: # old
-    PIN_LED=10 # external LED on +3.3V (inverse logic)
-    PIN_RJ12_4_RX_RED=20 # direct
-    PIN_RJ12_4_RX_RED_RD=8 # over 10k/BAT42
-    PIN_RJ12_2_TX_YELLOW_RD=21 # over 10k/BAT42
-    PIN_RJ12_2_TX_YELLOW=7 # direct
-  if 1: # new
-    PIN_LED=10 # external LED on +3.3V (inverse logic)
-    PIN_RJ12_4_RX_RED=20 # direct
-    PIN_RJ12_4_RX_RED_RD=8 # over 10k/BAT42
-    PIN_RJ12_2_TX_YELLOW_RD=7 # over 10k/BAT42
-    PIN_RJ12_2_TX_YELLOW=21 # direct
-  if 1:
-    # Motor Server - BLE Server
-    WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
-    NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
-    PASS="" # for WiFi
-    DEBUG=1 # debug prints
-    LOG="" # log file name, "" to disable
-    AP_CHANNEL=10 # 0 for client, >0 for ap
-    MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
-    BLE=1 # 0:WiFi 1:BLE
-  if 0:
-    # Motor Server - WiFi Client
-    WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
-    NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
-    PASS="" # for WiFi
-    DEBUG=0 # debug prints
-    LOG="" # log file name, "" to disable
-    AP_CHANNEL=0 # 0 for client, >0 for ap
-    MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
-    BLE=0 # 0:WiFi 1:BLE
-  if 0:
-    # Motor Client - WiFi Client - USB-Serial
-    # for linux provides usb-serial port
-    WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
-    NAME="SynScan_3538" # BLE/WiFi visible name or Wifi user name
-    PASS="" # for WiFi
-    DEBUG=0 # debug prints
-    LOG="" # log file name, "" to disable
-    AP_CHANNEL=0 # 0 for client, >0 for ap
-    MOTOR_SERVER=0 # 1:server (esp32 on motor) 0:client (esp32 on PC)
-    BLE=0 # 0:WiFi 1:BLE
-
-if uname()[4].endswith("ESP32"):
-  PIN_LED=2 # DevKit LED normal logic
-  PIN_RJ12_4_RX_RED=16 # direct
-  PIN_RJ12_2_TX_YELLOW_RD=17 # over 10k/BAT42 (but not on board)
-  PIN_RJ12_2_TX_YELLOW=17 # direct
-  # BLE Motor Server
+if 1:
+  # Motor Server - BLE Server
   WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
   NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
   PASS="" # for WiFi
@@ -102,6 +14,88 @@ if uname()[4].endswith("ESP32"):
   AP_CHANNEL=10 # 0 for client, >0 for ap
   MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
   BLE=1 # 0:WiFi 1:BLE
+if 0:
+  # Motor Server - WiFi Server
+  WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
+  NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
+  PASS="" # for WiFi
+  DEBUG=0 # debug prints
+  LOG="" # log file name, "" to disable
+  AP_CHANNEL=10 # 0 for client, >0 for ap
+  MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
+  BLE=0 # 0:WiFi 1:BLE
+if 0:
+  # Motor Server - WiFi Client
+  WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
+  NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
+  PASS="" # for WiFi
+  DEBUG=0 # debug prints
+  LOG="" # log file name, "" to disable
+  AP_CHANNEL=0 # 0 for client, >0 for ap
+  MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
+  BLE=0 # 0:WiFi 1:BLE
+if 0:
+  # Motor Client - WiFi Client - USB-Serial
+  # for linux provides usb-serial port
+  WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
+  NAME="SynScan_3538" # GTi WiFi name
+  #NAME="SynScan_WiFi_81db" # Mini WiFi name
+  PASS="" # for WiFi
+  DEBUG=0 # debug prints
+  LOG="" # log file name, "" to disable
+  AP_CHANNEL=0 # 0 for client, >0 for ap
+  MOTOR_SERVER=0 # 1:server (esp32 on motor) 0:client (esp32 on PC)
+  BLE=0 # 0:WiFi 1:BLE
+if 0:
+  # Motor Server - direct wire - USB-Serial - PC or Android
+  # autodetect doesn't work - at end of this file choose one:
+  # UART_INIT = [uart_half_duplex] # Virtoso Mini
+  # UART_INIT = [uart_full_duplex] # Virtoso GTi
+  WIRELESS=0 # 0:usb-serial wired directly 1:WiFi or BLE
+  NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
+  PASS="" # for WiFi
+  DEBUG=0 # debug prints
+  LOG="" # log file name, "" to disable
+  AP_CHANNEL=0 # 0 for client, >0 for ap
+  MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
+  BLE=0 # 0:WiFi 1:BLE
+
+if uname()[4].endswith("ESP32S3"):
+  # for android provides BLE synscan (Bluetooth Low Energy)
+  if 0: # old
+    PIN_LED=21 # XIAO LED inverse logic
+    PIN_RJ12_4_RX_RED=44 # direct
+    PIN_RJ12_4_RX_RED_RD=7 # over 10k/BAT42 (not connected)
+    PIN_RJ12_2_TX_YELLOW_RD=43 # over 10k/BAT42
+    PIN_RJ12_2_TX_YELLOW=6 # direct
+  if 1: # new
+    PIN_LED=21 # XIAO LED inverse logic
+    PIN_RJ12_4_RX_RED=44 # direct
+    PIN_RJ12_4_RX_RED_RD=7 # over 10k/BAT42
+    PIN_RJ12_2_TX_YELLOW_RD=6 # over 10k/BAT42
+    PIN_RJ12_2_TX_YELLOW=43 # direct
+
+if uname()[4].endswith("ESP32C3"):
+  # connects to motor using wifi
+  if 0: # old
+    PIN_LED=10 # external LED on +3.3V (inverse logic)
+    PIN_RJ12_4_RX_RED=20 # direct
+    PIN_RJ12_4_RX_RED_RD=8 # over 10k/BAT42 (not connected)
+    PIN_RJ12_2_TX_YELLOW_RD=21 # over 10k/BAT42
+    PIN_RJ12_2_TX_YELLOW=7 # direct
+  if 1: # new
+    PIN_LED=10 # external LED on +3.3V (inverse logic)
+    PIN_RJ12_4_RX_RED=20 # direct
+    PIN_RJ12_4_RX_RED_RD=8 # over 10k/BAT42
+    PIN_RJ12_2_TX_YELLOW_RD=7 # over 10k/BAT42
+    PIN_RJ12_2_TX_YELLOW=21 # direct
+
+if uname()[4].endswith("ESP32"):
+  PIN_LED=2 # DevKit LED normal logic
+  PIN_RJ12_4_RX_RED=16 # direct
+  PIN_RJ12_4_RX_RED_RD=18 # over 10k/BAT42 (not connected)
+  PIN_RJ12_2_TX_YELLOW_RD=17 # over 10k/BAT42 (but not on board)
+  PIN_RJ12_2_TX_YELLOW=17 # direct
 
 # for Virtuoso Mini FW 2.16.A1
 REPLACE_COMMAND_MINI={
