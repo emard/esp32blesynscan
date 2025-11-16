@@ -34,13 +34,13 @@ def init_wifi():
   if AP_CHANNEL:
     wifi = network.WLAN(network.AP_IF)
     reset_wifi()
-    wifi.config(channel=AP_CHANNEL, txpower=17, essid=NAME, password=PASS)
+    wifi.config(channel=AP_CHANNEL, txpower=15, essid=NAME, password=PASS)
     if DEBUG:
       print(wifi.ifconfig())
   else:
     wifi = network.WLAN(network.STA_IF)
     reset_wifi()
-    wifi.config(txpower=17)
+    wifi.config(txpower=15)
     wifi.connect(NAME, PASS)
   udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
