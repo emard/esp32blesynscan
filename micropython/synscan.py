@@ -45,7 +45,8 @@ def init_udp_client():
   udp_socket.setsockopt(socket.SOL_SOCKET, _SO_REGISTER_HANDLER, udp_client_recv)
 
 def sleep_now(dummy):
-  deepsleep(1000*SLEEP)
+  if SLEEP:
+    deepsleep(1000*SLEEP)
 
 # count idle seconds and sleep
 idle=0 # [s] idle seconds
