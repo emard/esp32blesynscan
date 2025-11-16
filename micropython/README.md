@@ -123,7 +123,7 @@ to WiFi bridge is very practical.
 ESP32 connects to mount using WiFi
 and modifies protocol to fix issues.
 
-Works on ESP32, ESP32C3. Doesn't work on ESP32S3.
+Works on ESP32, ESP32S3, ESP32C3 (wine reboots ESP32C3).
 Micropython versions from 1.23.0 to 1.26.1 have been
 tried but ESP32S3 doesn't connect to WiFi.
 
@@ -145,11 +145,14 @@ Wine SynScan Pro needs increased serial parameters to connect:
 
     Resend Tries * Serial Read Timeout > 9 seconds
 
+ESP32S3 connects with default serial timeouts.
+
+ESP32C3 needs increased serial timeouts.
 When Synscan initiates connection to serial port it
 probably toggles DTR or does something to serial port
-which causes ESP32 to restart.
+which causes ESP32C3 to restart.
 Read timeout should be long enough for
-ESP32 to boot and connect to mount WiFi.
+ESP32C3 to boot and connect to mount WiFi.
 
     SynScan Pro > Settings > Connection Settings > Serial
     SynScan Pro > Settings > Connection Settings > Resend Tries      > 2
@@ -160,6 +163,12 @@ or
     SynScan Pro > Settings > Connection Settings > Serial
     SynScan Pro > Settings > Connection Settings > Resend Tries      > 10
     SynScan Pro > Settings > Connection Settings > Read Timeout (ms) > 1000
+
+# Direct Wire USB-Serial Motor Client
+
+Works on Windows, Android, Linux.
+Works on ESP32, ESP32S3, ESP32C3 (wine reboots ESP32C3).
+Similar as WiFi to USB-Serial Motor Client.
 
 # Troubleshooting
 
