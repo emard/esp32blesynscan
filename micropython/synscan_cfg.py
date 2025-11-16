@@ -6,10 +6,18 @@ from os import uname
 
 if uname()[4].endswith("ESP32S3"):
   # for android provides BLE synscan (Bluetooth Low Energy)
-  PIN_LED=21 # XIAO LED inverse logic
-  PIN_RJ12_4_RX_RED=44 # direct
-  PIN_RJ12_2_TX_YELLOW_RD=43 # over 10k/BAT42
-  PIN_RJ12_2_TX_YELLOW=6 # direct
+  if 0: # old
+    PIN_LED=21 # XIAO LED inverse logic
+    PIN_RJ12_4_RX_RED=44 # direct
+    PIN_RJ12_4_RX_RED_RD=7 # over 10k/BAT42
+    PIN_RJ12_2_TX_YELLOW_RD=43 # over 10k/BAT42
+    PIN_RJ12_2_TX_YELLOW=6 # direct
+  if 1: # new
+    PIN_LED=21 # XIAO LED inverse logic
+    PIN_RJ12_4_RX_RED=44 # direct
+    PIN_RJ12_4_RX_RED_RD=7 # over 10k/BAT42
+    PIN_RJ12_2_TX_YELLOW_RD=6 # over 10k/BAT42
+    PIN_RJ12_2_TX_YELLOW=43 # direct
   if 1:
     # BLE Motor Server
     WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
@@ -36,16 +44,24 @@ if uname()[4].endswith("ESP32S3"):
 
 if uname()[4].endswith("ESP32C3"):
   # connects to motor using wifi
-  PIN_LED=10 # external LED on +3.3V (inverse logic)
-  PIN_RJ12_4_RX_RED=20 # direct
-  PIN_RJ12_2_TX_YELLOW_RD=21 # over 10k/BAT42
-  PIN_RJ12_2_TX_YELLOW=7 # direct
+  if 0: # old
+    PIN_LED=10 # external LED on +3.3V (inverse logic)
+    PIN_RJ12_4_RX_RED=20 # direct
+    PIN_RJ12_4_RX_RED_RD=8 # over 10k/BAT42
+    PIN_RJ12_2_TX_YELLOW_RD=21 # over 10k/BAT42
+    PIN_RJ12_2_TX_YELLOW=7 # direct
+  if 1: # new
+    PIN_LED=10 # external LED on +3.3V (inverse logic)
+    PIN_RJ12_4_RX_RED=20 # direct
+    PIN_RJ12_4_RX_RED_RD=8 # over 10k/BAT42
+    PIN_RJ12_2_TX_YELLOW_RD=7 # over 10k/BAT42
+    PIN_RJ12_2_TX_YELLOW=21 # direct
   if 1:
     # Motor Server - BLE Server
     WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
     NAME="synscan.py" # BLE/WiFi visible name or Wifi user name
     PASS="" # for WiFi
-    DEBUG=0 # debug prints
+    DEBUG=1 # debug prints
     LOG="" # log file name, "" to disable
     AP_CHANNEL=10 # 0 for client, >0 for ap
     MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
@@ -276,14 +292,16 @@ b"=0328AF\r": (REPLACE_COMMAND_GTI,         REPLACE_RESPONSE_GTI         ), # FW
 def uart_half_duplex():
   if DEBUG:
     print("trying half duplex")
-  Pin(PIN_RJ12_2_TX_YELLOW, mode=Pin.IN, pull=None)
+  Pin(PIN_RJ12_2_TX_YELLOW, mode=Pin.IN, pull=Pin.PULL_UP)
+  Pin(PIN_RJ12_4_RX_RED_RD, mode=Pin.IN, pull=Pin.PULL_UP)
   return UART(1,baudrate=9600,tx=PIN_RJ12_2_TX_YELLOW_RD,rx=PIN_RJ12_4_RX_RED,timeout=30) # Virtuoso Mini
 
 # Virtuoso GTi
 def uart_full_duplex():
   if DEBUG:
     print("trying full duplex")
-  Pin(PIN_RJ12_2_TX_YELLOW_RD, mode=Pin.IN, pull=None)
+  Pin(PIN_RJ12_2_TX_YELLOW_RD, mode=Pin.IN, pull=Pin.PULL_UP)
+  Pin(PIN_RJ12_4_RX_RED_RD,    mode=Pin.IN, pull=Pin.PULL_UP)
   return UART(1,baudrate=9600,tx=PIN_RJ12_4_RX_RED,rx=PIN_RJ12_2_TX_YELLOW,timeout=200) # Virtuoso GTi
 
 UART_INIT = [uart_half_duplex, uart_full_duplex] # Autodetect
