@@ -22,23 +22,26 @@ DEBUG=synscan_cfg.DEBUG
 LOG=synscan_cfg.LOG
 MOTOR_SERVER=synscan_cfg.MOTOR_SERVER
 
+def reset_wifi():
+  for a in (False, True):
+    wifi.active(a)
+    while wifi.active()!=a:
+      pass
+
 def init_wifi():
   global wifi, udp_socket, ble_tx, ble_rx, led_timer
   ble_tx, ble_rx = None, None
   if AP_CHANNEL:
     wifi = network.WLAN(network.AP_IF)
-    wifi.active(False)
-    wifi.active(True)
+    reset_wifi()
     wifi.config(channel=AP_CHANNEL, txpower=17, essid=NAME, password=PASS)
     if DEBUG:
       print(wifi.ifconfig())
   else:
     wifi = network.WLAN(network.STA_IF)
-    wifi.active(False)
-    wifi.active(True)
+    reset_wifi()
+    wifi.config(txpower=17)
     wifi.connect(NAME, PASS)
-  while wifi.active() == False:
-    pass
   udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   udp_socket.bind(('', 11880))
