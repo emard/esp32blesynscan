@@ -50,6 +50,7 @@ quick editor help
     del           delete selected block
     ctrl-c        copy   selected block
     ctrl-v        paste  selected block
+    ctrl-e        redraw screen
 
 Troubleshooting
 
