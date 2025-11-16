@@ -5,7 +5,7 @@ Motor server, WiFi Motor Server and USB-WiFi Motor Client for
 SynScan Pro on Windows, Linux, Android.
 Arduino ESP32 Bluetooth Classic UART bridge for SynScan Pro
 under Wine on Linux.
-UART 3.3V TTL is connected to SkyWatcher Virtuoso mini
+UART 3.3V TTL is connected to SkyWatcher Virtuoso Mini
 or Virtuoso GTi mount.
 
 ESP32C3 USB-C port can be used as direct USB-SERIAL on PC
@@ -37,7 +37,7 @@ connection before 12V pin. Hot-plugging
 can apply 12V to 3.3V pins and risk a
 permanent damage. Avoid hot-plugging.
 
-On the mount "Virtuoso mini" RX and TX are labeled
+On the mount "Virtuoso Mini" RX and TX are labeled
 swapped and seems as wired together making it a
 half-duplex serial port and ESP32 should cancel echo.
 ESP32 TX line should "simulate" open collector
@@ -64,18 +64,18 @@ First prototype (ESP32)
                 └─────────────┘
                   │    │    │
       MOUNT       │    │    └───────────────┐
-     MINI/GTi     │    │           10k      │   ESP32
-    ┌───────┐     │    │         ┌─░░░░─┐   │  ┌───────┐
-    │    12V│─────┘    │         │      │   └──│3.3V   │
-    │       │          │         │ BAT42│      │       │
-    │     TX│──────────│─────────┼──>∫──┴──────│TX2    │
-    │       │          │         └─────────────│RX1    │
-    │     RX│──────────│───────────────────────│RX2    │
+     MINI/GTi     │    │                    │   ESP32
+    ┌───────┐     │    │                    │  ┌───────┐
+    │    12V│─────┘    │         10k/BAT42  └──│3.3V   │
+    │       │          │         ┌─░░░░─┐      │       │
+    │     TX│──────────│─────────┼──>∫──┴──────│TXD    │
+    │       │          │         └─────────────│TX     │
+    │     RX│──────────│───────────────────────│RX     │
     │       │          │                       │       │
     │    GND│──────────┴───────────────────────│GND    │
     └───────┘                                  └───────┘
 
-Minimal schematic (ESP32S3)
+Minimal schematic (ESP32S3) old
 
                      RECOM
                  R-78K3.3-0.5
@@ -89,10 +89,31 @@ Minimal schematic (ESP32S3)
     ┌───────┐     │    │              │  ┌───────┐
     │    12V│─────┘    │   10k/BAT42  └──│3.3V   │
     │       │          │    ┌─░░░░─┐     │       │
-    │     TX│──────────│────┼──>∫──┴─────│TX     │
-    │       │          │    └────────────│RX1    │
+    │     TX│──────────│────┼──>∫──┴─────│TXD    │
+    │       │          │    └────────────│TX     │
     │     RX│──────────│─────────────────│RX     │
     │       │          │                 │       │
+    │    GND│──────────┴─────────────────│GND    │
+    └───────┘                            └───────┘
+
+Minimal schematic (ESP32S3) new
+
+                     RECOM
+                 R-78K3.3-0.5
+                ┌─────────────┐
+                │12V  GND 3.3V│
+                │IN        OUT│
+                └─────────────┘
+                  │    │    │
+      MOUNT       │    │    └─────────┐
+     MINI/GTi     │    │              │   ESP32S3
+    ┌───────┐     │    │   10k/BAT42  │  ┌───────┐
+    │    12V│─────┘    │    ┌─░░░░─┐  └──│3.3V   │
+    │       │          │    ├──>∫──┴─────│TXD    │
+    │     TX│──────────│────┴────────────│TX     │
+    │       │          │    ┌─░░░░─┐     │       │
+    │     RX│──────────│────┼──>∫──┴─────│RXD    │
+    │       │          │    └────────────│RX     │
     │    GND│──────────┴─────────────────│GND    │
     └───────┘                            └───────┘
 
@@ -112,9 +133,9 @@ part numbers and pinouts
     front view    front view
 
     1        N.C.
-    2 yellow TX       (3.3V) (esp32 sends to "mini", receives from "GTi")
+    2 yellow TX       (3.3V) (esp32 sends to "Mini", receives from "GTi")
     3 green  Vpp+     ( 12V) (esp32 draws power)
-    4 red    RX       (3.3V) (esp32 receives from "mini", sends to "GTi")
+    4 red    RX       (3.3V) (esp32 receives from "Mini", sends to "GTi")
     5 black  GND
     6        N.N.
 
@@ -130,7 +151,7 @@ part numbers and pinouts
                 └─────────────┘
                   bottom view
 
-    XIAO ESP32S3 MINI
+    XIAO ESP32S3 MINI old
     Mouser P/N: 713-113991114    7$
 
                  XIAO  ESP32S3
@@ -140,12 +161,12 @@ part numbers and pinouts
                 │3        3.3V│
                 │4           9│
                 │5           8│
-                │6  RX1      7│
-                │43 TX   RX 44│
+                │6  TX       7│
+                │43 TXD  RX 44│
                 └─────────────┘
                     top view
 
-    XIAO ESP32C3 MINI
+    XIAO ESP32C3 MINI old
     Mouser P/N: 713-113991054    5$
 
                  XIAO  ESP32C3
@@ -155,11 +176,40 @@ part numbers and pinouts
                 │4        3.3V│
                 │5          10│
                 │6           9│
-                │7  RX1      8│
-                │21 TX   RX 20│
+                │7  TX       8│
+                │21 TXD  RX 20│
                 └─────────────┘
                     top view
 
+    XIAO ESP32S3 MINI new
+    Mouser P/N: 713-113991114    7$
+
+                 XIAO  ESP32S3
+                ┌─────────────┐
+                │1    USB   5V│
+                │2         GND│
+                │3        3.3V│
+                │4           9│
+                │5           8│
+                │6  TXD  RXD 7│
+                │43 TX   RX 44│
+                └─────────────┘
+                    top view
+
+    XIAO ESP32C3 MINI new
+    Mouser P/N: 713-113991054    5$
+
+                 XIAO  ESP32C3
+                ┌─────────────┐
+                │2    USB   5V│
+                │3         GND│
+                │4        3.3V│
+                │5          10│
+                │6           9│
+                │7  TXD  RXD 8│
+                │21 TX   RX 20│
+                └─────────────┘
+                    top view
 
 # Connection
 
@@ -172,16 +222,16 @@ Looking at female RJ-12 socket on the mount:
        └──┘
 
     1 blue   N.C.
-    2 yellow TX       (3.3V) (mount "mini" receives, "GTi" sends)
+    2 yellow TX       (3.3V) (mount "Mini" receives, "GTi" sends)
     3 green  Vpp+     ( 12V) (mount provides power)
-    4 red    RX       (3.3V) (mount "mini" sends, "GTi" receives)
+    4 red    RX       (3.3V) (mount "Mini" sends, "GTi" receives)
     5 black  GND
     6 white  Reserved (3.3V)
 
-RX/TX roles on the mount "Virtuoso mini" are swapped and
+RX/TX roles on the mount "Virtuoso Mini" are swapped and
 actually indicate RX2/TX2 on ESP32.
 
-    Virtuoso mini  ESP32
+    Virtuoso Mini  ESP32
     -------------  ----------
     2 yellow TX    TX2 GPIO17 (over resistor/diode)
     4 red    RX    RX2 GPIO16
