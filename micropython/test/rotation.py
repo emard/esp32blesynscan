@@ -4,6 +4,9 @@ from math import *
 # example rotating a vector around axis
 # https://en.wikipedia.org/wiki/Rotation_matrix
 
+# astro change of basis
+# https://en.wikipedia.org/wiki/Astronomical_coordinate_systems#Converting_coordinates
+
 # vector length or magnitude
 def mag(v):
   return sqrt((v*v.transpose)[0][0])
