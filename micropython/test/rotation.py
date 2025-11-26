@@ -4,6 +4,9 @@ from math import *
 # example rotating a vector around axis
 # https://en.wikipedia.org/wiki/Rotation_matrix
 
+# see also quaternion rotation
+# https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
+
 # astro change of basis
 # https://en.wikipedia.org/wiki/Astronomical_coordinate_systems#Converting_coordinates
 
