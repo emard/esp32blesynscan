@@ -8,7 +8,7 @@
 
 from os import dupterm
 from machine import Pin, UART, Timer, deepsleep
-from synscan_cfg import NAME,PASS,PIN_LED,UART_INIT,AP_CHANNEL,WIRELESS,BLE,REPLACE,DEBUG,LOG,MOTOR_SERVER,TIMEOUT,SLEEP
+from synscan_cfg import NAME,PASS,PIN_LED,UART_INIT,AP_CHANNEL,WIRELESS,BLE,REPLACE,DEBUG,LOG,STANDALONE,MOTOR_SERVER,TIMEOUT,SLEEP
 
 def reset_wifi():
   for a in (False, True):
@@ -32,6 +32,8 @@ def init_wifi():
     wifi.connect(NAME, PASS)
   udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+  if STANDALONE:
+    udp_socket.settimeout(1.0) # [s]
   udp_socket.bind(('', 11880))
   led_timer=Timer(0)
   led_timer.init(mode=Timer.PERIODIC, period=1000, callback=led_wifi)
@@ -42,7 +44,8 @@ def init_udp_server():
   udp_socket.setsockopt(socket.SOL_SOCKET, _SO_REGISTER_HANDLER, udp_server_recv)
 
 def init_udp_client():
-  udp_socket.setsockopt(socket.SOL_SOCKET, _SO_REGISTER_HANDLER, udp_client_recv)
+  if not STANDALONE:
+    udp_socket.setsockopt(socket.SOL_SOCKET, _SO_REGISTER_HANDLER, udp_client_recv)
 
 def sleep_now(dummy):
   if SLEEP:
@@ -282,6 +285,31 @@ def advertiser():
   #print(advertise_data)
   ble.gap_advertise(100, advertise_data)
 
+def cmd(request):
+  if request:
+    if LOG:
+      log.write(request+b"\r\n")
+    if gateway:
+      request=replace_from_synscan(request)
+      if request:
+        try:
+          udp_socket.sendto(request,(gateway,11880))
+          # within some timeout expect udp response
+          led(0)
+          try:
+            response, source = udp_socket.recvfrom(256)
+          except: # timeout or host unreachable
+            response = b""
+          response = replace_from_motor(response)
+          led(1)
+          if response:
+            if LOG:
+              log.write(response+b"\n")
+            return response
+        except: # host unreachable
+          pass
+  return b""
+
 def usbclient():
   while 1:
     request=input("").encode("ASCII") # input strips "\r"
@@ -327,7 +355,9 @@ if WIRELESS:
       init_udp_server()
     else:
       init_udp_client()
-      usbclient()
+      if not STANDALONE:
+        usbclient()
       # Synscan > Settings > Connection Settings > Read Timeout (ms) > 2200 or higher like 3000
 else: # directly wired USB-SERIAL
-  usbserial()
+  if not STANDALONE:
+    usbserial()

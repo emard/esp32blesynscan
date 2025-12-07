@@ -12,6 +12,7 @@ if 1:
   DEBUG=0 # debug prints
   LOG="" # log file name, "" to disable
   AP_CHANNEL=10 # 0 for client, >0 for ap
+  STANDALONE=0 # 0:normal (PC or Android) 1:cmd python interface FIXME
   MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
   BLE=1 # 0:WiFi 1:BLE
 if 0:
@@ -22,6 +23,7 @@ if 0:
   DEBUG=0 # debug prints
   LOG="" # log file name, "" to disable
   AP_CHANNEL=10 # 0 for client, >0 for ap
+  STANDALONE=0 # 0:normal (PC or Android) 1:cmd python interface FIXME
   MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
   BLE=0 # 0:WiFi 1:BLE
 if 0:
@@ -32,6 +34,7 @@ if 0:
   DEBUG=0 # debug prints
   LOG="" # log file name, "" to disable
   AP_CHANNEL=0 # 0 for client, >0 for ap
+  STANDALONE=0 # 0:normal (PC or Android) 1:cmd python interface FIXME
   MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
   BLE=0 # 0:WiFi 1:BLE
 if 0:
@@ -44,6 +47,7 @@ if 0:
   DEBUG=0 # debug prints
   LOG="" # log file name, "" to disable
   AP_CHANNEL=0 # 0 for client, >0 for ap
+  STANDALONE=1 # 0:normal (PC or Android) 1:cmd python interface
   MOTOR_SERVER=0 # 1:server (esp32 on motor) 0:client (esp32 on PC)
   BLE=0 # 0:WiFi 1:BLE
 if 0:
@@ -57,6 +61,7 @@ if 0:
   DEBUG=0 # debug prints
   LOG="" # log file name, "" to disable
   AP_CHANNEL=0 # 0 for client, >0 for ap
+  STANDALONE=0 # 0:normal (PC or Android) 1:cmd python interface FIXME
   MOTOR_SERVER=1 # 1:server (esp32 on motor) 0:client (esp32 on PC)
   BLE=0 # 0:WiFi 1:BLE
 
