@@ -22,18 +22,18 @@ def init_wifi():
   if AP_CHANNEL:
     wifi = network.WLAN(network.AP_IF)
     reset_wifi()
-    wifi.config(channel=AP_CHANNEL, txpower=15, essid=NAME, password=PASS)
+    wifi.config(channel=AP_CHANNEL, txpower=14, essid=NAME, password=PASS)
     if DEBUG:
       print(wifi.ifconfig())
   else:
     wifi = network.WLAN(network.STA_IF)
     reset_wifi()
-    wifi.config(txpower=15)
+    wifi.config(txpower=14)
     wifi.connect(NAME, PASS)
   udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   if STANDALONE:
-    udp_socket.settimeout(1.0) # [s]
+    udp_socket.settimeout(2.0) # [s]
   udp_socket.bind(('', 11880))
   led_timer=Timer(0)
   led_timer.init(mode=Timer.PERIODIC, period=1000, callback=led_wifi)
@@ -285,7 +285,7 @@ def advertiser():
   #print(advertise_data)
   ble.gap_advertise(100, advertise_data)
 
-def cmd(request):
+def cmd(request,timeout=2.0):
   if request:
     if LOG:
       log.write(request+b"\r\n")
