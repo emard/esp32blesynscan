@@ -47,6 +47,19 @@ if 0:
   DEBUG=0 # debug prints
   LOG="" # log file name, "" to disable
   AP_CHANNEL=0 # 0 for client, >0 for ap
+  STANDALONE=0 # 0:normal (PC or Android) 1:cmd python interface
+  MOTOR_SERVER=0 # 1:server (esp32 on motor) 0:client (esp32 on PC)
+  BLE=0 # 0:WiFi 1:BLE
+if 0:
+  # Motor Client - WiFi Client - python interface cmd()
+  # for pysynscan running on esp32
+  WIRELESS=1 # 0:usb-serial wired directly 1:WiFi or BLE
+  NAME="SynScan_3538" # GTi WiFi name
+  #NAME="SynScan_WiFi_81db" # Mini WiFi name
+  PASS="" # for WiFi
+  DEBUG=0 # debug prints
+  LOG="" # log file name, "" to disable
+  AP_CHANNEL=0 # 0 for client, >0 for ap
   STANDALONE=1 # 0:normal (PC or Android) 1:cmd python interface
   MOTOR_SERVER=0 # 1:server (esp32 on motor) 0:client (esp32 on PC)
   BLE=0 # 0:WiFi 1:BLE
