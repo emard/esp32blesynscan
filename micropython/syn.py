@@ -8,7 +8,7 @@
 
 from os import dupterm
 from machine import Pin, UART, Timer, deepsleep
-from synscan_cfg import NAME,PASS,PIN_LED,UART_INIT,AP_CHANNEL,WIRELESS,BLE,REPLACE,DEBUG,LOG,STANDALONE,MOTOR_SERVER,TIMEOUT,SLEEP
+from syncfg import NAME,PASS,PIN_LED,UART_INIT,AP_CHANNEL,WIRELESS,BLE,REPLACE,DEBUG,LOG,STANDALONE,MOTOR_SERVER,TIMEOUT,SLEEP
 
 def reset_wifi():
   for a in (False, True):
