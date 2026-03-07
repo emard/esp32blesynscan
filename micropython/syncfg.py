@@ -255,23 +255,23 @@ b":e2\r": # Inquire firmware version
 
 # fine tuning counts per revolution
 # 8-10 mm eyepiece, center object to (0, 0), thighten AZ/ALT axis
-# goto (180, 180), edit target to re-center: (180 0, 180 3)
-# next_tuning = current_tuning + re_center - (180,180)
+# goto (360, 360), edit target to re-center: (360+3/60, 360+5/60)
+# next_tuning = current_tuning + re_center - (360, 360)
 b":a1\r": # FW 3.36.AF Inquire counts per revolution of AZ
 { #                                       --->      <---
-  b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(179+13/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
+  b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(360+3/60)/360+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
 },
 b":a2\r": # FW 3.36.AF Inquire counts per revolution of ALT
 { #                                       --->      <---
-  b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(176+1/60)/180+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
+  b"=1A330D\r": b"="+pack("<I", int(0x0D331A*(360+5/60)/360+0.5))[0:3].hex().encode("utf-8").upper()+b"\r"
 },
 b":X10002\r": # FW 3.40.AF Inquire counts per revolution of AZ
 { #                                        --->      <---
-  b"=000D331A\r": b"=%08X\r" % int(0x000D331A*(179+13/60)/180+0.5)
+  b"=000D331A\r": b"=%08X\r" % int(0x000D331A*(360+3/60)/360+0.5)
 },
 b":X20002\r": # FW 3.40.AF Inquire counts per revolution of ALT
 { #                                        --->      <---
-  b"=000D331A\r": b"=%08X\r" % int(0x000D331A*(176+1/60)/180+0.5)
+  b"=000D331A\r": b"=%08X\r" % int(0x000D331A*(360+5/60)/360+0.5)
 },
 }
 
