@@ -147,9 +147,9 @@ b":I2500000\r": b":I27A0000\r", # ALT 9 -> 7.5
 
 # GOTO SLEW SPEED (larger hex number -> slower)
 # replace them with slow long goto speed commands
-# main AZ  encoders loose counts with < 1C00000
+# main AZ  encoders loose counts with < 1D00000
 # main ALT encoders loose counts with < 1600000
-b":M1AC0D00\r": b":T1C00000\r", # AZ  brake -> AZ  goto speed
+b":M1AC0D00\r": b":T1D00000\r", # AZ  brake -> AZ  goto speed
 b":M2AC0D00\r": b":T2800000\r", # ALT brake -> ALT goto speed
 }
 
