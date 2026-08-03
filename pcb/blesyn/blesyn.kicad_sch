@@ -4,6 +4,10 @@
 	(generator_version "10.0")
 	(uuid "e63e39d7-6ac0-4ffd-8aa3-1841a4541b55")
 	(paper "A4")
+	(title_block
+		(title "blesyn")
+		(rev "1.0")
+	)
 	(lib_symbols
 		(symbol "Connector:RJ12"
 			(pin_names
