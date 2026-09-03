@@ -81,7 +81,7 @@ if 0:
 TIMEOUT=3600 # [s] no connection sleep for battery saving
 SLEEP=82800  # [s] how long to sleep
 
-if uname()[4].endswith("ESP32S3"):
+if uname()[4].endswith("ESP32S3") or uname()[4].endswith("ESP32-S3"):
   # for android provides BLE synscan (Bluetooth Low Energy)
   if 0: # old
     PIN_LED=21 # XIAO LED inverse logic
@@ -96,7 +96,7 @@ if uname()[4].endswith("ESP32S3"):
     PIN_RJ12_2_TX_YELLOW_RD=6 # over 10k/BAT42
     PIN_RJ12_2_TX_YELLOW=43 # direct
 
-if uname()[4].endswith("ESP32C3"):
+if uname()[4].endswith("ESP32C3") or uname()[4].endswith("ESP32-C3"):
   # connects to motor using wifi
   if 0: # old
     PIN_LED=10 # external LED on +3.3V (inverse logic)
