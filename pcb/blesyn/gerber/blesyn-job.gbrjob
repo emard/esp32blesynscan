@@ -3,18 +3,18 @@
     "GenerationSoftware": {
       "Vendor": "KiCad",
       "Application": "Pcbnew",
-      "Version": "10.0.4+b1"
+      "Version": "10.0.5+dfsg-1"
     },
-    "CreationDate": "2026-08-08T12:04:25+02:00"
+    "CreationDate": "2026-09-03T22:37:27+02:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
       "Name": "blesyn",
       "GUID": "626c6573-796e-42e6-9b69-6361645f7063",
-      "Revision": "rev?"
+      "Revision": "1.1"
     },
     "Size": {
-      "X": 17.93,
+      "X": 20.47,
       "Y": 35.71
     },
     "LayerNumber": 2,
