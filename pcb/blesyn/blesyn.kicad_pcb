@@ -1914,7 +1914,7 @@
 		(descr "RJ12 6P6C horizontal socket, plastic body, tab down, https://cdn.amphenol-icc.com/media/wysiwyg/files/drawing/c-bmj-0082.pdf")
 		(tags "RJ12 connector")
 		(property "Reference" "J1"
-			(at -4.694 5.992 0)
+			(at -4.694 8.89 0)
 			(layer "F.SilkS")
 			(uuid "57a34d18-a12f-485a-9e39-188d92d6f601")
 			(effects
@@ -3171,6 +3171,18 @@
 		(locked yes)
 		(layer "Edge.Cuts")
 		(uuid "cca703a7-09c1-4efd-941a-46bd08043010")
+	)
+	(gr_text "v1.1"
+		(at 72.78 118.33 90)
+		(layer "F.SilkS")
+		(uuid "6b190032-80e0-4ef6-a0d8-adc94eb9353f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify left bottom)
+		)
 	)
 	(segment
 		(start 56.27 128.49)
