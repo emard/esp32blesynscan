@@ -18,6 +18,16 @@ module pcb()
   cube(pcb_size,center=true);
 }
 
+module rounded_cube(v,r)
+{
+  minkowski()
+  {
+    h_minkowski=0.01;
+    cube(v-[2*r,2*r,h_minkowski],center=true);
+    cylinder(h=h_minkowski,r=r,$fn=90,center=true);
+  };
+}
+
 module rail_old()
 {
   difference()
@@ -73,7 +83,9 @@ module box()
 {
   difference()
   {
-    cube(box_inner+[2,1,2]*thick,center=true);
+    cube_dim=box_inner+[2,1,2]*thick;
+    rotate([90,0,0])
+    rounded_cube([cube_dim[0],cube_dim[2],cube_dim[1]],r=3);
     translate([0,-thick,0])
     cube(box_inner,center=true);
     // usb_connector_cut();
