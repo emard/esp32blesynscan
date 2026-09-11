@@ -1,13 +1,13 @@
 // box to insert pcb and fix with 2 screws
 // for factory made PCB (not universal pcb)
 
-pcb_size = [18,34,1.6]; // size of PCB
+pcb_size = [17.9,34,1.6]; // size of PCB
 
-box_inner = [19,35,21+2.5];
+box_inner = [18.1,37,21+2.5];
 thick = 2;
 
-rail_top   = [2,13,2];
-rail_bot   = [2.5,30,2];
+rail_top   = [0.9,13,2];
+rail_bot   = [0.9,30,2];
 rail_spc   = 2.5;
 // todo rail from rear, 45 deg cut
 // rail_rear  = 4;
@@ -77,7 +77,7 @@ module usb_connector_cut()
 module rj12_connector_cut_rear()
 {
   translate([0,box_inner[1]/2,+box_inner[2]/2-pcb_bottom-8.5])
-  cube([15,10,14],center=true);
+  cube([14.5,10,13.5],center=true);
 }
 
 module rj12_connector_cut_side()
