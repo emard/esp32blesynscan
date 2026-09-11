@@ -5,16 +5,16 @@
       "Application": "Pcbnew",
       "Version": "10.0.5+dfsg-1"
     },
-    "CreationDate": "2026-09-04T09:59:22+02:00"
+    "CreationDate": "2026-09-11T13:40:36+02:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
       "Name": "blesyn",
       "GUID": "626c6573-796e-42e6-9b69-6361645f7063",
-      "Revision": "1.1"
+      "Revision": "1.2"
     },
     "Size": {
-      "X": 20.47,
+      "X": 17.93,
       "Y": 35.71
     },
     "LayerNumber": 2,
